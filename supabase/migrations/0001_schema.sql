@@ -2,7 +2,7 @@
 create extension if not exists "uuid-ossp";
 create extension if not exists "vector";
 
-create or replace function auth.tier_rank(tier text)
+create or replace function public.tier_rank(tier text)
 returns int
 language sql
 immutable
@@ -18,7 +18,7 @@ as $$
   end;
 $$;
 
-create or replace function auth.user_tier()
+create or replace function public.user_tier()
 returns text
 language sql
 stable
@@ -30,13 +30,13 @@ as $$
   );
 $$;
 
-create or replace function auth.is_tier(min_tier text)
+create or replace function public.is_tier(min_tier text)
 returns boolean
 language sql
 stable
 security definer
 as $$
-  select auth.tier_rank(auth.user_tier()) >= auth.tier_rank(min_tier);
+  select public.tier_rank(public.user_tier()) >= public.tier_rank(min_tier);
 $$;
 
 create table public.profiles (
@@ -139,7 +139,7 @@ create table public.document_chunks (
   document_id  uuid        not null references public.documents(id) on delete cascade,
   chunk_index  int         not null,
   content      text        not null,
-  embedding    vector(3072),
+  embedding    halfvec(3072),
   token_count  int,
   page_number  int,
   created_at   timestamptz not null default now(),
@@ -147,7 +147,7 @@ create table public.document_chunks (
 );
 
 comment on table  public.document_chunks           is 'Chunked text segments of each document with pgvector embeddings.';
-comment on column public.document_chunks.embedding is '3072-dim gemini-embedding-001 vector for cosine similarity search.';
+comment on column public.document_chunks.embedding is '3072-dim gemini-embedding-001 vector stored as halfvec (16-bit) for cosine similarity search. Cast float32 output from the embedding API before insert.';
 
 create table public.document_validations (
   id           uuid        primary key default gen_random_uuid(),

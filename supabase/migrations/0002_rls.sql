@@ -1,6 +1,6 @@
 
--- All policies read the JWT claim `app_metadata.tier` via auth.user_tier()
--- and auth.is_tier() defined in 0001_schema.sql.
+-- All policies read the JWT claim `app_metadata.tier` via public.user_tier()
+-- and public.is_tier() defined in 0001_schema.sql.
 -- NEVER query the profiles table inside a policy — use the JWT claim only.
 
 alter table public.profiles             enable row level security;
@@ -35,7 +35,7 @@ create policy "profiles: users can update own"
 create policy "profiles: admin can delete"
   on public.profiles for delete
   to authenticated
-  using (auth.user_tier() = 'admin');
+  using (public.user_tier() = 'admin');
 
 create policy "approved_institutions: authenticated can read"
   on public.approved_institutions for select
@@ -45,18 +45,18 @@ create policy "approved_institutions: authenticated can read"
 create policy "approved_institutions: admin can insert"
   on public.approved_institutions for insert
   to authenticated
-  with check (auth.user_tier() = 'admin');
+  with check (public.user_tier() = 'admin');
 
 create policy "approved_institutions: admin can update"
   on public.approved_institutions for update
   to authenticated
-  using (auth.user_tier() = 'admin')
-  with check (auth.user_tier() = 'admin');
+  using (public.user_tier() = 'admin')
+  with check (public.user_tier() = 'admin');
 
 create policy "approved_institutions: admin can delete"
   on public.approved_institutions for delete
   to authenticated
-  using (auth.user_tier() = 'admin');
+  using (public.user_tier() = 'admin');
 
 create policy "documents: select"
   on public.documents for select
@@ -64,14 +64,14 @@ create policy "documents: select"
   using (
     status = 'published'
     or submitter_id = auth.uid()
-    or auth.is_tier('tier_1')
+    or public.is_tier('tier_1')
   );
 
 create policy "documents: tier_3+ can insert"
   on public.documents for insert
   to authenticated
   with check (
-    auth.is_tier('tier_3')
+    public.is_tier('tier_3')
     and submitter_id = auth.uid()
   );
 
@@ -80,17 +80,17 @@ create policy "documents: update"
   to authenticated
   using (
     (submitter_id = auth.uid() and status in ('pending', 'under_review'))
-    or auth.is_tier('tier_1')
+    or public.is_tier('tier_1')
   )
   with check (
     (submitter_id = auth.uid() and status in ('pending', 'under_review'))
-    or auth.is_tier('tier_1')
+    or public.is_tier('tier_1')
   );
 
 create policy "documents: admin can delete"
   on public.documents for delete
   to authenticated
-  using (auth.user_tier() = 'admin');
+  using (public.user_tier() = 'admin');
 
 create policy "document_chunks: select"
   on public.document_chunks for select
@@ -102,7 +102,7 @@ create policy "document_chunks: select"
         and (
           d.status = 'published'
           or d.submitter_id = auth.uid()
-          or auth.is_tier('tier_1')
+          or public.is_tier('tier_1')
         )
     )
   );
@@ -116,14 +116,14 @@ create policy "document_validations: select"
       select 1 from public.documents d
       where d.id = document_id and d.submitter_id = auth.uid()
     )
-    or auth.is_tier('tier_1')
+    or public.is_tier('tier_1')
   );
 
 create policy "document_validations: tier_1 can insert"
   on public.document_validations for insert
   to authenticated
   with check (
-    auth.is_tier('tier_1')
+    public.is_tier('tier_1')
     and validator_id = auth.uid()
     and not exists (
       select 1 from public.documents d
@@ -134,7 +134,7 @@ create policy "document_validations: tier_1 can insert"
 create policy "document_validations: admin can delete"
   on public.document_validations for delete
   to authenticated
-  using (auth.user_tier() = 'admin');
+  using (public.user_tier() = 'admin');
 
 create policy "living_essays: select"
   on public.living_essays for select
@@ -142,14 +142,14 @@ create policy "living_essays: select"
   using (
     status = 'published'
     or author_id = auth.uid()
-    or auth.is_tier('tier_1')
+    or public.is_tier('tier_1')
   );
 
 create policy "living_essays: tier_2+ can insert"
   on public.living_essays for insert
   to authenticated
   with check (
-    auth.is_tier('tier_2')
+    public.is_tier('tier_2')
     and author_id = auth.uid()
   );
 
@@ -158,17 +158,17 @@ create policy "living_essays: update"
   to authenticated
   using (
     (author_id = auth.uid() and status in ('draft', 'under_review'))
-    or auth.is_tier('tier_1')
+    or public.is_tier('tier_1')
   )
   with check (
     (author_id = auth.uid() and status in ('draft', 'under_review'))
-    or auth.is_tier('tier_1')
+    or public.is_tier('tier_1')
   );
 
 create policy "living_essays: admin can delete"
   on public.living_essays for delete
   to authenticated
-  using (auth.user_tier() = 'admin');
+  using (public.user_tier() = 'admin');
 
 create policy "essay_reviews: select"
   on public.essay_reviews for select
@@ -179,14 +179,14 @@ create policy "essay_reviews: select"
       select 1 from public.living_essays e
       where e.id = essay_id and e.author_id = auth.uid()
     )
-    or auth.is_tier('tier_1')
+    or public.is_tier('tier_1')
   );
 
 create policy "essay_reviews: tier_1 can insert"
   on public.essay_reviews for insert
   to authenticated
   with check (
-    auth.is_tier('tier_1')
+    public.is_tier('tier_1')
     and reviewer_id = auth.uid()
     and not exists (
       select 1 from public.living_essays e
@@ -197,14 +197,14 @@ create policy "essay_reviews: tier_1 can insert"
 create policy "essay_reviews: admin can delete"
   on public.essay_reviews for delete
   to authenticated
-  using (auth.user_tier() = 'admin');
+  using (public.user_tier() = 'admin');
 
 create policy "archive_gaps: select"
   on public.archive_gaps for select
   to authenticated
   using (
     user_id = auth.uid()
-    or auth.user_tier() = 'admin'
+    or public.user_tier() = 'admin'
   );
 
 create policy "archive_gaps: authenticated can insert"
@@ -215,7 +215,7 @@ create policy "archive_gaps: authenticated can insert"
 create policy "archive_gaps: admin can delete"
   on public.archive_gaps for delete
   to authenticated
-  using (auth.user_tier() = 'admin');
+  using (public.user_tier() = 'admin');
 
 create policy "contentions: authenticated can read"
   on public.contentions for select
@@ -226,19 +226,19 @@ create policy "contentions: authenticated can read"
 create policy "contentions: tier_1+ can insert"
   on public.contentions for insert
   to authenticated
-  with check (auth.is_tier('tier_1'));
+  with check (public.is_tier('tier_1'));
 
 -- tier_1+ can update (e.g. change status, add resolution notes).
 create policy "contentions: tier_1+ can update"
   on public.contentions for update
   to authenticated
-  using (auth.is_tier('tier_1'))
-  with check (auth.is_tier('tier_1'));
+  using (public.is_tier('tier_1'))
+  with check (public.is_tier('tier_1'));
 
 create policy "contentions: admin can delete"
   on public.contentions for delete
   to authenticated
-  using (auth.user_tier() = 'admin');
+  using (public.user_tier() = 'admin');
 
 -- Published paths are visible to all authenticated users.
 -- Non-published paths are visible only to the author or tier_1+.
@@ -248,7 +248,7 @@ create policy "knowledge_paths: select"
   using (
     status = 'published'
     or author_id = auth.uid()
-    or auth.is_tier('tier_1')
+    or public.is_tier('tier_1')
   );
 
 -- tier_3 and above can create paths.
@@ -256,7 +256,7 @@ create policy "knowledge_paths: tier_3+ can insert"
   on public.knowledge_paths for insert
   to authenticated
   with check (
-    auth.is_tier('tier_3')
+    public.is_tier('tier_3')
     and author_id = auth.uid()
   );
 
@@ -266,11 +266,11 @@ create policy "knowledge_paths: update"
   to authenticated
   using (
     author_id = auth.uid()
-    or auth.is_tier('tier_1')
+    or public.is_tier('tier_1')
   )
   with check (
     author_id = auth.uid()
-    or auth.is_tier('tier_1')
+    or public.is_tier('tier_1')
   );
 
 -- Authors can delete their own draft paths; admins can delete any.
@@ -279,7 +279,7 @@ create policy "knowledge_paths: delete"
   to authenticated
   using (
     (author_id = auth.uid() and status = 'draft')
-    or auth.user_tier() = 'admin'
+    or public.user_tier() = 'admin'
   );
 
 -- Nodes inherit the visibility of their parent path.
@@ -293,7 +293,7 @@ create policy "path_nodes: select"
         and (
           p.status = 'published'
           or p.author_id = auth.uid()
-          or auth.is_tier('tier_1')
+          or public.is_tier('tier_1')
         )
     )
   );
@@ -306,7 +306,7 @@ create policy "path_nodes: insert"
     exists (
       select 1 from public.knowledge_paths p
       where p.id = path_id
-        and (p.author_id = auth.uid() or auth.is_tier('tier_1'))
+        and (p.author_id = auth.uid() or public.is_tier('tier_1'))
     )
   );
 
@@ -317,7 +317,7 @@ create policy "path_nodes: update"
     exists (
       select 1 from public.knowledge_paths p
       where p.id = path_id
-        and (p.author_id = auth.uid() or auth.is_tier('tier_1'))
+        and (p.author_id = auth.uid() or public.is_tier('tier_1'))
     )
   );
 
@@ -328,7 +328,7 @@ create policy "path_nodes: delete"
     exists (
       select 1 from public.knowledge_paths p
       where p.id = path_id
-        and (p.author_id = auth.uid() or auth.is_tier('tier_1'))
+        and (p.author_id = auth.uid() or public.is_tier('tier_1'))
     )
   );
 
@@ -342,19 +342,19 @@ create policy "tags: authenticated can read"
 create policy "tags: tier_2+ can insert"
   on public.tags for insert
   to authenticated
-  with check (auth.is_tier('tier_2'));
+  with check (public.is_tier('tier_2'));
 
 create policy "tags: tier_2+ can update"
   on public.tags for update
   to authenticated
-  using (auth.is_tier('tier_2'))
-  with check (auth.is_tier('tier_2'));
+  using (public.is_tier('tier_2'))
+  with check (public.is_tier('tier_2'));
 
 -- Only admins can delete tags.
 create policy "tags: admin can delete"
   on public.tags for delete
   to authenticated
-  using (auth.user_tier() = 'admin');
+  using (public.user_tier() = 'admin');
 
 -- Visible to all authenticated users.
 create policy "document_tags: authenticated can read"
@@ -367,7 +367,7 @@ create policy "document_tags: insert"
   on public.document_tags for insert
   to authenticated
   with check (
-    auth.is_tier('tier_2')
+    public.is_tier('tier_2')
     or exists (
       select 1 from public.documents d
       where d.id = document_id and d.submitter_id = auth.uid()
@@ -379,7 +379,7 @@ create policy "document_tags: delete"
   on public.document_tags for delete
   to authenticated
   using (
-    auth.is_tier('tier_2')
+    public.is_tier('tier_2')
     or exists (
       select 1 from public.documents d
       where d.id = document_id and d.submitter_id = auth.uid()
@@ -432,7 +432,7 @@ create policy "citations: select"
 create policy "citations: admin can delete"
   on public.citations for delete
   to authenticated
-  using (auth.user_tier() = 'admin');
+  using (public.user_tier() = 'admin');
 
 -- All authenticated users can read votes (for displaying counts).
 create policy "votes: authenticated can read"

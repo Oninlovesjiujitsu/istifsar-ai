@@ -31,11 +31,11 @@ alter table public.knowledge_paths
 
 create index if not exists document_chunks_embedding_hnsw_idx
   on public.document_chunks
-  using hnsw (embedding vector_cosine_ops)
+  using hnsw (embedding halfvec_cosine_ops)
   with (m = 16, ef_construction = 64);
 
 comment on index public.document_chunks_embedding_hnsw_idx
-  is 'HNSW index for cosine-similarity ANN search in the RAG pipeline. Set hnsw.ef_search=100 at query time for high recall.';
+  is 'HNSW index on halfvec(3072) column. halfvec supports up to 4000 dims, bypassing the 2000-dim limit on vector. Set hnsw.ef_search=100 at query time for high recall.';
 
 create index if not exists documents_fts_idx
   on public.documents using gin (fts);
