@@ -18,15 +18,18 @@ export default async function Navbar() {
 
   const tier = (user?.app_metadata?.tier as string | undefined) ?? 'pending';
   const isContributor = tierRank(tier) >= tierRank('tier_3');
+  const isAdmin = tier === 'admin';
 
   let displayName = 'Account';
+  let username: string | null = null;
   if (user) {
     const { data: profile } = await supabase
       .from('profiles')
-      .select('display_name')
+      .select('display_name, username')
       .eq('id', user.id)
       .single();
     displayName = profile?.display_name ?? user.email?.split('@')[0] ?? 'Account';
+    username = profile?.username ?? null;
   }
 
   return (
@@ -40,8 +43,8 @@ export default async function Navbar() {
           Istifsar
         </Link>
 
-        {/* Nav links */}
-        <div className="flex items-center gap-1 text-sm">
+        {/* Nav links — hidden on small screens */}
+        <div className="hidden md:flex items-center gap-1 text-sm">
           <Link
             href="/explore"
             className="rounded-md px-3 py-1.5 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
@@ -53,6 +56,12 @@ export default async function Navbar() {
             className="rounded-md px-3 py-1.5 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
           >
             Sources
+          </Link>
+          <Link
+            href="/network"
+            className="rounded-md px-3 py-1.5 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+          >
+            Network
           </Link>
           <Link
             href="/paths"
@@ -88,7 +97,22 @@ export default async function Navbar() {
 
         {/* User menu */}
         <div className="flex items-center gap-2 text-sm">
-          <span className="text-muted-foreground hidden sm:block">{displayName}</span>
+          {user && (
+            <Link
+              href={username ? `/profile/${username}` : '/profile'}
+              className="hidden sm:block text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {displayName}
+            </Link>
+          )}
+          {isAdmin && (
+            <Link
+              href="/admin"
+              className="rounded-md px-2 py-1 text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200 transition-colors"
+            >
+              Admin
+            </Link>
+          )}
           <SignOutButton />
         </div>
       </nav>

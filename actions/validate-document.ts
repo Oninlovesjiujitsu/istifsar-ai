@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { DOCUMENT_APPROVALS_REQUIRED } from '@/lib/config/constants';
 import { revalidatePath } from 'next/cache';
+import { detectContentions } from '@/lib/ai/contention';
 
 export type ValidateResult =
   | { success: true }
@@ -98,6 +99,11 @@ export async function validateDocument(
     .from('documents')
     .update({ status: newStatus, ...statusUpdate })
     .eq('id', documentId);
+
+  // Fire-and-forget contention detection when a document reaches published status
+  if (newStatus === 'published') {
+    detectContentions(documentId).catch((e) => console.warn('[contention]', e));
+  }
 
   revalidatePath('/contribute/validate');
   revalidatePath(`/contribute/validate/${documentId}`);
