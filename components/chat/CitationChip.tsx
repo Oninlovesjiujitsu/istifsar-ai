@@ -52,7 +52,7 @@ export default function CitationChip({
             &ldquo;{excerpt.length > 180 ? excerpt.slice(0, 180) + '…' : excerpt}&rdquo;
           </span>
           <span className="block text-xs text-muted-foreground">
-            Similarity: {(score * 100).toFixed(0)}%
+            Relevance: {(score * 100).toFixed(0)}%
           </span>
         </span>
       )}

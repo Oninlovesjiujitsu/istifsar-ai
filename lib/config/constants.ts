@@ -48,11 +48,5 @@ export const CACHE_SKIP_IF_SOURCE_NEWER_THAN_DAYS = 7;
 // Validation Flow
 // -----------------------------------------------------------------------------
 
-/** Number of Tier 1 approvals required to publish a document. */
-export const DOCUMENT_APPROVALS_REQUIRED = 2;
-
-/** Number of Tier 1 peer reviews required to publish a Living Essay. */
+/** Number of peer reviews required to publish a Living Essay. */
 export const ESSAY_REVIEWS_REQUIRED = 1;
-
-/** Days before an unresolved validation is escalated to the admin queue. */
-export const VALIDATION_TIMEOUT_DAYS = 14;

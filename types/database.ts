@@ -34,32 +34,54 @@ export type Database = {
   }
   public: {
     Tables: {
-      approved_institutions: {
+      verification_requests: {
         Row: {
-          added_by: string | null
           created_at: string
-          domain: string
           id: string
-          institution_name: string
+          link_type: string
+          link_url: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reviewer_notes: string | null
+          status: string
+          updated_at: string
+          user_id: string
         }
         Insert: {
-          added_by?: string | null
           created_at?: string
-          domain: string
           id?: string
-          institution_name: string
+          link_type: string
+          link_url: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
         }
         Update: {
-          added_by?: string | null
           created_at?: string
-          domain?: string
           id?: string
-          institution_name?: string
+          link_type?: string
+          link_url?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "approved_institutions_added_by_fkey"
-            columns: ["added_by"]
+            foreignKeyName: "verification_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "verification_requests_reviewed_by_fkey"
+            columns: ["reviewed_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -678,7 +700,7 @@ export type Database = {
           display_name: string
           id: string
           institution: string | null
-          tier: string
+          role: string
           updated_at: string
           username: string
         }
@@ -689,7 +711,7 @@ export type Database = {
           display_name: string
           id: string
           institution?: string | null
-          tier?: string
+          role?: string
           updated_at?: string
           username: string
         }
@@ -700,7 +722,7 @@ export type Database = {
           display_name?: string
           id?: string
           institution?: string | null
-          tier?: string
+          role?: string
           updated_at?: string
           username?: string
         }

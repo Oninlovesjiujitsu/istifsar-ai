@@ -2,9 +2,8 @@
 
 import { useTransition } from 'react';
 import { signOut } from '@/actions/auth';
-import { Button } from '@/components/ui/button';
 
-export default function SignOutButton() {
+export default function SignOutButton({ className }: { className?: string }) {
   const [isPending, startTransition] = useTransition();
 
   function handleClick() {
@@ -14,8 +13,12 @@ export default function SignOutButton() {
   }
 
   return (
-    <Button variant="ghost" size="sm" onClick={handleClick} disabled={isPending}>
-      {isPending ? 'Signing out…' : 'Sign out'}
-    </Button>
+    <button
+      onClick={handleClick}
+      disabled={isPending}
+      className={className ?? 'text-sm hover:text-foreground transition-colors disabled:opacity-50'}
+    >
+      {isPending ? 'Signing out\u2026' : 'Sign out'}
+    </button>
   );
 }

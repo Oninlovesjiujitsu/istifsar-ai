@@ -1,14 +1,18 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
-import { DOCUMENT_APPROVALS_REQUIRED } from '@/lib/config/constants';
 import { revalidatePath } from 'next/cache';
-import { detectContentions } from '@/lib/ai/contention';
+import { getUserRole, isVerifiedHistorian } from '@/lib/ui/role-labels';
 
 export type ValidateResult =
   | { success: true }
   | { success: false; error: string };
 
+/**
+ * Submit a validation decision on a document.
+ * With the flat role system, any verified historian can validate.
+ * A single approval publishes the document (no multi-approval gate).
+ */
 export async function validateDocument(
   _prev: ValidateResult | null,
   formData: FormData,
@@ -20,9 +24,9 @@ export async function validateDocument(
   } = await supabase.auth.getUser();
   if (!user) return { success: false, error: 'You must be signed in.' };
 
-  const tier = (user.app_metadata?.tier as string) ?? 'pending';
-  if (tier !== 'tier_1' && tier !== 'admin') {
-    return { success: false, error: 'Tier 1 access required to validate documents.' };
+  const role = getUserRole(user);
+  if (!isVerifiedHistorian(role)) {
+    return { success: false, error: 'Verified Historian access required to validate documents.' };
   }
 
   const documentId = (formData.get('document_id') as string)?.trim();
@@ -61,7 +65,7 @@ export async function validateDocument(
     };
   }
 
-  // Insert validation — RLS enforces no-self-approve and tier_1+ only
+  // Insert validation
   const { error: insertError } = await supabase.from('document_validations').insert({
     document_id: documentId,
     validator_id: user.id,
@@ -71,38 +75,6 @@ export async function validateDocument(
 
   if (insertError) {
     return { success: false, error: `Could not save decision: ${insertError.message}` };
-  }
-
-  // Recompute document status from all current validations
-  const { data: allValidations } = await supabase
-    .from('document_validations')
-    .select('decision')
-    .eq('document_id', documentId);
-
-  const decisions = allValidations?.map((v) => v.decision) ?? [];
-  const approvalCount = decisions.filter((d) => d === 'approved').length;
-  const hasRejection = decisions.some((d) => d === 'rejected');
-
-  let newStatus: string;
-  const statusUpdate: Record<string, unknown> = {};
-
-  if (hasRejection) {
-    newStatus = 'rejected';
-  } else if (approvalCount >= DOCUMENT_APPROVALS_REQUIRED) {
-    newStatus = 'published';
-    statusUpdate.published_at = new Date().toISOString();
-  } else {
-    newStatus = 'under_review';
-  }
-
-  await supabase
-    .from('documents')
-    .update({ status: newStatus, ...statusUpdate })
-    .eq('id', documentId);
-
-  // Fire-and-forget contention detection when a document reaches published status
-  if (newStatus === 'published') {
-    detectContentions(documentId).catch((e) => console.warn('[contention]', e));
   }
 
   revalidatePath('/contribute/validate');

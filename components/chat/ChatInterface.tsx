@@ -180,10 +180,10 @@ export default function ChatInterface({
         <ChatInput
           onSubmit={handleSubmit}
           disabled={isLoading || isSwitching}
-          placeholder="Ask about the historical record…"
+          placeholder="Ask about history…"
         />
         <p className="mt-1.5 text-center text-xs text-muted-foreground">
-          Answers are grounded in verified primary sources only.
+          Answers are grounded in authenticated sources only.
         </p>
       </div>
     </div>

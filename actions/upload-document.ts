@@ -3,7 +3,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import type { DocumentInsert, UploadDocumentResult } from '@/types/ingestion';
-import { notifyValidators } from '@/lib/email/resend';
+import { isVerifiedHistorian, getUserRole } from '@/lib/ui/role-labels';
 
 const ALLOWED_SCAN_TYPES = new Set([
   'application/pdf',
@@ -15,26 +15,22 @@ const ALLOWED_SCAN_TYPES = new Set([
 const MAX_SCAN_BYTES = 52_428_800;    // 50 MB (matches document-scans bucket)
 const MAX_TRANS_BYTES = 10_485_760;  // 10 MB (matches transcriptions bucket)
 
-const TIER_RANK: Record<string, number> = {
-  pending: 0, reader: 1, tier_3: 2, tier_2: 3, tier_1: 4, admin: 5,
-};
-
 export async function uploadDocument(
   _prev: UploadDocumentResult | null,
   formData: FormData,
 ): Promise<UploadDocumentResult> {
   const supabase = await createClient();
 
-  // ── Auth + tier check ──────────────────────────────────────────────────────
+  // -- Auth + role check ---------------------------------------------------
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { success: false, error: 'You must be signed in.' };
 
-  const tier = (user.app_metadata?.tier as string) ?? 'pending';
-  if ((TIER_RANK[tier] ?? -1) < TIER_RANK.tier_3) {
-    return { success: false, error: 'Contributor access required to upload documents.' };
+  const role = getUserRole(user);
+  if (!isVerifiedHistorian(role)) {
+    return { success: false, error: 'Verified Historian access required to upload documents.' };
   }
 
-  // ── Field validation ───────────────────────────────────────────────────────
+  // -- Field validation ----------------------------------------------------
   const title = (formData.get('title') as string)?.trim();
   if (!title) return { success: false, error: 'Title is required.' };
 
@@ -55,12 +51,12 @@ export async function uploadDocument(
     return { success: false, error: 'Transcription file exceeds the 10 MB limit.' };
   }
 
-  // ── Generate document ID upfront for consistent storage paths ─────────────
+  // -- Generate document ID upfront for consistent storage paths -----------
   const docId = crypto.randomUUID();
   const scanPath = `scans/${user.id}/${docId}`;
   const transPath = `${user.id}/${docId}.txt`;
 
-  // ── Upload scan ────────────────────────────────────────────────────────────
+  // -- Upload scan ---------------------------------------------------------
   const { error: scanError } = await supabase.storage
     .from('document-scans')
     .upload(scanPath, scanFile, { contentType: scanFile.type });
@@ -69,7 +65,7 @@ export async function uploadDocument(
     return { success: false, error: `Scan upload failed: ${scanError.message}` };
   }
 
-  // ── Upload transcription (optional) ───────────────────────────────────────
+  // -- Upload transcription (optional) ------------------------------------
   let transcriptionPath: string | null = null;
 
   if (hasTranscription) {
@@ -85,7 +81,7 @@ export async function uploadDocument(
     transcriptionPath = transPath;
   }
 
-  // ── Insert document record (triggers ingestion webhook) ───────────────────
+  // -- Insert document record (published directly, triggers ingestion) ----
   const payload: DocumentInsert = {
     id: docId,
     title,
@@ -95,6 +91,8 @@ export async function uploadDocument(
     origin_location: (formData.get('origin_location') as string)?.trim() || null,
     language: (formData.get('language') as string)?.trim() || null,
     submitter_id: user.id,
+    status: 'published',
+    published_at: new Date().toISOString(),
     storage_path: scanPath,
     transcription_path: transcriptionPath,
     original_filename: scanFile.name,
@@ -119,9 +117,6 @@ export async function uploadDocument(
     }
     return { success: false, error: `Submission failed: ${docError.message}` };
   }
-
-  // Notify Tier 1 validators (non-blocking — email failure does not affect the upload)
-  notifyValidators(docId, title).catch(() => {});
 
   return { success: true, documentId: docId };
 }

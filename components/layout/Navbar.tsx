@@ -1,14 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
 import SignOutButton from '@/components/layout/SignOutButton';
-
-const TIER_RANK: Record<string, number> = {
-  pending: 0, reader: 1, tier_3: 2, tier_2: 3, tier_1: 4, admin: 5,
-};
-
-function tierRank(tier: string): number {
-  return TIER_RANK[tier] ?? 0;
-}
+import { getUserRole, isVerifiedHistorian, isAdmin } from '@/lib/ui/role-labels';
 
 export default async function Navbar() {
   const supabase = await createClient();
@@ -16,9 +9,9 @@ export default async function Navbar() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const tier = (user?.app_metadata?.tier as string | undefined) ?? 'pending';
-  const isContributor = tierRank(tier) >= tierRank('tier_3');
-  const isAdmin = tier === 'admin';
+  const role = getUserRole(user);
+  const canContribute = isVerifiedHistorian(role);
+  const showAdmin = isAdmin(role);
 
   let displayName = 'Account';
   let username: string | null = null;
@@ -76,20 +69,20 @@ export default async function Navbar() {
             Perspectives
           </Link>
 
-          {/* Contribute section (tier_3+) */}
-          {isContributor && (
+          {/* Historian section */}
+          {canContribute && (
             <>
+              <Link
+                href="/dashboard"
+                className="rounded-md px-3 py-1.5 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              >
+                Dashboard
+              </Link>
               <Link
                 href="/contribute/upload"
                 className="rounded-md px-3 py-1.5 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
               >
                 Upload
-              </Link>
-              <Link
-                href="/contribute/validate"
-                className="rounded-md px-3 py-1.5 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-              >
-                Validate
               </Link>
             </>
           )}
@@ -105,7 +98,7 @@ export default async function Navbar() {
               {displayName}
             </Link>
           )}
-          {isAdmin && (
+          {showAdmin && (
             <Link
               href="/admin"
               className="rounded-md px-2 py-1 text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200 transition-colors"
@@ -113,7 +106,7 @@ export default async function Navbar() {
               Admin
             </Link>
           )}
-          <SignOutButton />
+          <SignOutButton className="text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50" />
         </div>
       </nav>
     </header>

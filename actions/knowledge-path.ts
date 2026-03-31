@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { getUserRole, isVerifiedHistorian } from '@/lib/ui/role-labels';
 
 type NodeInput = {
   node_type: string;
@@ -23,11 +24,8 @@ export async function savePath(formData: FormData): Promise<
 
   if (!user) return { success: false, error: 'Not authenticated.' };
 
-  const tier = (user.app_metadata?.tier as string | undefined) ?? 'pending';
-  const tierRank: Record<string, number> = {
-    pending: 0, reader: 1, tier_3: 2, tier_2: 3, tier_1: 4, admin: 5,
-  };
-  if ((tierRank[tier] ?? 0) < tierRank['tier_3']) {
+  const role = getUserRole(user);
+  if (!isVerifiedHistorian(role)) {
     return { success: false, error: 'Insufficient permissions.' };
   }
 
@@ -58,7 +56,7 @@ export async function savePath(formData: FormData): Promise<
       .single();
 
     if (!existing) return { success: false, error: 'Path not found.' };
-    if (existing.author_id !== user.id && tier !== 'tier_1' && tier !== 'admin') {
+    if (existing.author_id !== user.id && role !== 'admin') {
       return { success: false, error: 'Not authorized to edit this path.' };
     }
 
@@ -143,8 +141,8 @@ export async function deletePath(
 
   if (!existing) return { success: false, error: 'Path not found.' };
 
-  const tier = (user.app_metadata?.tier as string | undefined) ?? 'pending';
-  if (existing.author_id !== user.id && tier !== 'tier_1' && tier !== 'admin') {
+  const role = getUserRole(user);
+  if (existing.author_id !== user.id && role !== 'admin') {
     return { success: false, error: 'Not authorized.' };
   }
 

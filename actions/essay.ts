@@ -2,10 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
-
-const TIER_RANK: Record<string, number> = {
-  pending: 0, reader: 1, tier_3: 2, tier_2: 3, tier_1: 4, admin: 5,
-};
+import { getUserRole, isVerifiedHistorian } from '@/lib/ui/role-labels';
 
 export async function saveEssay(formData: FormData): Promise<
   | { success: true; essayId: string; slug: string }
@@ -19,8 +16,8 @@ export async function saveEssay(formData: FormData): Promise<
 
   if (!user) return { success: false, error: 'Not authenticated.' };
 
-  const tier = (user.app_metadata?.tier as string | undefined) ?? 'pending';
-  if ((TIER_RANK[tier] ?? 0) < TIER_RANK['tier_2']) {
+  const role = getUserRole(user);
+  if (!isVerifiedHistorian(role)) {
     return { success: false, error: 'Insufficient permissions.' };
   }
 
@@ -44,7 +41,7 @@ export async function saveEssay(formData: FormData): Promise<
       .single();
 
     if (!existing) return { success: false, error: 'Essay not found.' };
-    if (existing.author_id !== user.id && tier !== 'tier_1' && tier !== 'admin') {
+    if (existing.author_id !== user.id && role !== 'admin') {
       return { success: false, error: 'Not authorized to edit this essay.' };
     }
 
@@ -136,8 +133,8 @@ export async function deleteEssay(
 
   if (!existing) return { success: false, error: 'Essay not found.' };
 
-  const tier = (user.app_metadata?.tier as string | undefined) ?? 'pending';
-  if (existing.author_id !== user.id && tier !== 'tier_1' && tier !== 'admin') {
+  const role = getUserRole(user);
+  if (existing.author_id !== user.id && role !== 'admin') {
     return { success: false, error: 'Not authorized.' };
   }
 

@@ -117,7 +117,11 @@ export default function ContentionCard({ contention, documentTitles }: Props) {
             className="w-full rounded-md border bg-background px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary"
             disabled={isPending}
           />
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && (
+            <p className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              {error}
+            </p>
+          )}
           <div className="flex gap-2">
             <Button
               size="sm"

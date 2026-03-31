@@ -4,23 +4,23 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { revalidatePath } from 'next/cache';
 
-const VALID_TIERS = ['pending', 'reader', 'tier_3', 'tier_2', 'tier_1', 'admin'] as const;
-type Tier = (typeof VALID_TIERS)[number];
+const VALID_ROLES = ['reader', 'verified_historian', 'admin'] as const;
+type Role = (typeof VALID_ROLES)[number];
 
 // ---------------------------------------------------------------------------
-// changeTier
+// changeRole
 // ---------------------------------------------------------------------------
 
-/** Change a user's tier. Caller must be admin. */
-export async function changeTier(userId: string, tier: string): Promise<void> {
+/** Change a user's role. Caller must be admin. */
+export async function changeRole(userId: string, role: string): Promise<void> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (user?.app_metadata?.tier !== 'admin') throw new Error('Unauthorized');
+  if (user?.app_metadata?.role !== 'admin') throw new Error('Unauthorized');
 
-  if (!VALID_TIERS.includes(tier as Tier)) {
-    throw new Error('Invalid tier value');
+  if (!VALID_ROLES.includes(role as Role)) {
+    throw new Error('Invalid role value');
   }
 
   const admin = createAdminClient();
@@ -28,14 +28,14 @@ export async function changeTier(userId: string, tier: string): Promise<void> {
   // Update the profiles table
   const { error: profileError } = await admin
     .from('profiles')
-    .update({ tier })
+    .update({ role })
     .eq('id', userId);
 
   if (profileError) throw new Error(profileError.message);
 
   // Sync to JWT app_metadata so the claim is updated on next login
   const { error: authError } = await admin.auth.admin.updateUserById(userId, {
-    app_metadata: { tier },
+    app_metadata: { role },
   });
 
   if (authError) throw new Error(authError.message);
@@ -57,7 +57,7 @@ export async function resolveContention(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (user?.app_metadata?.tier !== 'admin') throw new Error('Unauthorized');
+  if (user?.app_metadata?.role !== 'admin') throw new Error('Unauthorized');
 
   const admin = createAdminClient();
 

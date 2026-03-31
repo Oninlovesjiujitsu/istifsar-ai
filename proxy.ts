@@ -1,29 +1,16 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-
-type Tier = 'pending' | 'reader' | 'tier_3' | 'tier_2' | 'tier_1' | 'admin';
-
-const TIER_RANK: Record<Tier, number> = {
-  pending: 0,
-  reader: 1,
-  tier_3: 2,
-  tier_2: 3,
-  tier_1: 4,
-  admin: 5,
-};
-
-function tierRank(tier: string): number {
-  return TIER_RANK[tier as Tier] ?? -1;
-}
+import { type Role, isVerifiedHistorian, isAdmin } from '@/lib/ui/role-labels';
 
 type ProxyOptions = {
   requireAuth?: boolean;
-  minTier?: Tier;
+  /** Minimum role required. 'verified_historian' also allows admin. */
+  minRole?: Role;
   redirectAuthenticated?: string;
 };
 
 export async function proxy(options: ProxyOptions = {}): Promise<void> {
-  const { requireAuth = false, minTier, redirectAuthenticated } = options;
+  const { requireAuth = false, minRole, redirectAuthenticated } = options;
 
   const supabase = await createClient();
   const { data: { session } } = await supabase.auth.getSession();
@@ -36,11 +23,15 @@ export async function proxy(options: ProxyOptions = {}): Promise<void> {
     redirect('/login');
   }
 
-  if (minTier && session) {
-    const tier: string =
-      (session.user.app_metadata?.tier as string | undefined) ?? 'pending';
+  if (minRole && session) {
+    const role = (session.user.app_metadata?.role as string) ?? 'reader';
 
-    if (tierRank(tier) < tierRank(minTier)) {
+    const allowed =
+      minRole === 'reader' ||
+      (minRole === 'verified_historian' && isVerifiedHistorian(role)) ||
+      (minRole === 'admin' && isAdmin(role));
+
+    if (!allowed) {
       redirect('/');
     }
   }

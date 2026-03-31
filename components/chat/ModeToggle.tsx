@@ -17,7 +17,7 @@ export default function ModeToggle({ mode, onChange, disabled }: Props) {
 
     if (next === 'interpreted') {
       const confirmed = window.confirm(
-        'Switching to Historian\'s Perspective mode will start a new conversation. Continue?',
+        "Switch to Historian's Perspective? This starts a new conversation — your current messages won't carry over.",
       );
       if (!confirmed) return;
     }
