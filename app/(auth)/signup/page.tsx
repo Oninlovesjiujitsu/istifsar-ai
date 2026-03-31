@@ -1,10 +1,10 @@
 import Link from 'next/link';
-import LoginForm from '@/components/auth/LoginForm';
+import SignUpForm from '@/components/auth/SignUpForm';
 import type { Metadata } from 'next';
 
-export const metadata: Metadata = { title: 'Sign in — Istifsar' };
+export const metadata: Metadata = { title: 'Create account — Istifsar' };
 
-export default function LoginPage() {
+export default function SignUpPage() {
   return (
     <div className="relative mx-auto w-full max-w-sm sm:max-w-md">
       <div
@@ -17,7 +17,6 @@ export default function LoginPage() {
 
       <div className="relative rounded-2xl border border-[#a08430]/15 bg-[#1a1720]/90 px-6 py-8 shadow-2xl shadow-[#a08430]/5 backdrop-blur-sm sm:px-10 sm:py-10">
         <div className="absolute inset-x-6 -top-px h-px bg-gradient-to-r from-transparent via-[#b8963f]/50 to-transparent sm:inset-x-10" />
-
         <div className="mb-8 space-y-2 text-center">
           <div className="flex items-center justify-center gap-2">
             <h1 className="text-2xl font-semibold tracking-wide text-amber-200/90 sm:text-3xl">
@@ -38,32 +37,23 @@ export default function LoginPage() {
           </div>
 
           <h2 className="text-lg font-medium text-amber-100/80 sm:text-xl">
-            Welcome to the Archive
+            Join the Archive
           </h2>
           <p className="text-sm text-neutral-400">
-            Sign in to explore history through authentic sources.
+            Create a free account to start exploring history through primary sources.
           </p>
         </div>
 
-        <LoginForm />
-
-        <div className="mt-4 text-center">
-          <Link
-            href="/login"
-            className="text-sm text-amber-300/60 underline-offset-4 transition-colors hover:text-amber-200 hover:underline"
-          >
-            Forgot password?
-          </Link>
-        </div>
+        <SignUpForm />
       </div>
 
       <p className="mt-6 text-center text-sm text-neutral-500">
-        New to Istifsar?{' '}
+        Already have an account?{' '}
         <Link
-          href="/signup"
+          href="/login"
           className="text-amber-300/70 underline-offset-4 transition-colors hover:text-amber-200 hover:underline"
         >
-          Create an account
+          Sign in
         </Link>
       </p>
     </div>
