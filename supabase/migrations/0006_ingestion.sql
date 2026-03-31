@@ -64,23 +64,5 @@ create policy "transcriptions: owner can delete"
 
 -- ------------------------------------------------------------
 -- DB webhook trigger → ingest-document Edge Function
---
--- LOCAL DEV:  http://host.docker.internal:54321/functions/v1/ingest-document
---             Works with Docker Desktop on WSL2.
---             Run: npx supabase functions serve ingest-document
---
--- PRODUCTION: Recreate this trigger via Supabase Dashboard >
---             Database > Webhooks, pointing to your project URL.
---             Include "Authorization: Bearer <service-role-key>" header.
+-- Moved to 0010_pg_net_ingest_trigger.sql (uses pg_net + Vault)
 -- ------------------------------------------------------------
-
-create trigger on_document_insert_ingest
-  after insert on public.documents
-  for each row
-  execute function supabase_functions.http_request(
-    'http://host.docker.internal:54321/functions/v1/ingest-document',
-    'POST',
-    '{"Content-Type":"application/json"}',
-    '{}',
-    '5000'
-  );
