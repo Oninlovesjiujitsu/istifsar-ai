@@ -111,9 +111,9 @@ export async function uploadDocument(
 
   if (docError) {
     // Best-effort cleanup of orphaned storage objects.
-    await supabase.storage.from('document-scans').remove([scanPath]).catch(() => {});
+    await supabase.storage.from('document-scans').remove([scanPath]).catch(() => { });
     if (transcriptionPath) {
-      await supabase.storage.from('transcriptions').remove([transPath]).catch(() => {});
+      await supabase.storage.from('transcriptions').remove([transPath]).catch(() => { });
     }
     return { success: false, error: `Submission failed: ${docError.message}` };
   }

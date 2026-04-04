@@ -31,7 +31,17 @@ export async function GET(request: Request) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error && data.session) {
-      const role = (data.session.user.app_metadata?.role as string) ?? 'reader';
+      let role = (data.session.user.app_metadata?.role as string) ?? 'reader';
+
+      // Fallback: if the JWT hook hasn't synced the role, query profiles directly
+      if (role === 'reader') {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', data.session.user.id)
+          .single();
+        if (profile?.role) role = profile.role;
+      }
 
       if (role === 'admin') {
         return NextResponse.redirect(`${origin}/admin`);

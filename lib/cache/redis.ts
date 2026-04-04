@@ -35,12 +35,14 @@ function getRedis(): import('@upstash/redis').Redis | null {
 // ---------------------------------------------------------------------------
 
 /**
- * Build a deterministic cache key for a (query, mode) pair.
+ * Build a deterministic cache key for a (query, mode, topic) tuple.
  * The query is base64url-encoded and truncated to keep keys short.
  */
-export function buildCacheKey(query: string, mode: string): string {
+export function buildCacheKey(query: string, mode: string, topicTagId?: string | null, documentId?: string | null): string {
   const encoded = Buffer.from(query).toString('base64url').slice(0, 64);
-  return `rag:${mode}:${encoded}`;
+  const topicSuffix = topicTagId ? `:t:${topicTagId}` : '';
+  const docSuffix = documentId ? `:d:${documentId}` : '';
+  return `rag:${mode}:${encoded}${topicSuffix}${docSuffix}`;
 }
 
 /**
@@ -81,6 +83,56 @@ export async function setCachedResponse(key: string, value: CachedRagResponse): 
 
   try {
     await redis.set(key, value, { ex: CACHE_TTL_SECONDS });
+  } catch {
+    // Degrade gracefully
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Catalog cache helpers
+// ---------------------------------------------------------------------------
+
+const CATALOG_KEY = 'catalog:tags';
+
+export type CatalogTag = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  count: number;
+};
+
+/** Retrieve cached catalog tags. Returns null on miss. */
+export async function getCachedCatalog(): Promise<CatalogTag[] | null> {
+  const redis = getRedis();
+  if (!redis) return null;
+
+  try {
+    return await redis.get<CatalogTag[]>(CATALOG_KEY) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/** Cache catalog tags with 1-hour TTL. */
+export async function setCachedCatalog(tags: CatalogTag[]): Promise<void> {
+  const redis = getRedis();
+  if (!redis) return;
+
+  try {
+    await redis.set(CATALOG_KEY, tags, { ex: CACHE_TTL_SECONDS });
+  } catch {
+    // Degrade gracefully
+  }
+}
+
+/** Invalidate the catalog cache (call when a document is published). */
+export async function invalidateCatalogCache(): Promise<void> {
+  const redis = getRedis();
+  if (!redis) return;
+
+  try {
+    await redis.del(CATALOG_KEY);
   } catch {
     // Degrade gracefully
   }

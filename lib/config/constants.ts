@@ -12,6 +12,10 @@
  *  Below this threshold the LLM is never called — returns "No document, no history." */
 export const SIMILARITY_THRESHOLD = 0.65;
 
+/** Lower similarity gate when queries are scoped to a single document.
+ *  A single document has fewer chunks so top cosine scores tend to be lower. */
+export const DOCUMENT_SCOPE_SIMILARITY_THRESHOLD = 0.50;
+
 /** Target token count per document chunk during ingestion. */
 export const CHUNK_SIZE_TOKENS = 600;
 

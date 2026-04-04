@@ -4,7 +4,10 @@ import ChatInterface from '@/components/chat/ChatInterface';
 import { redirect } from 'next/navigation';
 import type { Metadata } from 'next';
 
-type Props = { params: Promise<{ id: string }> };
+type Props = {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ topic?: string; doc?: string }>;
+};
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
@@ -19,10 +22,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function ConversationPage({ params }: Props) {
+export default async function ConversationPage({ params, searchParams }: Props) {
   await proxy({ requireAuth: true });
 
   const { id } = await params;
+  const { topic: topicParam, doc: docParam } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -37,11 +41,20 @@ export default async function ConversationPage({ params }: Props) {
 
   if (!conv) redirect('/explore');
 
-  const { data: messages } = await supabase
-    .from('messages')
-    .select('id, role, content')
-    .eq('conversation_id', id)
-    .order('created_at', { ascending: true });
+  // Fetch messages and available topics in parallel
+  const [{ data: messagesRaw }, { data: tags }] = await Promise.all([
+    supabase
+      .from('messages')
+      .select(
+        'id, role, content, citations(position, excerpt, similarity_score, document_id, documents(title, date_of_origin))'
+      )
+      .eq('conversation_id', id)
+      .order('created_at', { ascending: true }),
+    supabase
+      .from('tags')
+      .select('id, name')
+      .order('name'),
+  ]);
 
   // Resolve Lens essay title for interpreted mode conversations
   let lensTitle: string | null = null;
@@ -54,17 +67,53 @@ export default async function ConversationPage({ params }: Props) {
     lensTitle = lens?.title ?? null;
   }
 
+  // Resolve document title for document-scoped queries
+  let docTitle: string | null = null;
+  if (docParam) {
+    const { data: doc } = await supabase
+      .from('documents')
+      .select('title')
+      .eq('id', docParam)
+      .single();
+    docTitle = doc?.title ?? null;
+  }
+
+  const topics = (tags ?? []).map((t) => ({ id: t.id, name: t.name }));
+
   return (
-    <div className="flex h-screen flex-col">
+    <div className="flex h-screen min-h-0 flex-col">
       <ChatInterface
         conversationId={id}
-        initialMessages={(messages ?? []).map((m) => ({
-          id: m.id,
-          role: m.role as 'user' | 'assistant',
-          content: m.content,
-        }))}
+        initialMessages={(messagesRaw ?? []).map((m) => {
+          let metadata = undefined;
+
+          if (m.citations && (m.citations as any[]).length > 0) {
+            const sortedCitations = [...(m.citations as any[])].sort((a, b) => (a.position || 0) - (b.position || 0));
+            metadata = {
+              citations: sortedCitations.map((c) => ({
+                position: c.position,
+                documentId: c.document_id,
+                documentTitle: (c.documents as any)?.title ?? 'Unknown Document',
+                documentDate: (c.documents as any)?.date_of_origin ?? null,
+                excerpt: c.excerpt ?? '',
+                score: c.similarity_score ?? 0,
+              })),
+            };
+          }
+
+          return {
+            id: m.id,
+            role: m.role as 'user' | 'assistant',
+            content: m.content,
+            metadata,
+          };
+        })}
         initialMode={conv.mode as 'raw_evidence' | 'interpreted'}
         lensTitle={lensTitle}
+        topics={docParam ? undefined : topics}
+        initialTopicId={topicParam ?? null}
+        documentId={docParam ?? null}
+        documentTitle={docTitle}
       />
     </div>
   );

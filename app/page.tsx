@@ -10,11 +10,12 @@ import {
   ChartBarIncreasingIcon,
   BookOpen02Icon,
   QuillWrite01Icon,
+  ArrowDown01Icon,
 } from '@hugeicons/core-free-icons';
 import type { IconSvgElement } from '@hugeicons/react';
 import ArchiveCatalog from '@/components/discovery/ArchiveCatalog';
 
-const navSections = ['agoncillo', 'historians'] as const;
+const navSections = ['agoncillo', 'boundaries', 'historians'] as const;
 type SectionId = (typeof navSections)[number];
 
 const fadeUp = {
@@ -29,11 +30,40 @@ const staggerContainer = {
 
 const viewport = { once: true, amount: 0.3 as const };
 
+const AccordionItem = ({ title, text, defaultOpen = false }: { title: string; text: string; defaultOpen?: boolean }) => {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+  return (
+    <motion.div variants={fadeUp} className="border border-gold/10 rounded-sm overflow-hidden bg-background">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex justify-between items-center p-4 sm:p-5 text-left hover:bg-gold/[0.02] transition-colors"
+      >
+        <h4 className="text-foreground font-medium text-base sm:text-lg px-2">{title}</h4>
+        <HugeiconsIcon icon={ArrowDown01Icon} size={20} className={`text-gold transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: 'easeInOut' }}
+          >
+            <div className="px-6 pb-5 text-muted-foreground text-sm leading-relaxed">
+              {text}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+};
+
 const valueProps: { icon: IconSvgElement; title: string; text: string }[] = [
   {
     icon: Shield01Icon,
     title: 'The Agoncillo Constraint',
-    text: 'Our AI adheres to strict historiographical protocols, prioritizing primary source validation over speculative inference.',
+    text: 'Our AI adheres to strict historiographical protocols, prioritizing validated sources over speculative inference.',
   },
   {
     icon: BalanceScaleIcon,
@@ -43,7 +73,7 @@ const valueProps: { icon: IconSvgElement; title: string; text: string }[] = [
   {
     icon: ChartBarIncreasingIcon,
     title: 'The Citation Economy',
-    text: 'Every claim is backed by a verifiable digital thread, connecting synthesized insights directly to the original manuscript.',
+    text: 'Every claim is backed by a verifiable digital thread, connecting synthesized insights directly to scholarly literature.',
   },
 ];
 
@@ -120,6 +150,9 @@ export default function LandingPage() {
             <a href="#agoncillo" className={navLinkClass('agoncillo')}>
               The Agoncillo Constraint
             </a>
+            <a href="#boundaries" className={navLinkClass('boundaries')}>
+              Platform Boundaries
+            </a>
             <a href="#historians" className={navLinkClass('historians')}>
               For Historians
             </a>
@@ -179,6 +212,13 @@ export default function LandingPage() {
                   className="font-serif font-light tracking-tight text-text-muted-vault hover:text-gold transition-colors text-lg"
                 >
                   The Agoncillo Constraint
+                </a>
+                <a
+                  href="#boundaries"
+                  onClick={closeMobileMenu}
+                  className="font-serif font-light tracking-tight text-text-muted-vault hover:text-gold transition-colors text-lg"
+                >
+                  Platform Boundaries
                 </a>
                 <a
                   href="#historians"
@@ -299,6 +339,74 @@ export default function LandingPage() {
           </motion.div>
         </section>
 
+        <section id="boundaries" className="bg-background py-16 sm:py-24 md:py-32 px-4 sm:px-6 md:px-12 border-y border-gold/10">
+          <div className="max-w-[1440px] mx-auto">
+            <motion.div
+              variants={fadeUp}
+              initial="hidden"
+              whileInView="visible"
+              viewport={viewport}
+              transition={{ duration: 0.6, ease: 'easeOut' }}
+              className="text-center mb-16 sm:mb-20"
+            >
+              <h2 className="font-heading text-3xl sm:text-4xl md:text-5xl text-foreground mb-6">
+                Capabilities & Limits
+              </h2>
+              <p className="max-w-2xl mx-auto text-muted-foreground text-sm sm:text-base leading-relaxed">
+                In the realm of historical research, understanding the limitations of a tool is just as important as knowing its strengths. Istifsar AI is designed to assist, not replace, the rigorous work of historical analysis.
+              </p>
+            </motion.div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 sm:gap-16 lg:gap-24">
+              <motion.div
+                variants={staggerContainer}
+                initial="hidden"
+                whileInView="visible"
+                viewport={viewport}
+                className="space-y-8"
+              >
+                <div className="border-b border-gold/20 pb-4 mb-8">
+                  <h3 className="font-serif italic text-gold text-2xl tracking-wide">What Istifsar AI Is</h3>
+                  <p className="text-xs uppercase tracking-[0.2em] text-text-muted-vault mt-2">Our Capabilities</p>
+                </div>
+                <div className="space-y-4">
+                  {[
+                    { title: 'An Engine for Academic Consensus', text: 'Navigates a strictly vetted database of peer-reviewed journals, academic books, and scholarly writings to present the prevailing historical consensus.' },
+                    { title: 'A Citation-Driven Assistant', text: 'Every synthesis generated is anchored to retrieved texts with clear, traceable citations so you can verify the original academic context.' },
+                    { title: 'A Contextual Navigator', text: 'Surfaces relevant historiographical debates, key figures, and temporal contexts that would normally require hours of manual review.' },
+                    { title: 'A Human-Governed Platform', text: 'Ruled by human Historians who review outputs, flag anomalies, and ensure strict adherence to academic standards.' }
+                  ].map((item, i) => (
+                    <AccordionItem key={i} title={item.title} text={item.text} defaultOpen={i === 0} />
+                  ))}
+                </div>
+              </motion.div>
+
+              <motion.div
+                variants={staggerContainer}
+                initial="hidden"
+                whileInView="visible"
+                viewport={viewport}
+                className="space-y-8"
+              >
+                <div className="border-b border-gold/20 pb-4 mb-8">
+                  <h3 className="font-serif italic text-gold text-2xl tracking-wide">What Istifsar AI Isn't</h3>
+                  <p className="text-xs uppercase tracking-[0.2em] text-text-muted-vault mt-2">Our Limitations</p>
+                </div>
+                <div className="space-y-4">
+                  {[
+                    { title: 'Not a Generator of New Primary Research', text: 'Does not conduct original research. It cannot interpret raw archival documents or formulate entirely new historical theories.' },
+                    { title: 'Not an Arbiter of Absolute Truth', text: 'The AI does not provide an unquestionable final word; it reflects the current scholarly landscape and acknowledges debates.' },
+                    { title: 'Not an Autonomous Oracle', text: 'A retrieval tool, not an independent thinker. Hallucinations or anachronisms are subject to immediate correction by our Historian tier.' },
+                    { title: 'Not a Creative Storyteller', text: 'Explicitly tuned to prevent creative extrapolation. If there is insufficient scholarly data, it will state that information is unavailable rather than invent a narrative.' }
+                  ].map((item, i) => (
+                    <AccordionItem key={i} title={item.title} text={item.text} defaultOpen={i === 0} />
+                  ))}
+                </div>
+              </motion.div>
+            </div>
+          </div>
+        </section>
+
         <section
           id="historians"
           className="py-20 sm:py-28 md:py-40 text-center max-w-4xl mx-auto px-4 sm:px-6 md:px-8"
@@ -338,7 +446,7 @@ export default function LandingPage() {
               href="/signup"
               className="inline-flex items-center bg-transparent border border-gold text-gold px-6 sm:px-8 md:px-12 py-3 sm:py-4 md:py-5 rounded-sm uppercase tracking-widest text-xs sm:text-sm hover:bg-gold/5 transition-all group"
             >
-              Apply for Researcher Access
+              Apply for Historian Access
               <HugeiconsIcon
                 icon={BookOpen02Icon}
                 size={20}

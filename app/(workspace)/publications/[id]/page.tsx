@@ -1,9 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
-import { createAdminClient } from '@/lib/supabase/admin';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import ContentionView from '@/components/shared/ContentionView';
-import AskAboutButton from '@/components/document/AskAboutButton';
 import type { Metadata } from 'next';
 
 type Props = { params: Promise<{ id: string }> };
@@ -15,46 +13,46 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .from('documents')
     .select('title')
     .eq('id', id)
-    .eq('status', 'published')
     .single();
 
   return { title: doc ? `${doc.title} — Istifsar` : 'Document — Istifsar' };
 }
 
-export default async function DocumentDetailPage({ params }: Props) {
+export default async function WorkspaceDocumentPage({ params }: Props) {
   const { id } = await params;
   const supabase = await createClient();
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // Historian can see their own documents regardless of status
   const { data: doc } = await supabase
     .from('documents')
     .select(
       'id, title, description, document_type, date_of_origin, origin_location, language, status, published_at, storage_path, mime_type, document_tags(tag_id, tags(name, slug))',
     )
     .eq('id', id)
-    .eq('status', 'published')
+    .eq('submitter_id', user!.id)
     .single();
 
   if (!doc) notFound();
 
-  // Use admin client for storage — the storage RLS policies restrict reads to
-  // owner/verified_historian, but readers need to view scans of published docs.
-  // The document query above already enforces status='published' via RLS.
-  const adminClient = createAdminClient();
-
   // Signed URL for document scan
   let signedUrl: string | null = null;
   if (doc.storage_path) {
-    const { data: signed } = await adminClient.storage
+    const { data: signed } = await supabase.storage
       .from('document-scans')
       .createSignedUrl(doc.storage_path, 3600);
     signedUrl = signed?.signedUrl ?? null;
   }
 
-  // Transcription path (added in migration 0006 — use type assertion)
-  const transcriptionPath = (doc as Record<string, unknown>).transcription_path as string | null ?? null;
+  // Transcription
+  const transcriptionPath =
+    ((doc as Record<string, unknown>).transcription_path as string | null) ?? null;
   let transcriptionText: string | null = null;
   if (transcriptionPath) {
-    const { data: transcriptionSigned } = await adminClient.storage
+    const { data: transcriptionSigned } = await supabase.storage
       .from('transcriptions')
       .createSignedUrl(transcriptionPath, 3600);
 
@@ -75,18 +73,26 @@ export default async function DocumentDetailPage({ params }: Props) {
 
   const isPDF = doc.mime_type?.includes('pdf');
 
+  const STATUS_BADGE: Record<string, string> = {
+    published:
+      'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
+    pending_review:
+      'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+    under_review:
+      'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+    rejected:
+      'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+  };
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
       {/* Back link */}
       <Link
-        href="/documents"
+        href="/publications"
         className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
-        ← Primary sources
+        ← My Publications
       </Link>
-
-      {/* Title */}
-      <h1 className="mt-4 text-3xl font-bold leading-tight">{doc.title}</h1>
 
       {/* Metadata bar */}
       <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
@@ -104,14 +110,18 @@ export default async function DocumentDetailPage({ params }: Props) {
         {doc.language && (
           <span className="text-muted-foreground capitalize">{doc.language}</span>
         )}
-        <span className="rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-400">
-          Verified
+        <span
+          className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${STATUS_BADGE[doc.status] ?? 'bg-gray-100 text-gray-600'}`}
+        >
+          {doc.status.replace(/_/g, ' ')}
         </span>
       </div>
 
       {/* Description */}
       {doc.description && (
-        <p className="mt-6 text-muted-foreground leading-relaxed">{doc.description}</p>
+        <p className="mt-6 text-muted-foreground leading-relaxed">
+          {doc.description}
+        </p>
       )}
 
       {/* Two-column layout */}
@@ -156,7 +166,9 @@ export default async function DocumentDetailPage({ params }: Props) {
                 {transcriptionText}
               </pre>
             ) : (
-              <p className="text-sm text-muted-foreground">No transcription on file for this source.</p>
+              <p className="text-sm text-muted-foreground">
+                No transcription on file for this source.
+              </p>
             )}
           </div>
         </div>
@@ -170,13 +182,12 @@ export default async function DocumentDetailPage({ params }: Props) {
           </h2>
           <div className="flex flex-wrap gap-2">
             {tags.map((tag) => (
-              <Link
+              <span
                 key={tag.slug}
-                href={`/documents?tag=${tag.slug}`}
-                className="rounded-full bg-muted px-3 py-1 text-sm text-muted-foreground hover:bg-muted/80 transition-colors"
+                className="rounded-full bg-muted px-3 py-1 text-sm text-muted-foreground"
               >
                 {tag.name}
-              </Link>
+              </span>
             ))}
           </div>
         </div>
@@ -184,42 +195,23 @@ export default async function DocumentDetailPage({ params }: Props) {
 
       {/* Contentions */}
       <ContentionsSection documentId={id} />
-
-      {/* CTA */}
-      <div className="mt-10 rounded-lg border bg-primary/5 p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-        <div className="flex-1">
-          <h2 className="font-semibold">Have questions about this source?</h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            Start a conversation grounded in verified primary sources.
-          </p>
-        </div>
-        <AskAboutButton
-          documentId={doc.id}
-          label="Ask about this source"
-          pendingLabel="Starting conversation…"
-          className="shrink-0 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/80 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-        />
-      </div>
     </div>
   );
 }
 
-/**
- * Server component that fetches and displays contentions related to a document.
- */
 async function ContentionsSection({ documentId }: { documentId: string }) {
   const supabase = await createClient();
 
-  // Fetch contentions where this document is involved
   const { data: contentions } = await supabase
     .from('contentions')
-    .select('id, title, description, status, document_ids, resolution_notes, created_at')
+    .select(
+      'id, title, description, status, document_ids, resolution_notes, created_at',
+    )
     .contains('document_ids', [documentId])
     .order('created_at', { ascending: false });
 
   if (!contentions || contentions.length === 0) return null;
 
-  // Collect all document IDs referenced in contentions to resolve titles
   const allDocIds = [...new Set(contentions.flatMap((c) => c.document_ids))];
   const { data: docs } = await supabase
     .from('documents')
@@ -241,7 +233,7 @@ async function ContentionsSection({ documentId }: { documentId: string }) {
       </p>
       <div className="space-y-3">
         {contentions.map((c) => (
-          <ContentionView key={c.id} contention={c} documentTitles={titleMap} />
+          <ContentionView key={c.id} contention={c} documentTitles={titleMap} documentBasePath="/publications" />
         ))}
       </div>
     </div>

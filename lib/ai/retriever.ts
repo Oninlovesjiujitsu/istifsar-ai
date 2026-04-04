@@ -16,10 +16,11 @@ export type RetrievedChunk = {
 /**
  * Retrieve candidate chunks for a query using hybrid search (vector + FTS via RRF).
  * Calls the `hybrid_search` Postgres function which only returns published document chunks.
+ * When topicTagId is provided, results are scoped to documents tagged with that topic.
  */
 export async function retrieveChunks(
   query: string,
-  options: { candidateCount?: number } = {},
+  options: { candidateCount?: number; topicTagId?: string | null; documentId?: string | null } = {},
 ): Promise<RetrievedChunk[]> {
   const candidateCount = options.candidateCount ?? RETRIEVAL_CANDIDATE_COUNT;
 
@@ -28,13 +29,21 @@ export async function retrieveChunks(
     createClient(),
   ]);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any).rpc('hybrid_search', {
+  // Build RPC params — only include scope_document_id when set so the call
+  // stays compatible with the pre-0014 5-param function signature.
+  const rpcParams: Record<string, unknown> = {
     query_text: query,
     query_vector: queryVector,
     match_count: candidateCount,
     rrf_k: 60,
-  });
+    topic_tag_id: options.topicTagId ?? null,
+  };
+  if (options.documentId) {
+    rpcParams.scope_document_id = options.documentId;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any).rpc('hybrid_search', rpcParams);
 
   if (error) {
     throw new Error(`hybrid_search RPC failed: ${error.message}`);

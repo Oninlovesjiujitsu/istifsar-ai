@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import CitationsChart from '@/components/dashboard/CitationsChart';
 
 export const metadata: Metadata = { title: 'Impact Dashboard — Istifsar' };
 
@@ -12,10 +13,13 @@ export default async function HistorianDashboard() {
 
   const userId = user!.id;
 
+  /* ── Data fetching ──────────────────────────────────────────────────── */
+
   const [
     { data: profile },
     { data: documents },
-    { data: citationCount },
+    { count: totalCitations },
+    { count: pendingReviews },
   ] = await Promise.all([
     supabase
       .from('profiles')
@@ -26,8 +30,7 @@ export default async function HistorianDashboard() {
       .from('documents')
       .select('id, title, status, created_at, published_at')
       .eq('submitter_id', userId)
-      .order('created_at', { ascending: false })
-      .limit(10),
+      .order('created_at', { ascending: false }),
     supabase
       .from('citations')
       .select('id', { count: 'exact', head: true })
@@ -37,93 +40,228 @@ export default async function HistorianDashboard() {
           (d) => d.id,
         ) ?? [],
       ),
+    supabase
+      .from('documents')
+      .select('id', { count: 'exact', head: true })
+      .eq('submitter_id', userId)
+      .eq('status', 'under_review'),
   ]);
 
-  const firstName = profile?.display_name?.split(' ')[0] ?? 'Historian';
+  const publishedDocs = documents?.filter((d) => d.status === 'published') ?? [];
   const totalDocs = documents?.length ?? 0;
-  const publishedDocs = documents?.filter((d) => d.status === 'published').length ?? 0;
-  const totalCitations = citationCount?.length ?? 0;
+
+  /* ── Per-document citation counts (for top cited works) ─────────────── */
+
+  const docIds = documents?.map((d) => d.id) ?? [];
+  let topCited: Array<{
+    id: string;
+    title: string;
+    status: string;
+    published_at: string | null;
+    citations: number;
+  }> = [];
+
+  if (docIds.length > 0) {
+    const { data: citationRows } = await supabase
+      .from('citations')
+      .select('document_id')
+      .in('document_id', docIds);
+
+    const countMap: Record<string, number> = {};
+    for (const row of citationRows ?? []) {
+      countMap[row.document_id] = (countMap[row.document_id] ?? 0) + 1;
+    }
+
+    topCited = (documents ?? [])
+      .map((doc) => ({
+        id: doc.id,
+        title: doc.title,
+        status: doc.status,
+        published_at: doc.published_at,
+        citations: countMap[doc.id] ?? 0,
+      }))
+      .sort((a, b) => b.citations - a.citations)
+      .slice(0, 5);
+  }
+
+  /* ── Monthly citation data (for chart) ──────────────────────────────── */
+
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const previousYear = currentYear - 1;
+  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  let monthlyData: Array<{ month: string; currentYear: number; previousYear: number }> = [];
+
+  if (docIds.length > 0) {
+    const { data: recentCitations } = await supabase
+      .from('citations')
+      .select('created_at')
+      .in('document_id', docIds)
+      .gte('created_at', `${previousYear}-01-01`)
+      .order('created_at', { ascending: true });
+
+    const buckets: Record<string, { current: number; previous: number }> = {};
+    for (const m of MONTHS) {
+      buckets[m] = { current: 0, previous: 0 };
+    }
+
+    for (const row of recentCitations ?? []) {
+      const d = new Date(row.created_at);
+      const month = MONTHS[d.getMonth()];
+      if (d.getFullYear() === currentYear) {
+        buckets[month].current += 1;
+      } else if (d.getFullYear() === previousYear) {
+        buckets[month].previous += 1;
+      }
+    }
+
+    monthlyData = MONTHS.map((m) => ({
+      month: m,
+      currentYear: buckets[m].current,
+      previousYear: buckets[m].previous,
+    }));
+  }
+
+  /* ── Render ─────────────────────────────────────────────────────────── */
+
+  const displayName = profile?.display_name ?? 'Historian';
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10 space-y-10">
-      {/* Greeting */}
-      <div>
-        <h1 className="text-2xl font-bold">Welcome back, {firstName}</h1>
-        <p className="mt-1 text-muted-foreground">
-          Your contributions help build the archive.
+    <div className="px-6 md:px-12 py-12 max-w-7xl">
+      {/* Editorial Header */}
+      <div className="mb-16">
+        <span className="text-[10px] uppercase tracking-[0.3em] text-gold/60 mb-4 block">
+          Analytical Overview
+        </span>
+        <h2 className="font-heading text-3xl md:text-5xl font-black text-foreground mb-4 tracking-tight">
+          Curatorial Impact
+        </h2>
+        <p className="text-muted-foreground max-w-2xl leading-relaxed">
+          Welcome, {displayName}. A comprehensive trace of your contributions to the digital archive.
+          {publishedDocs.length > 0 && (
+            <> You have {publishedDocs.length} published {publishedDocs.length === 1 ? 'writing' : 'writings'} in the archive.</>
+          )}
         </p>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-        <StatCard label="Writings uploaded" value={totalDocs} detail={`${publishedDocs} published`} />
-        <StatCard label="Times cited" value={totalCitations} />
-        <StatCard label="Published" value={publishedDocs} />
+      {/* Metric Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+        <MetricCard
+          label="Total Citations"
+          value={totalCitations ?? 0}
+          icon={
+            <svg className="w-20 h-20" fill="none" viewBox="0 0 24 24" strokeWidth={0.5} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+            </svg>
+          }
+        />
+        <MetricCard
+          label="Published Writings"
+          value={publishedDocs.length}
+          detail={totalDocs > 0 ? `${totalDocs} total uploaded` : undefined}
+          icon={
+            <svg className="w-20 h-20" fill="none" viewBox="0 0 24 24" strokeWidth={0.5} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+            </svg>
+          }
+        />
+        <MetricCard
+          label="Pending Peer Reviews"
+          value={pendingReviews ?? 0}
+          detail={pendingReviews ? 'Awaiting reviewer decisions' : undefined}
+          icon={
+            <svg className="w-20 h-20" fill="none" viewBox="0 0 24 24" strokeWidth={0.5} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
+            </svg>
+          }
+        />
       </div>
 
-      {/* Quick actions */}
-      <div className="grid gap-3 sm:grid-cols-3">
-        <QuickAction
-          href="/upload"
-          title="Upload a manuscript"
-          description="Add a new writing to the archive"
-        />
-        <QuickAction
-          href="/review"
-          title="Peer review queue"
-          description="Review submitted writings"
-        />
-        <QuickAction
-          href="/bounties"
-          title="Target bounties"
-          description="Unanswered questions in your domain"
+      {/* Citations Over Time Chart */}
+      <div className="mb-16">
+        <CitationsChart
+          data={monthlyData}
+          currentYearLabel={`${currentYear} Active`}
+          previousYearLabel={`${previousYear} Baseline`}
         />
       </div>
 
-      {/* Recent uploads */}
-      {totalDocs > 0 && (
-        <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-              Your writings
-            </h2>
-            <Link href="/publications" className="text-xs text-primary hover:underline">
-              View all
+      {/* Top Cited Works Table */}
+      {topCited.length > 0 && (
+        <div>
+          <div className="flex items-center justify-between mb-8">
+            <h4 className="font-heading text-2xl font-bold text-foreground">Top Cited Works</h4>
+            <Link
+              href="/publications"
+              className="text-[10px] uppercase tracking-widest text-gold hover:underline underline-offset-4 decoration-2 transition-all"
+            >
+              View All Publications
             </Link>
           </div>
-          <div className="divide-y rounded-lg border bg-card">
-            {documents?.map((doc) => (
-              <div key={doc.id} className="flex items-center justify-between px-4 py-3">
-                <div className="min-w-0 flex-1">
-                  <Link
-                    href={`/documents/${doc.id}`}
-                    className="text-sm font-medium hover:text-primary transition-colors line-clamp-1"
-                  >
-                    {doc.title}
-                  </Link>
-                  <p className="text-xs text-muted-foreground">
-                    {new Date(doc.created_at).toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                    })}
-                  </p>
-                </div>
-                <StatusPill status={doc.status} />
-              </div>
-            ))}
+          <div className="bg-surface-elevated overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="border-b border-white/[0.06]">
+                    <th className="py-6 px-8 text-[10px] uppercase tracking-widest text-text-muted-vault font-medium">
+                      Manuscript Title
+                    </th>
+                    <th className="py-6 px-8 text-[10px] uppercase tracking-widest text-text-muted-vault font-medium">
+                      Year
+                    </th>
+                    <th className="py-6 px-8 text-[10px] uppercase tracking-widest text-text-muted-vault font-medium">
+                      Citations
+                    </th>
+                    <th className="py-6 px-8 text-[10px] uppercase tracking-widest text-text-muted-vault font-medium text-right">
+                      Status
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/[0.03]">
+                  {topCited.map((doc) => (
+                    <tr key={doc.id} className="group hover:bg-zinc-900/40 transition-colors">
+                      <td className="py-8 px-8">
+                        <div className="flex items-center gap-4">
+                          <svg className="w-5 h-5 shrink-0 text-gold/40" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+                          </svg>
+                          <Link
+                            href={`/publications/${doc.id}`}
+                            className="font-heading text-lg text-foreground group-hover:text-gold transition-colors"
+                          >
+                            {doc.title}
+                          </Link>
+                        </div>
+                      </td>
+                      <td className="py-8 px-8 text-sm text-text-muted-vault">
+                        {doc.published_at
+                          ? new Date(doc.published_at).getFullYear()
+                          : new Date().getFullYear()}
+                      </td>
+                      <td className="py-8 px-8">
+                        <span className="font-heading text-xl text-gold font-bold">{doc.citations}</span>
+                      </td>
+                      <td className="py-8 px-8 text-right">
+                        <StatusBadge status={doc.status} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </section>
+        </div>
       )}
 
       {/* Empty state */}
       {totalDocs === 0 && (
-        <div className="rounded-lg border bg-muted/20 py-16 text-center space-y-2">
-          <p className="text-muted-foreground">You haven&apos;t contributed anything yet.</p>
+        <div className="bg-surface-elevated py-16 text-center space-y-3">
+          <p className="font-heading text-xl text-foreground">No contributions yet</p>
           <p className="text-sm text-muted-foreground">
             Start by{' '}
-            <Link href="/upload" className="text-primary hover:underline">
-              uploading a writing
+            <Link href="/upload" className="text-gold hover:underline">
+              uploading a manuscript
             </Link>{' '}
             to the archive.
           </p>
@@ -135,58 +273,55 @@ export default async function HistorianDashboard() {
 
 /* ── Helper components ──────────────────────────────────────────────────── */
 
-function StatCard({
+function MetricCard({
   label,
   value,
   detail,
+  icon,
 }: {
   label: string;
   value: number;
   detail?: string;
+  icon: React.ReactNode;
 }) {
   return (
-    <div className="rounded-lg border bg-card p-4 space-y-1">
-      <p className="text-2xl font-bold">{value}</p>
-      <p className="text-xs text-muted-foreground">{label}</p>
-      {detail && <p className="text-xs text-muted-foreground/70">{detail}</p>}
+    <div className="bg-surface-elevated p-8 border-t-2 border-gold shadow-[0_0_20px_rgba(212,175,55,0.08)] relative overflow-hidden group hover:shadow-[0_0_25px_rgba(212,175,55,0.15)] transition-all duration-500">
+      <div className="absolute -right-4 -bottom-4 opacity-5 group-hover:opacity-10 transition-opacity text-foreground">
+        {icon}
+      </div>
+      <p className="text-[10px] uppercase tracking-widest text-text-muted-vault mb-6">{label}</p>
+      <h3 className="font-heading text-4xl font-bold text-gold mb-2">
+        {value.toLocaleString()}
+      </h3>
+      {detail && (
+        <p className="text-xs text-text-muted-vault/60 font-medium">{detail}</p>
+      )}
     </div>
   );
 }
 
-function QuickAction({
-  href,
-  title,
-  description,
-}: {
-  href: string;
-  title: string;
-  description: string;
-}) {
-  return (
-    <Link
-      href={href}
-      className="group rounded-lg border bg-card p-5 space-y-1 hover:border-primary/30 hover:shadow-sm transition-all"
-    >
-      <p className="font-medium group-hover:text-primary transition-colors">{title}</p>
-      <p className="text-sm text-muted-foreground">{description}</p>
-    </Link>
-  );
-}
-
-const STATUS_COLORS: Record<string, string> = {
-  published: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-  draft: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
-  under_review: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-  pending: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
-  rejected: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+const STATUS_STYLES: Record<string, string> = {
+  published:
+    'bg-gold/10 border-gold/20 text-gold',
+  under_review:
+    'bg-amber-500/10 border-amber-500/20 text-amber-400',
+  pending:
+    'bg-zinc-800/40 border-zinc-700/50 text-zinc-400',
+  draft:
+    'bg-zinc-800/40 border-zinc-700/50 text-zinc-400',
+  rejected:
+    'bg-red-500/10 border-red-500/20 text-red-400',
 };
 
-function StatusPill({ status }: { status: string }) {
+function StatusBadge({ status }: { status: string }) {
+  const style = STATUS_STYLES[status] ?? STATUS_STYLES.pending;
+  const label = status === 'published' ? 'Authenticated' : status.replace(/_/g, ' ');
+
   return (
     <span
-      className={`shrink-0 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium capitalize ${STATUS_COLORS[status] ?? STATUS_COLORS.pending}`}
+      className={`inline-block px-3 py-1 border text-[10px] uppercase tracking-widest font-bold ${style}`}
     >
-      {status.replace(/_/g, ' ')}
+      {label}
     </span>
   );
 }

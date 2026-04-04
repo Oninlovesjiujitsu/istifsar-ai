@@ -8,7 +8,7 @@ const figtree = Figtree({ subsets: ['latin'], variable: '--font-sans' });
 const playfairDisplay = Playfair_Display({
   subsets: ['latin'],
   variable: '--font-headline',
-  weight: ['700'],
+  weight: ['700', '900'],
 });
 
 const notoSerif = Noto_Serif({
@@ -43,6 +43,7 @@ export default function RootLayout({
         geistMono.variable,
         "font-sans",
       )}
+      suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

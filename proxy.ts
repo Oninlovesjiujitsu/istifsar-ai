@@ -24,7 +24,17 @@ export async function proxy(options: ProxyOptions = {}): Promise<void> {
   }
 
   if (minRole && session) {
-    const role = (session.user.app_metadata?.role as string) ?? 'reader';
+    let role = (session.user.app_metadata?.role as string) ?? 'reader';
+
+    // Fallback: if the JWT hook hasn't synced the role, query profiles directly
+    if (role === 'reader') {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', session.user.id)
+        .single();
+      if (profile?.role) role = profile.role;
+    }
 
     const allowed =
       minRole === 'reader' ||

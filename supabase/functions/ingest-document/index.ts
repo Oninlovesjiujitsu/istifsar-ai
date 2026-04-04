@@ -26,6 +26,7 @@ const UNSTRUCTURED_API_URL =
   'https://api.unstructuredapp.io/general/v0/general';
 
 const EMBEDDING_MODEL = 'gemini-embedding-001';
+const GEMINI_FLASH_MODEL = 'gemini-2.5-flash';
 const CHUNK_SIZE = 600;   // tokens
 const CHUNK_OVERLAP = 100; // tokens
 const EMBED_BATCH = 100;  // Gemini batchEmbedContents limit
@@ -44,7 +45,8 @@ type DocumentRecord = {
 type WebhookPayload = {
   type: 'INSERT';
   table: string;
-  record: DocumentRecord;
+  /** The trigger (0010) only sends { id } — the full record must be fetched from the DB. */
+  record: { id: string };
 };
 
 // ─── Main handler ─────────────────────────────────────────────────────────────
@@ -54,16 +56,28 @@ Deno.serve(async (req: Request) => {
   // Failure state is persisted in ingestion_status.
   try {
     const payload: WebhookPayload = await req.json();
-    const doc = payload.record;
+    const docId = payload.record?.id;
 
-    if (!doc?.id) {
-      console.error('[ingest-document] Missing document record in payload');
-      return ok({ error: 'Missing document record' });
+    if (!docId) {
+      console.error('[ingest-document] Missing document id in payload');
+      return ok({ error: 'Missing document id' });
     }
 
     const db = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
       auth: { autoRefreshToken: false, persistSession: false },
     });
+
+    // The pg_net trigger (0010) only sends { id } — fetch the full record.
+    const { data: doc, error: fetchErr } = await db
+      .from('documents')
+      .select('id, storage_path, transcription_path, original_filename, mime_type')
+      .eq('id', docId)
+      .single();
+
+    if (fetchErr || !doc) {
+      console.error('[ingest-document] Failed to fetch document:', fetchErr?.message);
+      return ok({ error: `Document not found: ${docId}` });
+    }
 
     await setStatus(db, doc.id, 'processing');
 
@@ -149,7 +163,7 @@ async function extractText(
   db: ReturnType<typeof createClient>,
   doc: DocumentRecord,
 ): Promise<string> {
-  // Prefer historian transcription.
+  // 1. Prefer historian-provided transcription (instant, no API call).
   if (doc.transcription_path) {
     const { data, error } = await db.storage
       .from('transcriptions')
@@ -158,25 +172,101 @@ async function extractText(
     return data.text();
   }
 
-  // Fall back to Unstructured.io on the raw scan.
   if (!doc.storage_path) {
     throw new Error('Document has neither transcription_path nor storage_path.');
   }
 
-  const { data, error } = await db.storage
+  // Download the file once — reused by both extraction methods.
+  const { data: fileBlob, error: dlErr } = await db.storage
     .from('document-scans')
     .download(doc.storage_path);
-  if (error) throw new Error(`Scan download failed: ${error.message}`);
+  if (dlErr) throw new Error(`Scan download failed: ${dlErr.message}`);
 
+  // 2. Primary: Gemini multimodal extraction (fast, works for text PDFs).
+  try {
+    const text = await extractWithGemini(fileBlob, doc.mime_type);
+    if (text?.trim()) return text;
+  } catch (e) {
+    console.warn('[ingest-document] Gemini extraction failed, trying Unstructured.io:', e);
+  }
+
+  // 3. Fallback: Unstructured.io with 'fast' strategy (for scanned/image docs).
+  return extractWithUnstructured(fileBlob, doc.original_filename);
+}
+
+/**
+ * Extract text from a PDF/image using Gemini's multimodal capabilities.
+ * Sends the file as inline base64 data — works for files up to ~20 MB.
+ */
+async function extractWithGemini(
+  fileBlob: Blob,
+  mimeType: string | null,
+): Promise<string> {
+  const bytes = new Uint8Array(await fileBlob.arrayBuffer());
+  let base64 = '';
+  // Encode in 32 KB slices to avoid stack overflow on large files.
+  for (let i = 0; i < bytes.length; i += 32768) {
+    base64 += String.fromCharCode(...bytes.subarray(i, i + 32768));
+  }
+  base64 = btoa(base64);
+
+  const res = await fetch(
+    `${GEMINI_API_BASE}/models/${GEMINI_FLASH_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              {
+                inlineData: {
+                  mimeType: mimeType ?? 'application/pdf',
+                  data: base64,
+                },
+              },
+              {
+                text: 'Extract ALL text from this document. Preserve the original structure, paragraphs, and formatting. Return ONLY the extracted text, nothing else. Do not summarize or interpret.',
+              },
+            ],
+          },
+        ],
+        generationConfig: {
+          maxOutputTokens: 65536,
+        },
+      }),
+      signal: AbortSignal.timeout(45_000), // 45s — leaves headroom within Edge Function 60s limit
+    },
+  );
+
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Gemini extraction error ${res.status}: ${body}`);
+  }
+
+  const result = (await res.json()) as {
+    candidates?: Array<{ content: { parts: Array<{ text: string }> } }>;
+  };
+
+  return result.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+}
+
+/**
+ * Fallback: extract text via Unstructured.io using 'fast' strategy.
+ */
+async function extractWithUnstructured(
+  fileBlob: Blob,
+  originalFilename: string | null,
+): Promise<string> {
   const formData = new FormData();
-  formData.append('files', data, doc.original_filename ?? 'document');
-  formData.append('strategy', 'hi_res');
+  formData.append('files', fileBlob, originalFilename ?? 'document');
+  formData.append('strategy', 'fast');
 
   const res = await fetch(UNSTRUCTURED_API_URL, {
     method: 'POST',
     headers: { 'unstructured-api-key': UNSTRUCTURED_API_KEY },
     body: formData,
-    signal: AbortSignal.timeout(120_000), // 2-min timeout; hi_res is slow
+    signal: AbortSignal.timeout(45_000), // 45s — leaves headroom within Edge Function 60s limit
   });
 
   if (!res.ok) {
@@ -323,8 +413,6 @@ async function embedBatch(chunks: string[]): Promise<number[][]> {
 }
 
 // ─── Auto-tagging ─────────────────────────────────────────────────────────────
-
-const GEMINI_FLASH_MODEL = 'gemini-2.0-flash';
 
 async function autoTag(
   db: ReturnType<typeof createClient>,

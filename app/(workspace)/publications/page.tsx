@@ -65,7 +65,7 @@ export default async function PublicationsPage() {
               <div key={doc.id} className="flex items-center justify-between px-4 py-3">
                 <div className="min-w-0 flex-1">
                   <Link
-                    href={`/documents/${doc.id}`}
+                    href={`/publications/${doc.id}`}
                     className="text-sm font-medium hover:text-primary transition-colors line-clamp-1"
                   >
                     {doc.title}
