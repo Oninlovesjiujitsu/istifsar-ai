@@ -20,7 +20,22 @@ export default function LoginForm() {
       setError(error.message);
       setLoading(false);
     } else {
-      const role = (data.session?.user.app_metadata?.role as string) ?? 'reader';
+      let role = (data.session?.user.app_metadata?.role as string) ?? 'reader';
+
+      // Fallback: if the JWT hook hasn't synced the role, query profiles directly
+      if (role === 'reader' && data.session?.user.id) {
+        try {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', data.session.user.id)
+            .single();
+          if (profile?.role) role = profile.role;
+        } catch {
+          // use JWT role as-is
+        }
+      }
+
       if (role === 'admin') {
         window.location.href = '/admin';
       } else if (role === 'verified_historian') {

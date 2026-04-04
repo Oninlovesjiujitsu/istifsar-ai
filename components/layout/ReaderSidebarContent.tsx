@@ -1,11 +1,14 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useTransition } from 'react';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { QuillWrite01Icon } from '@hugeicons/core-free-icons';
 import SignOutButton from '@/components/layout/SignOutButton';
 import ConversationVault from '@/components/layout/ConversationVault';
 import { SidebarToggle, SidebarLabel, useSidebar } from '@/components/layout/SidebarShell';
+import { createConversation } from '@/actions/conversation';
 
 type Conversation = {
   id: string;
@@ -20,6 +23,18 @@ export default function ReaderSidebarContent({
   conversations: Conversation[];
 }) {
   const { expanded, close } = useSidebar();
+  const router = useRouter();
+  const [isCreating, startCreateTransition] = useTransition();
+
+  function handleNewInquiry() {
+    startCreateTransition(async () => {
+      const result = await createConversation('raw_evidence');
+      if (result.success) {
+        close();
+        router.push(`/explore/${result.conversationId}`);
+      }
+    });
+  }
 
   return (
     <>
@@ -38,12 +53,13 @@ export default function ReaderSidebarContent({
 
       {/* New Inquiry CTA */}
       <div className="px-4">
-        <Link
-          href="/explore"
-          onClick={close}
+        <button
+          onClick={handleNewInquiry}
+          disabled={isCreating}
           className={[
             'flex items-center justify-center gap-2 bg-gold text-[#241a00] font-bold rounded-sm',
             'shadow-[0_4px_10px_rgba(212,175,55,0.2)] hover:bg-gold-bright transition-all text-sm uppercase tracking-tight',
+            'disabled:opacity-60 disabled:cursor-not-allowed',
             expanded ? 'w-full py-3' : 'lg:w-10 lg:h-10 lg:p-0 py-3 w-full',
           ].join(' ')}
           title="New Inquiry"
@@ -51,8 +67,8 @@ export default function ReaderSidebarContent({
           <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
-          <SidebarLabel>New Inquiry</SidebarLabel>
-        </Link>
+          <SidebarLabel>{isCreating ? 'Starting…' : 'New Inquiry'}</SidebarLabel>
+        </button>
       </div>
 
       {/* Primary Navigation */}
@@ -60,6 +76,9 @@ export default function ReaderSidebarContent({
         <div className="flex flex-col gap-0.5 px-2">
           <SidebarNavLink href="/explore" icon="archive" onNavigate={close}>
             The Archive
+          </SidebarNavLink>
+          <SidebarNavLink href="/documents" icon="writings" onNavigate={close}>
+            Writings
           </SidebarNavLink>
           <SidebarNavLink href="/bounty" icon="target" onNavigate={close}>
             Bounty Board
@@ -104,6 +123,11 @@ const ICONS: Record<string, React.ReactNode> = {
   archive: (
     <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+    </svg>
+  ),
+  writings: (
+    <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
     </svg>
   ),
   target: (

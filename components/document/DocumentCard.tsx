@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import AskAboutButton from './AskAboutButton';
 
 type Props = {
   id: string;
@@ -71,12 +72,7 @@ export default function DocumentCard({
           {dateOfOrigin && <span>{dateOfOrigin}</span>}
           {!dateOfOrigin && formattedDate && <span>{formattedDate}</span>}
         </div>
-        <Link
-          href={`/explore`}
-          className="shrink-0 text-xs text-primary hover:underline"
-        >
-          Ask about this →
-        </Link>
+        <AskAboutButton documentId={id} />
       </div>
     </div>
   );

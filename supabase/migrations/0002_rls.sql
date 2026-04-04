@@ -202,10 +202,7 @@ create policy "essay_reviews: admin can delete"
 create policy "archive_gaps: select"
   on public.archive_gaps for select
   to authenticated
-  using (
-    user_id = auth.uid()
-    or public.user_tier() = 'admin'
-  );
+  using (true);
 
 create policy "archive_gaps: authenticated can insert"
   on public.archive_gaps for insert

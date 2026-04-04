@@ -91,26 +91,35 @@ export type Database = {
       archive_gaps: {
         Row: {
           created_at: string
+          era: string | null
+          geography: string | null
           id: string
           mode: string
           query_text: string
           similarity_score: number | null
+          subject: string | null
           user_id: string | null
         }
         Insert: {
           created_at?: string
+          era?: string | null
+          geography?: string | null
           id?: string
           mode?: string
           query_text: string
           similarity_score?: number | null
+          subject?: string | null
           user_id?: string | null
         }
         Update: {
           created_at?: string
+          era?: string | null
+          geography?: string | null
           id?: string
           mode?: string
           query_text?: string
           similarity_score?: number | null
+          subject?: string | null
           user_id?: string | null
         }
         Relationships: [

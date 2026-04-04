@@ -1,6 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 
 type Props = {
   documentTitle: string;
@@ -21,24 +25,21 @@ export default function CitationChip({
   excerpt,
   position,
 }: Props) {
-  const [expanded, setExpanded] = useState(false);
-
   return (
     <span className="relative inline-block">
-      <button
-        type="button"
-        onClick={() => setExpanded((prev) => !prev)}
-        className="inline-flex items-center rounded bg-primary/10 px-1.5 py-0.5 text-xs font-semibold text-primary hover:bg-primary/20 transition-colors"
-        aria-expanded={expanded}
-        aria-label={`View source ${position + 1}: ${documentTitle}`}
-      >
-        [{position + 1}]
-      </button>
+      <Popover>
+        <PopoverTrigger
+          className="inline-flex items-center rounded bg-primary/10 px-1.5 py-0.5 text-xs font-semibold text-primary hover:bg-primary/20 transition-colors"
+          aria-label={`View source ${position + 1}: ${documentTitle}`}
+        >
+          [{position + 1}]
+        </PopoverTrigger>
 
-      {expanded && (
-        <span
-          className="absolute bottom-full left-0 z-50 mb-2 w-72 rounded-lg border border-border bg-card p-3 shadow-lg text-left"
-          role="tooltip"
+        <PopoverContent
+          side="top"
+          align="start"
+          sideOffset={8}
+          className="w-72 max-w-[calc(100vw-2rem)] max-h-[50vh] overflow-y-auto p-3 text-left z-50"
         >
           <span className="block text-xs font-semibold text-foreground leading-snug mb-1">
             {documentTitle}
@@ -54,8 +55,8 @@ export default function CitationChip({
           <span className="block text-xs text-muted-foreground">
             Relevance: {(score * 100).toFixed(0)}%
           </span>
-        </span>
-      )}
+        </PopoverContent>
+      </Popover>
     </span>
   );
 }

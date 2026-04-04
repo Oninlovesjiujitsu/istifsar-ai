@@ -65,33 +65,11 @@ export default function HistorianSidebarContent() {
           </SidebarNavLink>
         </div>
 
-        {/* Switch to Archive */}
-        <div className="mt-auto px-2 pt-4">
-          {expanded && (
-            <span className="px-3 text-[10px] uppercase tracking-[0.2em] text-text-muted-vault/60">
-              Switch View
-            </span>
-          )}
-          <Link
-            href="/explore"
-            onClick={close}
-            title="Enter Archive (Reader View)"
-            className={[
-              'mt-1 text-text-muted-vault hover:text-gold px-3 py-3 transition-colors hover:bg-white/[0.04] flex items-center font-serif text-sm tracking-tight',
-              expanded ? 'gap-3' : 'lg:justify-center gap-3',
-            ].join(' ')}
-          >
-            <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
-            </svg>
-            <SidebarLabel>Enter Archive</SidebarLabel>
-          </Link>
-        </div>
       </nav>
 
       {/* Footer */}
       <div className="px-2 flex flex-col gap-0.5 border-t border-white/[0.06] pt-4">
-        <SidebarNavLink href="/settings" icon="settings" onNavigate={close}>
+        <SidebarNavLink href="/account" icon="settings" onNavigate={close}>
           Settings
         </SidebarNavLink>
         <div className={[

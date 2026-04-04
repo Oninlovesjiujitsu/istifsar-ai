@@ -6,25 +6,29 @@ import { runRag } from '@/lib/ai/rag';
 export async function POST(req: Request): Promise<Response> {
   // ── Auth check ─────────────────────────────────────────────────────────
   const supabase = await createClient();
+  const { data: { session } } = await supabase.auth.getSession();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
+  if (!user || !session) {
     return new Response('Unauthorized', { status: 401 });
   }
 
   // ── Parse request body ─────────────────────────────────────────────────
-  const { messages, conversationId, lensTitle } = (await req.json()) as {
+  const { messages, conversationId, lensTitle, topicTagId, documentId, documentTitle } = (await req.json()) as {
     messages: UIMessage[];
     conversationId: string;
     lensTitle?: string | null;
+    topicTagId?: string | null;
+    documentId?: string | null;
+    documentTitle?: string | null;
   };
 
   // ── Validate conversation ownership ────────────────────────────────────
   const { data: conv } = await supabase
     .from('conversations')
-    .select('id, mode')
+    .select('id, mode, active_lens_id')
     .eq('id', conversationId)
     .eq('user_id', user.id)
     .single();
@@ -69,12 +73,23 @@ export async function POST(req: Request): Promise<Response> {
     .map((m) => ({ role: m.role, content: m.content }));
 
   // ── Run the RAG pipeline ───────────────────────────────────────────────
-  return runRag({
-    query: lastUserText,
-    conversationId,
-    history,
-    mode: conv.mode as 'raw_evidence' | 'interpreted',
-    lensTitle: lensTitle ?? null,
-    userId: user.id,
-  });
+  try {
+    return await runRag({
+      query: lastUserText,
+      conversationId,
+      history,
+      mode: conv.mode as 'raw_evidence' | 'interpreted',
+      lensTitle: lensTitle ?? null,
+      lensEssayId: conv.active_lens_id ?? null,
+      topicTagId: topicTagId ?? null,
+      documentId: documentId ?? null,
+      documentTitle: documentTitle ?? null,
+      userId: user.id,
+      accessToken: session.access_token,
+    });
+  } catch (err) {
+    console.error('[chat route error]', err);
+    const message = err instanceof Error ? err.message : 'An unexpected error occurred.';
+    return new Response(message, { status: 500 });
+  }
 }

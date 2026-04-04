@@ -3,6 +3,8 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { getUserRole, isVerifiedHistorian } from '@/lib/ui/role-labels';
+import { detectContentions } from '@/lib/ai/contention';
+import { invalidateCatalogCache } from '@/lib/cache/redis';
 
 export type ValidateResult =
   | { success: true }
@@ -11,7 +13,7 @@ export type ValidateResult =
 /**
  * Submit a validation decision on a document.
  * With the flat role system, any verified historian can validate.
- * A single approval publishes the document (no multi-approval gate).
+ * A single approval publishes the document and triggers contention detection.
  */
 export async function validateDocument(
   _prev: ValidateResult | null,
@@ -77,8 +79,31 @@ export async function validateDocument(
     return { success: false, error: `Could not save decision: ${insertError.message}` };
   }
 
-  revalidatePath('/contribute/validate');
-  revalidatePath(`/contribute/validate/${documentId}`);
+  // If approved, check if the document should be published
+  if (decision === 'approved') {
+    const { count } = await supabase
+      .from('document_validations')
+      .select('id', { count: 'exact', head: true })
+      .eq('document_id', documentId)
+      .eq('decision', 'approved');
+
+    // Single approval publishes the document
+    if ((count ?? 0) >= 1 && doc.status !== 'published') {
+      await supabase
+        .from('documents')
+        .update({ status: 'published' })
+        .eq('id', documentId);
+
+      // Fire contention detection (non-blocking)
+      void detectContentions(documentId);
+
+      // Invalidate catalog cache so new document counts are reflected
+      void invalidateCatalogCache();
+    }
+  }
+
+  revalidatePath('/review');
+  revalidatePath(`/review/${documentId}`);
 
   return { success: true };
 }

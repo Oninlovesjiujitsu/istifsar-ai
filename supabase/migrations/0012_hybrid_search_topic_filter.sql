@@ -1,17 +1,20 @@
 
 -- ---------------------------------------------------------------------------
--- hybrid_search: RRF-merged vector + full-text search over published chunks
+-- hybrid_search: add optional topic_tag_id filter parameter
 -- ---------------------------------------------------------------------------
--- Returns document chunks ranked by Reciprocal Rank Fusion of:
---   1. Cosine similarity (pgvector halfvec <=> operator)
---   2. BM25-style full-text search (ts_rank on generated tsvector)
--- Only chunks belonging to documents with status = 'published' are returned.
+-- When topic_tag_id is provided, both vector and FTS searches are scoped to
+-- only return chunks from documents tagged with that topic.
+-- When null, behaviour is identical to the original function.
+
+-- Drop the old 4-param overload so we don't end up with two signatures.
+drop function if exists public.hybrid_search(text, halfvec, int, int);
 
 create or replace function public.hybrid_search(
-  query_text  text,
-  query_vector halfvec(3072),
-  match_count  int  default 30,
-  rrf_k        int  default 60
+  query_text    text,
+  query_vector  halfvec(3072),
+  match_count   int   default 30,
+  rrf_k         int   default 60,
+  topic_tag_id  uuid  default null
 )
 returns table (
   chunk_id       uuid,
@@ -46,6 +49,11 @@ begin
     join public.documents d on d.id = dc.document_id
     where d.status = 'published'
       and dc.embedding is not null
+      and (topic_tag_id is null or exists (
+        select 1 from public.document_tags dt
+        where dt.document_id = dc.document_id
+          and dt.tag_id = topic_tag_id
+      ))
     order by dc.embedding <=> query_vector
     limit 50
   ),
@@ -65,6 +73,11 @@ begin
     join public.documents d on d.id = dc.document_id
     where d.status = 'published'
       and dc.fts @@ websearch_to_tsquery('english', query_text)
+      and (topic_tag_id is null or exists (
+        select 1 from public.document_tags dt
+        where dt.document_id = dc.document_id
+          and dt.tag_id = topic_tag_id
+      ))
     order by fts_rank_score desc
     limit 50
   ),
@@ -102,8 +115,8 @@ begin
 end;
 $$;
 
-comment on function public.hybrid_search is
-  'Hybrid vector + FTS search over published document_chunks using Reciprocal Rank Fusion (RRF).';
+comment on function public.hybrid_search(text, halfvec, int, int, uuid) is
+  'Hybrid vector + FTS search over published document_chunks using Reciprocal Rank Fusion (RRF). Optionally scoped to a topic tag.';
 
 -- Allow authenticated users to call this function (RLS on base tables still applies)
-grant execute on function public.hybrid_search to authenticated;
+grant execute on function public.hybrid_search(text, halfvec, int, int, uuid) to authenticated;
