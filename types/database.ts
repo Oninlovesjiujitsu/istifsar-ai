@@ -240,6 +240,8 @@ export type Database = {
           created_at: string
           id: string
           mode: string
+          scope_document_id: string | null
+          scope_topic_id: string | null
           title: string | null
           updated_at: string
           user_id: string
@@ -249,6 +251,8 @@ export type Database = {
           created_at?: string
           id?: string
           mode?: string
+          scope_document_id?: string | null
+          scope_topic_id?: string | null
           title?: string | null
           updated_at?: string
           user_id: string
@@ -258,6 +262,8 @@ export type Database = {
           created_at?: string
           id?: string
           mode?: string
+          scope_document_id?: string | null
+          scope_topic_id?: string | null
           title?: string | null
           updated_at?: string
           user_id?: string
@@ -268,6 +274,20 @@ export type Database = {
             columns: ["active_lens_id"]
             isOneToOne: false
             referencedRelation: "living_essays"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_scope_document_id_fkey"
+            columns: ["scope_document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_scope_topic_id_fkey"
+            columns: ["scope_topic_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
             referencedColumns: ["id"]
           },
           {

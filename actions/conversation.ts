@@ -7,22 +7,16 @@ export type ConversationRow = {
   id: string;
   title: string | null;
   mode: string;
+  scope_document_id: string | null;
+  scope_topic_id: string | null;
   created_at: string;
   updated_at: string;
 };
-
-// ---------------------------------------------------------------------------
-// createConversation
-// ---------------------------------------------------------------------------
-
-/**
- * Create a new conversation for the current user.
- * Defaults to raw_evidence mode. Pass a lensId to set an active Lens essay
- * for interpreted mode.
- */
 export async function createConversation(
   mode: 'raw_evidence' | 'interpreted' = 'raw_evidence',
   lensId?: string,
+  scopeDocumentId?: string,
+  scopeTopicId?: string,
 ): Promise<{ success: true; conversationId: string } | { success: false; error: string }> {
   const supabase = await createClient();
 
@@ -40,6 +34,8 @@ export async function createConversation(
       user_id: user.id,
       mode,
       active_lens_id: lensId ?? null,
+      scope_document_id: scopeDocumentId ?? null,
+      scope_topic_id: scopeTopicId ?? null,
     })
     .select('id')
     .single();
@@ -53,27 +49,17 @@ export async function createConversation(
   return { success: true, conversationId: data.id };
 }
 
-// ---------------------------------------------------------------------------
-// getConversations
-// ---------------------------------------------------------------------------
-
-/** Return the current user's conversations, most recently updated first. */
 export async function getConversations(): Promise<ConversationRow[]> {
   const supabase = await createClient();
 
   const { data } = await supabase
     .from('conversations')
-    .select('id, title, mode, created_at, updated_at')
+    .select('id, title, mode, scope_document_id, scope_topic_id, created_at, updated_at')
     .order('updated_at', { ascending: false });
 
   return (data ?? []) as ConversationRow[];
 }
 
-// ---------------------------------------------------------------------------
-// getConversationWithMessages
-// ---------------------------------------------------------------------------
-
-/** Load a single conversation plus its messages. Returns null if not found. */
 export async function getConversationWithMessages(conversationId: string): Promise<{
   conversation: ConversationRow;
   messages: Array<{ id: string; role: string; content: string; created_at: string }>;
@@ -82,7 +68,7 @@ export async function getConversationWithMessages(conversationId: string): Promi
 
   const { data: conv } = await supabase
     .from('conversations')
-    .select('id, title, mode, created_at, updated_at')
+    .select('id, title, mode, scope_document_id, scope_topic_id, created_at, updated_at')
     .eq('id', conversationId)
     .single();
 
@@ -105,11 +91,6 @@ export async function getConversationWithMessages(conversationId: string): Promi
   };
 }
 
-// ---------------------------------------------------------------------------
-// updateConversationTitle
-// ---------------------------------------------------------------------------
-
-/** Set a human-readable title on a conversation (e.g. inferred from first message). */
 export async function updateConversationTitle(
   conversationId: string,
   title: string,
@@ -125,11 +106,6 @@ export async function updateConversationTitle(
   revalidatePath(`/explore/${conversationId}`);
 }
 
-// ---------------------------------------------------------------------------
-// deleteConversation
-// ---------------------------------------------------------------------------
-
-/** Permanently delete a conversation and all its messages/citations. */
 export async function deleteConversation(conversationId: string): Promise<void> {
   const supabase = await createClient();
 

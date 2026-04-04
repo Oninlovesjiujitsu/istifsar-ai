@@ -34,14 +34,16 @@ export default async function ConversationPage({ params, searchParams }: Props) 
 
   const { data: conv } = await supabase
     .from('conversations')
-    .select('id, title, mode, active_lens_id')
+    .select('id, title, mode, active_lens_id, scope_document_id, scope_topic_id')
     .eq('id', id)
     .eq('user_id', user!.id)
     .single();
 
   if (!conv) redirect('/explore');
 
-  // Fetch messages and available topics in parallel
+  const effectiveDocId = conv.scope_document_id ?? docParam ?? null;
+  const effectiveTopicId = conv.scope_topic_id ?? topicParam ?? null;
+
   const [{ data: messagesRaw }, { data: tags }] = await Promise.all([
     supabase
       .from('messages')
@@ -56,7 +58,6 @@ export default async function ConversationPage({ params, searchParams }: Props) 
       .order('name'),
   ]);
 
-  // Resolve Lens essay title for interpreted mode conversations
   let lensTitle: string | null = null;
   if (conv.active_lens_id) {
     const { data: lens } = await supabase
@@ -67,13 +68,12 @@ export default async function ConversationPage({ params, searchParams }: Props) 
     lensTitle = lens?.title ?? null;
   }
 
-  // Resolve document title for document-scoped queries
   let docTitle: string | null = null;
-  if (docParam) {
+  if (effectiveDocId) {
     const { data: doc } = await supabase
       .from('documents')
       .select('title')
-      .eq('id', docParam)
+      .eq('id', effectiveDocId)
       .single();
     docTitle = doc?.title ?? null;
   }
@@ -110,9 +110,9 @@ export default async function ConversationPage({ params, searchParams }: Props) 
         })}
         initialMode={conv.mode as 'raw_evidence' | 'interpreted'}
         lensTitle={lensTitle}
-        topics={docParam ? undefined : topics}
-        initialTopicId={topicParam ?? null}
-        documentId={docParam ?? null}
+        topics={effectiveDocId ? undefined : topics}
+        initialTopicId={effectiveTopicId}
+        documentId={effectiveDocId}
         documentTitle={docTitle}
       />
     </div>

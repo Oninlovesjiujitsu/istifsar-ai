@@ -24,15 +24,14 @@ export default function AskAboutButton({
 
   function handleClick() {
     startTransition(async () => {
-      const result = await createConversation('raw_evidence');
+      const result = await createConversation(
+        'raw_evidence',
+        undefined,
+        documentId ?? undefined,
+        topicId ?? undefined,
+      );
       if (result.success) {
-        let url = `/explore/${result.conversationId}`;
-        if (documentId) {
-          url += `?doc=${documentId}`;
-        } else if (topicId) {
-          url += `?topic=${topicId}`;
-        }
-        router.push(url);
+        router.push(`/explore/${result.conversationId}`);
       }
     });
   }
