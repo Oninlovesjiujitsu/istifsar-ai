@@ -83,7 +83,6 @@ export default function LandingPage() {
 
   const closeMobileMenu = useCallback(() => setMobileMenuOpen(false), []);
 
-  /* Lock body scroll when mobile menu is open */
   useEffect(() => {
     if (mobileMenuOpen) {
       document.body.style.overflow = 'hidden';
@@ -123,7 +122,7 @@ export default function LandingPage() {
       <motion.nav
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: 'easeOut' }}
+        transition={{ duration: 1.0, ease: 'easeOut' }}
         className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-sm shadow-[0_0_15px_rgba(212,175,55,0.1)]"
       >
         <div className="flex justify-between items-center px-4 sm:px-6 md:px-12 py-4 md:py-6 max-w-[1440px] mx-auto">
@@ -253,7 +252,7 @@ export default function LandingPage() {
       </motion.nav>
 
       <main>
-        <section className="relative min-h-screen flex items-center justify-center pt-20 md:pt-24 px-4 sm:px-6 md:px-8 overflow-hidden">
+        <section className="relative min-h-screen flex items-center justify-center pt-0 md:pt-0 px-4 sm:px-6 md:px-0 overflow-hidden">
           <div className="absolute inset-0 z-0">
             <div className="absolute inset-0 bg-gradient-to-b from-gold/[0.03] via-background to-background" />
           </div>
@@ -262,14 +261,14 @@ export default function LandingPage() {
             <motion.h1
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.3, ease: 'easeOut' }}
+              transition={{ duration: 1, delay: 1, ease: 'easeOut' }}
               className="font-heading text-4xl sm:text-5xl md:text-6xl lg:text-8xl text-gold leading-tight mb-6 sm:mb-8 tracking-tight"
             >
               Seek the Truth <br />
               <motion.span
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ duration: 0.8, delay: 0.7 }}
+                transition={{ duration: 1, delay: 1 }}
                 className="italic font-light font-serif"
               >
                 of the Past.
@@ -279,7 +278,7 @@ export default function LandingPage() {
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.9, ease: 'easeOut' }}
+              transition={{ duration: 1.0, delay: 1.0, ease: 'easeOut' }}
               className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed mb-10 sm:mb-12 px-2"
             >
               An advanced analytical engine designed for the rigorous demands of
@@ -292,14 +291,14 @@ export default function LandingPage() {
               initial="hidden"
               animate="visible"
               transition={{ delayChildren: 1.2 }}
-              className="flex flex-wrap justify-center gap-6 sm:gap-8 md:gap-16 items-center opacity-40"
+              className="flex flex-wrap justify-center gap-6 sm:gap-8 md:gap-16 items-center opacity-50"
             >
               {['Curated Archives', 'Verified Sources', 'Scholarly Nodes'].map(
                 (label) => (
                   <motion.span
                     key={label}
                     variants={fadeUp}
-                    transition={{ duration: 0.5 }}
+                    transition={{ duration: 1.0 }}
                     className="text-[10px] sm:text-xs uppercase tracking-[0.2em] sm:tracking-[0.3em]"
                   >
                     {label}
@@ -312,19 +311,19 @@ export default function LandingPage() {
 
         <ArchiveCatalog />
 
-        <section id="agoncillo" className="bg-surface-vault py-16 sm:py-24 md:py-32 px-4 sm:px-6 md:px-12">
+        <section id="agoncillo" className="bg-surface-vault py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-12">
           <motion.div
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
             viewport={viewport}
-            className="max-w-[1440px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-10 sm:gap-16 md:gap-24"
+            className="max-w-[1440px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12 md:gap-16"
           >
             {valueProps.map((prop) => (
               <motion.div
                 key={prop.title}
                 variants={fadeUp}
-                transition={{ duration: 0.6, ease: 'easeOut' }}
+                transition={{ duration: 1.0, ease: 'easeOut' }}
                 className="flex flex-col items-start"
               >
                 <div className="bg-card p-3 sm:p-4 rounded-sm mb-5 sm:mb-8">
@@ -339,15 +338,15 @@ export default function LandingPage() {
           </motion.div>
         </section>
 
-        <section id="boundaries" className="bg-background py-16 sm:py-24 md:py-32 px-4 sm:px-6 md:px-12 border-y border-gold/10">
+        <section id="boundaries" className="bg-background py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-12 border-y border-gold/10">
           <div className="max-w-[1440px] mx-auto">
             <motion.div
               variants={fadeUp}
               initial="hidden"
               whileInView="visible"
               viewport={viewport}
-              transition={{ duration: 0.6, ease: 'easeOut' }}
-              className="text-center mb-16 sm:mb-20"
+              transition={{ duration: 1.0, ease: 'easeOut' }}
+              className="text-center mb-10 sm:mb-14"
             >
               <h2 className="font-heading text-3xl sm:text-4xl md:text-5xl text-foreground mb-6">
                 Capabilities & Limits
@@ -357,7 +356,7 @@ export default function LandingPage() {
               </p>
             </motion.div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 sm:gap-16 lg:gap-24">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16">
               <motion.div
                 variants={staggerContainer}
                 initial="hidden"
@@ -409,14 +408,14 @@ export default function LandingPage() {
 
         <section
           id="historians"
-          className="py-20 sm:py-28 md:py-40 text-center max-w-4xl mx-auto px-4 sm:px-6 md:px-8"
+          className="py-14 sm:py-20 md:py-28 text-center max-w-4xl mx-auto px-4 sm:px-6 md:px-8"
         >
           <motion.h2
             variants={fadeUp}
             initial="hidden"
             whileInView="visible"
             viewport={viewport}
-            transition={{ duration: 0.7, ease: 'easeOut' }}
+            transition={{ duration: 1.0, ease: 'easeOut' }}
             className="font-heading text-3xl sm:text-4xl md:text-5xl text-foreground mb-8 sm:mb-12"
           >
             History is not just preserved; it is understood.
@@ -427,7 +426,7 @@ export default function LandingPage() {
             initial="hidden"
             whileInView="visible"
             viewport={viewport}
-            transition={{ duration: 0.6, delay: 0.15, ease: 'easeOut' }}
+            transition={{ duration: 1.0, delay: 0.5, ease: 'easeOut' }}
             className="text-muted-foreground mb-10 sm:mb-16 text-sm sm:text-base md:text-lg leading-relaxed"
           >
             Access to the Istifsar engine is currently by institutional
@@ -464,7 +463,7 @@ export default function LandingPage() {
         transition={{ duration: 0.6 }}
         className="w-full border-t border-border"
       >
-        <div className="flex flex-col md:flex-row justify-between items-center px-4 sm:px-6 md:px-16 py-8 md:py-12 w-full max-w-[1440px] mx-auto gap-6 md:gap-8">
+        <div className="flex flex-col md:flex-row justify-between items-center px-4 sm:px-6 md:px-16 py-6 md:py-8 w-full max-w-[1440px] mx-auto gap-6 md:gap-8">
           <p className="text-xs sm:text-sm tracking-widest uppercase text-text-muted-vault text-center md:text-left">
             &copy; 2026 Istifsar AI. All rights reserved. The Digital Curator.
           </p>

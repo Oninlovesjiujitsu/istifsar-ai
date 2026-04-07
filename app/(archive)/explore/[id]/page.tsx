@@ -48,7 +48,7 @@ export default async function ConversationPage({ params, searchParams }: Props) 
     supabase
       .from('messages')
       .select(
-        'id, role, content, citations(position, excerpt, similarity_score, document_id, documents(title, date_of_origin))'
+        'id, role, content, citations(position, excerpt, similarity_score, document_id, documents(title, date_of_origin, profiles!documents_submitter_id_fkey(username, display_name)))'
       )
       .eq('conversation_id', id)
       .order('created_at', { ascending: true }),
@@ -90,14 +90,20 @@ export default async function ConversationPage({ params, searchParams }: Props) 
           if (m.citations && (m.citations as any[]).length > 0) {
             const sortedCitations = [...(m.citations as any[])].sort((a, b) => (a.position || 0) - (b.position || 0));
             metadata = {
-              citations: sortedCitations.map((c) => ({
-                position: c.position,
-                documentId: c.document_id,
-                documentTitle: (c.documents as any)?.title ?? 'Unknown Document',
-                documentDate: (c.documents as any)?.date_of_origin ?? null,
-                excerpt: c.excerpt ?? '',
-                score: c.similarity_score ?? 0,
-              })),
+              citations: sortedCitations.map((c) => {
+                const doc = c.documents as any;
+                const profile = doc?.profiles as any;
+                return {
+                  position: c.position,
+                  documentId: c.document_id,
+                  documentTitle: doc?.title ?? 'Unknown Document',
+                  documentDate: doc?.date_of_origin ?? null,
+                  excerpt: c.excerpt ?? '',
+                  score: c.similarity_score ?? 0,
+                  authorUsername: profile?.username ?? null,
+                  authorDisplayName: profile?.display_name ?? null,
+                };
+              }),
             };
           }
 

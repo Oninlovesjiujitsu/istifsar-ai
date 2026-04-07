@@ -43,7 +43,7 @@ export default function ArchiveCatalog() {
       >
         <motion.h2
           variants={fadeUp}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
+          transition={{ duration: 1.0, ease: 'easeOut' }}
           className="font-heading text-2xl sm:text-3xl md:text-4xl text-foreground mb-4"
         >
           The Digital Collections
@@ -52,7 +52,7 @@ export default function ArchiveCatalog() {
           initial={{ scaleX: 0 }}
           whileInView={{ scaleX: 1 }}
           viewport={viewport}
-          transition={{ duration: 0.8, delay: 0.3, ease: 'easeOut' }}
+          transition={{ duration: 1.0, delay: 0.5, ease: 'easeOut' }}
           className="w-24 h-px bg-gold/40 origin-left"
         />
       </motion.div>
