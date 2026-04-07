@@ -27,10 +27,18 @@ const UNSTRUCTURED_API_URL =
 
 const EMBEDDING_MODEL = 'gemini-embedding-001';
 const GEMINI_FLASH_MODEL = 'gemini-2.5-flash';
-const CHUNK_SIZE = 600;   // tokens
-const CHUNK_OVERLAP = 100; // tokens
 const EMBED_BATCH = 100;  // Gemini batchEmbedContents limit
 const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta';
+
+// Semantic chunking config
+const SEMANTIC_BREAKPOINT_THRESHOLD = 75;  // percentile
+const SEMANTIC_MAX_CHUNK_TOKENS = 1500;
+const SEMANTIC_MIN_CHUNK_TOKENS = 50;
+const MAX_SENTENCES_FOR_SEMANTIC = 2000;
+
+// Recursive fallback config
+const CHUNK_SIZE = 600;   // tokens
+const CHUNK_OVERLAP = 100; // tokens
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -89,19 +97,23 @@ Deno.serve(async (req: Request) => {
         return ok({ error: 'No text extracted' });
       }
 
-      const rawChunks = chunkDocument(text, CHUNK_SIZE, CHUNK_OVERLAP);
-      const vectors = await embedBatch(rawChunks);
+      // Semantic chunking: segment → embed sentences → detect breakpoints → assemble
+      const semanticChunks = await chunkDocumentSemantic(text);
+      const chunkContents = semanticChunks.map((c) => c.content);
+
+      // Re-embed assembled chunks for high-fidelity storage vectors
+      const vectors = await embedBatch(chunkContents);
 
       // Delete any prior chunks (handles re-ingestion).
       await db.from('document_chunks').delete().eq('document_id', doc.id);
 
       // Insert in batches of 100 to stay within PostgREST limits.
-      for (let i = 0; i < rawChunks.length; i += 100) {
-        const batch = rawChunks.slice(i, i + 100).map((content, j) => ({
+      for (let i = 0; i < semanticChunks.length; i += 100) {
+        const batch = semanticChunks.slice(i, i + 100).map((chunk, j) => ({
           document_id: doc.id,
           chunk_index: i + j,
-          content,
-          token_count: estimateTokens(content),
+          content: chunk.content,
+          token_count: chunk.tokenCount,
           page_number: null,
           // halfvec expects '[v1,v2,...]' string — PostgREST casts it.
           embedding: `[${vectors[i + j].join(',')}]`,
@@ -113,14 +125,14 @@ Deno.serve(async (req: Request) => {
 
       await setStatus(db, doc.id, 'done');
 
-      // Auto-tag (non-critical — failure does not affect ingestion status)
-      try {
-        await autoTag(db, doc.id, text);
-      } catch (e) {
-        console.warn('[ingest-document] Auto-tagging failed:', e);
-      }
+      // Auto-tag — disabled for now; re-enable when ready
+      // try {
+      //   await autoTag(db, doc.id, text);
+      // } catch (e) {
+      //   console.warn('[ingest-document] Auto-tagging failed:', e);
+      // }
 
-      return ok({ chunks: rawChunks.length });
+      return ok({ chunks: semanticChunks.length, method: 'semantic' });
     } catch (inner) {
       const msg = inner instanceof Error ? inner.message : String(inner);
       console.error('[ingest-document] Pipeline error:', msg);
@@ -281,13 +293,179 @@ async function extractWithUnstructured(
     .join('\n\n');
 }
 
-// ─── Chunking — RecursiveCharacterTextSplitter (no LangChain) ─────────────────
+// ─── Chunking — Semantic (primary) + Recursive (fallback) ─────────────────────
+
+type SemanticChunk = {
+  content: string;
+  tokenCount: number;
+};
 
 function estimateTokens(text: string): number {
   return Math.ceil(text.length / 4);
 }
 
-function mergeChunks(
+/** Segment text into sentences using regex-based boundary detection. */
+function segmentSentences(text: string): string[] {
+  const sentences: string[] = [];
+  const raw = text
+    .replace(/\r\n/g, '\n')
+    .split(/(?<=[.!?])\s+(?=[A-Z\u0600-\u06FF\u0400-\u04FF])|\n{2,}/);
+
+  for (const segment of raw) {
+    const trimmed = segment.trim();
+    if (trimmed) sentences.push(trimmed);
+  }
+  return sentences;
+}
+
+/** Cosine similarity between two vectors. */
+function cosineSimilarity(a: number[], b: number[]): number {
+  let dot = 0;
+  let normA = 0;
+  let normB = 0;
+  for (let i = 0; i < a.length; i++) {
+    dot += a[i] * b[i];
+    normA += a[i] * a[i];
+    normB += b[i] * b[i];
+  }
+  const denom = Math.sqrt(normA) * Math.sqrt(normB);
+  return denom === 0 ? 0 : dot / denom;
+}
+
+/** Detect breakpoint indices where similarity drops below the percentile threshold. */
+function detectBreakpoints(similarities: number[], threshold: number): number[] {
+  if (similarities.length === 0) return [];
+
+  const sorted = [...similarities].sort((a, b) => a - b);
+  const cutoffIdx = Math.floor((threshold / 100) * (sorted.length - 1));
+  const cutoff = sorted[cutoffIdx];
+
+  const breakpoints: number[] = [];
+  for (let i = 0; i < similarities.length; i++) {
+    if (similarities[i] < cutoff) {
+      breakpoints.push(i);
+    }
+  }
+  return breakpoints;
+}
+
+/** Group sentences into chunks based on breakpoint indices. */
+function assembleChunks(sentences: string[], breakpoints: number[]): SemanticChunk[] {
+  const chunks: SemanticChunk[] = [];
+  const bpSet = new Set(breakpoints);
+
+  let start = 0;
+  for (let i = 0; i < sentences.length; i++) {
+    if (bpSet.has(i) || i === sentences.length - 1) {
+      const content = sentences.slice(start, i + 1).join(' ').trim();
+      if (content) {
+        chunks.push({ content, tokenCount: estimateTokens(content) });
+      }
+      start = i + 1;
+    }
+  }
+
+  if (start < sentences.length) {
+    const content = sentences.slice(start).join(' ').trim();
+    if (content) {
+      chunks.push({ content, tokenCount: estimateTokens(content) });
+    }
+  }
+
+  return chunks;
+}
+
+/** Enforce chunk size guardrails: split oversized, merge undersized. */
+function enforceGuardrails(
+  chunks: SemanticChunk[],
+  maxTokens: number,
+  minTokens: number,
+): SemanticChunk[] {
+  // Phase 1: Split oversized chunks using recursive fallback
+  const split: SemanticChunk[] = [];
+  for (const chunk of chunks) {
+    if (chunk.tokenCount > maxTokens) {
+      const subChunks = chunkDocumentRecursive(chunk.content, maxTokens, CHUNK_OVERLAP);
+      split.push(...subChunks.map((content) => ({
+        content,
+        tokenCount: estimateTokens(content),
+      })));
+    } else {
+      split.push(chunk);
+    }
+  }
+
+  // Phase 2: Merge undersized chunks with the next neighbor
+  const merged: SemanticChunk[] = [];
+  let buffer = '';
+
+  for (const chunk of split) {
+    buffer = buffer ? buffer + ' ' + chunk.content : chunk.content;
+
+    if (estimateTokens(buffer) >= minTokens) {
+      merged.push({ content: buffer, tokenCount: estimateTokens(buffer) });
+      buffer = '';
+    }
+  }
+
+  if (buffer.trim()) {
+    if (merged.length > 0) {
+      const last = merged[merged.length - 1];
+      last.content += ' ' + buffer.trim();
+      last.tokenCount = estimateTokens(last.content);
+    } else {
+      merged.push({ content: buffer.trim(), tokenCount: estimateTokens(buffer.trim()) });
+    }
+  }
+
+  return merged;
+}
+
+/**
+ * Primary chunking: semantic chunking using embedding similarity.
+ * Falls back to recursive splitting for documents exceeding the sentence limit.
+ */
+async function chunkDocumentSemantic(text: string): Promise<SemanticChunk[]> {
+  const sentences = segmentSentences(text);
+
+  // Too few sentences — return the whole text as one chunk
+  if (sentences.length <= 2) {
+    const content = text.trim();
+    if (!content) return [];
+    return [{ content, tokenCount: estimateTokens(content) }];
+  }
+
+  // Too many sentences — fall back to recursive splitter
+  if (sentences.length > MAX_SENTENCES_FOR_SEMANTIC) {
+    console.warn(
+      `[ingest-document] ${sentences.length} sentences exceeds limit of ${MAX_SENTENCES_FOR_SEMANTIC}, falling back to recursive splitter`,
+    );
+    return chunkDocumentRecursive(text, CHUNK_SIZE, CHUNK_OVERLAP).map((content) => ({
+      content,
+      tokenCount: estimateTokens(content),
+    }));
+  }
+
+  // Embed all sentences (for breakpoint detection only)
+  const sentenceEmbeddings = await embedBatch(sentences);
+
+  // Compute cosine similarity between consecutive pairs
+  const similarities: number[] = [];
+  for (let i = 0; i < sentenceEmbeddings.length - 1; i++) {
+    similarities.push(cosineSimilarity(sentenceEmbeddings[i], sentenceEmbeddings[i + 1]));
+  }
+
+  // Detect breakpoints and assemble chunks
+  const breakpoints = detectBreakpoints(similarities, SEMANTIC_BREAKPOINT_THRESHOLD);
+  const rawChunks = assembleChunks(sentences, breakpoints);
+
+  // Enforce size guardrails
+  return enforceGuardrails(rawChunks, SEMANTIC_MAX_CHUNK_TOKENS, SEMANTIC_MIN_CHUNK_TOKENS);
+}
+
+// ─── Recursive character splitter (fallback) ─────────────────────────────────
+
+function mergeRecursiveSplits(
   splits: string[],
   sep: string,
   chunkSize: number,
@@ -352,7 +530,7 @@ function recursiveSplit(
   for (const s of splits) {
     if (estimateTokens(s) >= chunkSize) {
       if (good.length > 0) {
-        result.push(...mergeChunks(good, sep, chunkSize, overlap));
+        result.push(...mergeRecursiveSplits(good, sep, chunkSize, overlap));
         good.length = 0;
       }
       result.push(
@@ -363,11 +541,11 @@ function recursiveSplit(
     }
   }
 
-  if (good.length > 0) result.push(...mergeChunks(good, sep, chunkSize, overlap));
+  if (good.length > 0) result.push(...mergeRecursiveSplits(good, sep, chunkSize, overlap));
   return result;
 }
 
-function chunkDocument(text: string, chunkSize: number, overlap: number): string[] {
+function chunkDocumentRecursive(text: string, chunkSize: number, overlap: number): string[] {
   const separators = ['\n\n', '\n', '. ', '! ', '? ', '; ', ', ', ' ', ''];
   return recursiveSplit(text, separators, chunkSize, overlap).filter(
     (c) => c.trim().length > 0,

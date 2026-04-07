@@ -15,10 +15,8 @@ import {
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/types/database';
 import { categorizeArchiveGap } from './categorizeGap';
+import { createAdminClient } from '@/lib/supabase/admin';
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
 
 export type RagParams = {
   query: string;
@@ -41,6 +39,8 @@ export type CitationMeta = {
   documentDate: string | null;
   excerpt: string;
   score: number;
+  authorUsername: string | null;
+  authorDisplayName: string | null;
 };
 
 export type RagMetadata = {
@@ -51,30 +51,10 @@ export type RagMetadata = {
 // UIMessage with our custom metadata type
 type RagUIMessage = UIMessage<RagMetadata>;
 
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
 const NO_DOCUMENT_MESSAGE =
   "No document, no history. The current archive does not contain sources that address your question. This query has been recorded to help us identify gaps in the collection.";
 
-// ---------------------------------------------------------------------------
-// Main pipeline
-// ---------------------------------------------------------------------------
 
-/**
- * Run the full RAG pipeline for a user query.
- *
- * Pipeline stages:
- * 1. Hybrid retrieval (vector + FTS via RRF) — up to 30 candidates, scoped by topic
- * 2. Rerank by cosine score — keep top 8
- * 2b. (Interpreted mode) Boost lens essay's related documents
- * 3. Similarity gate — if top chunk < 0.65, short-circuit (log to archive_gaps)
- * 4. Cache check — return cached response if available
- * 5. Build system prompt + context block (with lens essay if applicable)
- * 6. Stream LLM response via Vercel AI SDK
- * 7. On finish: persist assistant message + citations
- */
 export async function runRag(params: RagParams): Promise<Response> {
   const supabase = createClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -135,6 +115,23 @@ export async function runRag(params: RagParams): Promise<Response> {
     }
   }
 
+  // ── Stage 2c: Fetch submitter profiles for cited documents ──────────────────
+  const uniqueDocIds = [...new Set(rankedChunks.map((c) => c.documentId))];
+  const { data: docAuthors } = await supabase
+    .from('documents')
+    .select('id, submitter_id, profiles!documents_submitter_id_fkey(username, display_name)')
+    .in('id', uniqueDocIds);
+
+  const authorByDocId = new Map<string, { username: string; display_name: string }>();
+  if (docAuthors) {
+    for (const doc of docAuthors) {
+      const profile = doc.profiles as unknown as { username: string; display_name: string } | null;
+      if (profile) {
+        authorByDocId.set(doc.id, profile);
+      }
+    }
+  }
+
   // ── Stage 3: Similarity gate ───────────────────────────────────────────────
   const topChunk = rankedChunks[0];
   const similarityGate = params.documentId
@@ -188,14 +185,19 @@ export async function runRag(params: RagParams): Promise<Response> {
   if (!skipCache) {
     const cached = await getCachedResponse(cacheKey);
     if (cached) {
-      const citations: CitationMeta[] = cached.chunks.map((chunk, i) => ({
-        position: i,
-        documentId: chunk.documentId,
-        documentTitle: chunk.documentTitle,
-        documentDate: chunk.documentDate,
-        excerpt: chunk.content.slice(0, 200),
-        score: chunk.cosineScore,
-      }));
+      const citations: CitationMeta[] = cached.chunks.map((chunk, i) => {
+        const author = authorByDocId.get(chunk.documentId);
+        return {
+          position: i,
+          documentId: chunk.documentId,
+          documentTitle: chunk.documentTitle,
+          documentDate: chunk.documentDate,
+          excerpt: chunk.content,
+          score: chunk.cosineScore,
+          authorUsername: author?.username ?? null,
+          authorDisplayName: author?.display_name ?? null,
+        };
+      });
 
       const cachedStream = createUIMessageStream<RagUIMessage>({
         execute: async ({ writer }) => {
@@ -220,14 +222,19 @@ export async function runRag(params: RagParams): Promise<Response> {
   const systemPrompt =
     buildSystemPrompt(params.mode, params.lensTitle, params.documentTitle) + contextBlock;
 
-  const citations: CitationMeta[] = rankedChunks.map((chunk, i) => ({
-    position: i,
-    documentId: chunk.documentId,
-    documentTitle: chunk.documentTitle,
-    documentDate: chunk.documentDate,
-    excerpt: chunk.content.slice(0, 200),
-    score: chunk.cosineScore,
-  }));
+  const citations: CitationMeta[] = rankedChunks.map((chunk, i) => {
+    const author = authorByDocId.get(chunk.documentId);
+    return {
+      position: i,
+      documentId: chunk.documentId,
+      documentTitle: chunk.documentTitle,
+      documentDate: chunk.documentDate,
+      excerpt: chunk.content,
+      score: chunk.cosineScore,
+      authorUsername: author?.username ?? null,
+      authorDisplayName: author?.display_name ?? null,
+    };
+  });
 
   // ── Stage 6 & 7: Stream + persist ─────────────────────────────────────────
   const ragStream = createUIMessageStream<RagUIMessage>({
@@ -276,11 +283,8 @@ export async function runRag(params: RagParams): Promise<Response> {
           .select('id')
           .single();
 
-        // 2. Log any Supabase rejection
         if (msgError) {
           console.error('[Supabase Insert Error]:', msgError);
-          // If you see an RLS error here, it means this backend 
-          // Supabase client doesn't know who the logged-in user is!
         }
 
         if (msgError) {
@@ -290,12 +294,13 @@ export async function runRag(params: RagParams): Promise<Response> {
         }
 
         if (msg?.id) {
-          const { error: citError } = await supabase.from('citations').insert(
+          const adminClient = createAdminClient();
+          const { error: citError } = await adminClient.from('citations').insert(
             rankedChunks.map((chunk, i) => ({
               message_id: msg.id,
               document_id: chunk.documentId,
               chunk_id: chunk.chunkId,
-              excerpt: chunk.content.slice(0, 200),
+              excerpt: chunk.content,
               similarity_score: chunk.cosineScore,
               position: i,
             })),

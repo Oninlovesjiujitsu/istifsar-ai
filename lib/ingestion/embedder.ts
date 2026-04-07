@@ -38,6 +38,7 @@ export async function embedChunks(
   const results: EmbeddingVector[] = [];
 
   for (let i = 0; i < chunks.length; i += EMBED_BATCH_SIZE) {
+    if (i > 0) await new Promise(resolve => setTimeout(resolve, 4000));
     const batch = chunks.slice(i, i + EMBED_BATCH_SIZE);
 
     const res = await fetch(
@@ -82,6 +83,60 @@ export async function embedChunks(
         vector: `[${values.join(',')}]`,
       });
     }
+  }
+
+  return results;
+}
+
+/**
+ * Embed an array of sentences and return raw number[][] vectors.
+ * Used by semantic chunking to compute inter-sentence similarity.
+ * Reuses the same Gemini batchEmbedContents logic and batch size of 100.
+ */
+export async function embedSentences(
+  sentences: string[],
+  taskType: 'RETRIEVAL_DOCUMENT' | 'RETRIEVAL_QUERY' = 'RETRIEVAL_DOCUMENT',
+): Promise<number[][]> {
+  const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+  if (!apiKey) throw new Error('GOOGLE_GENERATIVE_AI_API_KEY is not set.');
+
+  const results: number[][] = [];
+
+  for (let i = 0; i < sentences.length; i += EMBED_BATCH_SIZE) {
+    if (i > 0) await new Promise(resolve => setTimeout(resolve, 4000));
+    const batch = sentences.slice(i, i + EMBED_BATCH_SIZE);
+
+    const res = await fetch(
+      `${API_BASE}/models/${MODELS.embedding}:batchEmbedContents?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          requests: batch.map((text) => ({
+            model: `models/${MODELS.embedding}`,
+            content: { parts: [{ text }] },
+            taskType,
+          })),
+        }),
+      },
+    );
+
+    if (!res.ok) {
+      const body = await res.text();
+      throw new Error(`Gemini embed error ${res.status}: ${body}`);
+    }
+
+    const { embeddings } = (await res.json()) as {
+      embeddings: { values: number[] }[];
+    };
+
+    if (embeddings.length !== batch.length) {
+      throw new Error(
+        `Gemini returned ${embeddings.length} embeddings for ${batch.length} sentences.`,
+      );
+    }
+
+    results.push(...embeddings.map((e) => e.values));
   }
 
   return results;
