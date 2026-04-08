@@ -2,9 +2,9 @@ import { convertToModelMessages } from 'ai';
 import type { UIMessage } from 'ai';
 import { createClient } from '@/lib/supabase/server';
 import { runRag } from '@/lib/ai/rag';
+import { checkRateLimit } from '@/lib/cache/rate-limit';
 
 export async function POST(req: Request): Promise<Response> {
-  // ── Auth check ─────────────────────────────────────────────────────────
   const supabase = await createClient();
   const { data: { session } } = await supabase.auth.getSession();
   const {
@@ -15,17 +15,31 @@ export async function POST(req: Request): Promise<Response> {
     return new Response('Unauthorized', { status: 401 });
   }
 
-  // ── Parse request body ─────────────────────────────────────────────────
-  const { messages, conversationId, lensTitle, topicTagId, documentId, documentTitle } = (await req.json()) as {
+  const rl = await checkRateLimit(user.id);
+  if (!rl.success) {
+    return new Response('Too many requests. Please wait a moment.', {
+      status: 429,
+      headers: {
+        'X-RateLimit-Limit': String(rl.limit),
+        'X-RateLimit-Remaining': String(rl.remaining),
+        'X-RateLimit-Reset': String(rl.reset),
+      },
+    });
+  }
+
+  // Parse request body 
+  const { messages, conversationId, lensTitle, topicTagId, documentId, documentTitle, targetScholar, semanticQuery } = (await req.json()) as {
     messages: UIMessage[];
     conversationId: string;
     lensTitle?: string | null;
     topicTagId?: string | null;
     documentId?: string | null;
     documentTitle?: string | null;
+    targetScholar?: string | null;
+    semanticQuery?: string | null;
   };
 
-  // ── Validate conversation ownership ────────────────────────────────────
+  // Validate conversation ownership 
   const { data: conv } = await supabase
     .from('conversations')
     .select('id, mode, active_lens_id')
@@ -37,7 +51,6 @@ export async function POST(req: Request): Promise<Response> {
     return new Response('Conversation not found', { status: 404 });
   }
 
-  // ── Extract the last user message ──────────────────────────────────────
   const lastUserMessage = [...messages].reverse().find((m) => m.role === 'user');
 
   if (!lastUserMessage) {
@@ -54,14 +67,14 @@ export async function POST(req: Request): Promise<Response> {
     return new Response('No user message text', { status: 400 });
   }
 
-  // ── Persist the user message ───────────────────────────────────────────
+  // Persist the user message
   await supabase.from('messages').insert({
     conversation_id: conversationId,
     role: 'user',
     content: lastUserText,
   });
 
-  // ── Build history for the LLM ──────────────────────────────────────────
+  // Build history for the LLM 
   // Convert the prior messages (all but the last user turn) to model message format.
   // runRag appends the current query as the final user turn.
   const priorMessages = messages.slice(0, -1);
@@ -72,18 +85,19 @@ export async function POST(req: Request): Promise<Response> {
     )
     .map((m) => ({ role: m.role, content: m.content }));
 
-  // ── Run the RAG pipeline ───────────────────────────────────────────────
+  //  Run the RAG pipeline 
   try {
     return await runRag({
-      query: lastUserText,
+      query: semanticQuery?.trim() || lastUserText,
       conversationId,
       history,
-      mode: conv.mode as 'raw_evidence' | 'interpreted',
+      mode: conv.mode as 'scholarly_consensus' | 'scholar_lens',
       lensTitle: lensTitle ?? null,
       lensEssayId: conv.active_lens_id ?? null,
       topicTagId: topicTagId ?? null,
       documentId: documentId ?? null,
       documentTitle: documentTitle ?? null,
+      targetScholar: targetScholar ?? null,
       userId: user.id,
       accessToken: session.access_token,
     });

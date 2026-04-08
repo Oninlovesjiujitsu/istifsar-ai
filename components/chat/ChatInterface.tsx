@@ -21,7 +21,7 @@ type Props = {
     content: string;
     metadata?: RagMetadata;
   }>;
-  initialMode: 'raw_evidence' | 'interpreted';
+  initialMode: 'scholarly_consensus' | 'scholar_lens';
   lensTitle?: string | null;
   topics?: TopicOption[];
   initialTopicId?: string | null;
@@ -43,9 +43,13 @@ type CitationMeta = {
 type RagMetadata = {
   citations?: CitationMeta[];
   noDocument?: boolean;
+  targetScholar?: string;
 };
 
 type RagUIMessage = UIMessage<RagMetadata>;
+
+/** Minimum per-scholar citation count to show a Dive Deeper button. */
+const DIVE_DEEPER_CITATION_THRESHOLD = 2;
 
 /** Extract text content from a UIMessage's parts array. */
 function getMessageText(message: UIMessage): string {
@@ -76,6 +80,29 @@ function extractCitations(metadata: unknown): CitationData[] | undefined {
     authorUsername: c.authorUsername ?? null,
     authorDisplayName: c.authorDisplayName ?? null,
   }));
+}
+
+/** Extract the targetScholar field from message metadata (set on Dive Deeper responses). */
+function extractTargetScholar(metadata: unknown): string | undefined {
+  if (!metadata || typeof metadata !== 'object') return undefined;
+  return (metadata as RagMetadata).targetScholar;
+}
+
+/**
+ * Derive scholars eligible for "Dive Deeper" from a message's citations.
+ * Returns scholars with at least DIVE_DEEPER_CITATION_THRESHOLD citations.
+ */
+function getDiveDeeperScholars(citations: CitationData[] | undefined): string[] {
+  if (!citations) return [];
+  const counts = new Map<string, number>();
+  for (const c of citations) {
+    if (c.authorDisplayName) {
+      counts.set(c.authorDisplayName, (counts.get(c.authorDisplayName) ?? 0) + 1);
+    }
+  }
+  return [...counts.entries()]
+    .filter(([, count]) => count >= DIVE_DEEPER_CITATION_THRESHOLD)
+    .map(([name]) => name);
 }
 
 function toUIMessages(
@@ -127,6 +154,9 @@ export default function ChatInterface({
 
   const isLoading = status === 'streaming' || status === 'submitted';
 
+  // Show Dive Deeper only in scholarly_consensus mode and not document-scoped
+  const showDiveDeeper = initialMode === 'scholarly_consensus' && !documentId;
+
   // Auto-scroll the message list
   useEffect(() => {
     const el = messageListRef.current;
@@ -138,7 +168,24 @@ export default function ChatInterface({
     sendMessage({ text });
   }
 
-  function handleModeChange(nextMode: 'raw_evidence' | 'interpreted', essayId?: string) {
+  function handleDiveDeeper(scholarName: string) {
+    // Find the last real user query (not a Dive Deeper "Analyze this..." message)
+    const lastRealQuery = [...messages]
+      .reverse()
+      .find(
+        (m) =>
+          m.role === 'user' &&
+          !getMessageText(m).startsWith('Analyze this through '),
+      );
+    const semanticQuery = lastRealQuery ? getMessageText(lastRealQuery) : '';
+
+    sendMessage(
+      { text: `Analyze this through ${scholarName}'s perspective.` },
+      { body: { targetScholar: scholarName, semanticQuery } },
+    );
+  }
+
+  function handleModeChange(nextMode: 'scholarly_consensus' | 'scholar_lens', essayId?: string) {
     startSwitchTransition(async () => {
       const result = await createConversation(nextMode, essayId);
       if (result.success) {
@@ -189,6 +236,13 @@ export default function ChatInterface({
               isLastMessage && isLoading && message.role === 'assistant';
             const text = getMessageText(message);
             const citations = extractCitations(message.metadata);
+            const targetScholar = extractTargetScholar(message.metadata);
+
+            // Derive eligible scholars for Dive Deeper buttons
+            const diveDeeperScholars =
+              showDiveDeeper && message.role === 'assistant' && !isStreamingMessage && !targetScholar
+                ? getDiveDeeperScholars(citations)
+                : [];
 
             return (
               <MessageBubble
@@ -197,6 +251,9 @@ export default function ChatInterface({
                 content={text}
                 citations={citations}
                 isStreaming={isStreamingMessage}
+                targetScholar={targetScholar}
+                diveDeeperScholars={diveDeeperScholars}
+                onDiveDeeper={handleDiveDeeper}
                 onCitationClick={(citation) => setSelectedCitation(citation)}
               />
             );

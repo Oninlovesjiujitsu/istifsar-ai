@@ -25,7 +25,7 @@ export default function AskAboutButton({
   function handleClick() {
     startTransition(async () => {
       const result = await createConversation(
-        'raw_evidence',
+        'scholarly_consensus',
         undefined,
         documentId ?? undefined,
         topicId ?? undefined,

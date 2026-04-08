@@ -1,9 +1,10 @@
 
 'use client';
 
-import { useActionState, useRef } from 'react';
+import { useActionState, useRef, useState } from 'react';
 import { uploadDocument } from '@/actions/upload-document';
 import { Button } from '@/components/ui/button';
+import TagSelector, { type TagOption } from '@/components/contribute/TagSelector';
 import type { UploadDocumentResult } from '@/types/ingestion';
 
 const DOCUMENT_TYPES = [
@@ -25,6 +26,7 @@ export default function UploadForm() {
   >(uploadDocument, null);
 
   const formRef = useRef<HTMLFormElement>(null);
+  const [selectedTags, setSelectedTags] = useState<TagOption[]>([]);
 
   // Success state
   if (state?.success) {
@@ -42,7 +44,10 @@ export default function UploadForm() {
         </p>
         <button
           type="button"
-          onClick={() => formRef.current?.reset()}
+          onClick={() => {
+            formRef.current?.reset();
+            setSelectedTags([]);
+          }}
           className="mt-4 text-sm text-green-700 underline underline-offset-2 dark:text-green-300"
         >
           Submit another document
@@ -126,6 +131,11 @@ export default function UploadForm() {
           />
         </Field>
       </div>
+
+      {/* Tags */}
+      <Field label="Tags" htmlFor="tag-input">
+        <TagSelector selected={selectedTags} onChange={setSelectedTags} />
+      </Field>
 
       {/* File uploads */}
       <div className="space-y-5 rounded-xl border border-zinc-200 bg-zinc-50 p-5 dark:border-zinc-800 dark:bg-zinc-900/50">

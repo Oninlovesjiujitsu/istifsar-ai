@@ -4,23 +4,18 @@ import { useState } from 'react';
 import LensSelector from './LensSelector';
 
 type Props = {
-  mode: 'raw_evidence' | 'interpreted';
-  onChange: (mode: 'raw_evidence' | 'interpreted', essayId?: string) => void;
+  mode: 'scholarly_consensus' | 'scholar_lens';
+  onChange: (mode: 'scholarly_consensus' | 'scholar_lens', essayId?: string) => void;
   disabled?: boolean;
 };
 
-/**
- * Two-button toggle for switching between Raw Evidence and Historian's Perspective
- * (Interpreted) mode. Switching to Interpreted opens the LensSelector to pick
- * a Living Essay before creating the conversation.
- */
 export default function ModeToggle({ mode, onChange, disabled }: Props) {
   const [showLensSelector, setShowLensSelector] = useState(false);
 
-  function handleSwitch(next: 'raw_evidence' | 'interpreted') {
+  function handleSwitch(next: 'scholarly_consensus' | 'scholar_lens') {
     if (next === mode) return;
 
-    if (next === 'interpreted') {
+    if (next === 'scholar_lens') {
       setShowLensSelector(true);
       return;
     }
@@ -37,12 +32,12 @@ export default function ModeToggle({ mode, onChange, disabled }: Props) {
       >
         <button
           type="button"
-          onClick={() => handleSwitch('raw_evidence')}
+          onClick={() => handleSwitch('scholarly_consensus')}
           disabled={disabled}
-          aria-pressed={mode === 'raw_evidence'}
+          aria-pressed={mode === 'scholarly_consensus'}
           className={[
             'rounded-md px-3 py-1.5 font-medium transition-colors',
-            mode === 'raw_evidence'
+            mode === 'scholarly_consensus'
               ? 'bg-background text-foreground shadow-sm'
               : 'text-muted-foreground hover:text-foreground',
             disabled ? 'pointer-events-none opacity-50' : '',
@@ -50,16 +45,16 @@ export default function ModeToggle({ mode, onChange, disabled }: Props) {
             .filter(Boolean)
             .join(' ')}
         >
-          Raw Evidence
+          Scholarly Consensus
         </button>
         <button
           type="button"
-          onClick={() => handleSwitch('interpreted')}
+          onClick={() => handleSwitch('scholar_lens')}
           disabled={disabled}
-          aria-pressed={mode === 'interpreted'}
+          aria-pressed={mode === 'scholar_lens'}
           className={[
             'rounded-md px-3 py-1.5 font-medium transition-colors',
-            mode === 'interpreted'
+            mode === 'scholar_lens'
               ? 'bg-background text-foreground shadow-sm'
               : 'text-muted-foreground hover:text-foreground',
             disabled ? 'pointer-events-none opacity-50' : '',
@@ -67,7 +62,7 @@ export default function ModeToggle({ mode, onChange, disabled }: Props) {
             .filter(Boolean)
             .join(' ')}
         >
-          Historian&apos;s Perspective
+          Scholar&apos;s Perspective
         </button>
       </div>
 
@@ -75,7 +70,7 @@ export default function ModeToggle({ mode, onChange, disabled }: Props) {
         <LensSelector
           onSelect={(essayId) => {
             setShowLensSelector(false);
-            onChange('interpreted', essayId);
+            onChange('scholar_lens', essayId);
           }}
           onCancel={() => setShowLensSelector(false)}
         />

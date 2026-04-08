@@ -13,7 +13,7 @@ export type ConversationRow = {
   updated_at: string;
 };
 export async function createConversation(
-  mode: 'raw_evidence' | 'interpreted' = 'raw_evidence',
+  mode: 'scholarly_consensus' | 'scholar_lens' = 'scholarly_consensus',
   lensId?: string,
   scopeDocumentId?: string,
   scopeTopicId?: string,

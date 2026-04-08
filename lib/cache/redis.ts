@@ -1,4 +1,4 @@
-import { CACHE_TTL_SECONDS } from '@/lib/config/constants';
+import { CACHE_TTL_SECONDS, EMBEDDING_CACHE_TTL_SECONDS } from '@/lib/config/constants';
 import type { RetrievedChunk } from '@/lib/ai/retriever';
 
 export type CachedRagResponse = {
@@ -12,7 +12,7 @@ export type CachedRagResponse = {
 
 let _redis: import('@upstash/redis').Redis | null = null;
 
-function getRedis(): import('@upstash/redis').Redis | null {
+export function getRedis(): import('@upstash/redis').Redis | null {
   if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
     return null;
   }
@@ -38,26 +38,27 @@ function getRedis(): import('@upstash/redis').Redis | null {
  * Build a deterministic cache key for a (query, mode, topic) tuple.
  * The query is base64url-encoded and truncated to keep keys short.
  */
-export function buildCacheKey(query: string, mode: string, topicTagId?: string | null, documentId?: string | null): string {
+export function buildCacheKey(query: string, mode: string, topicTagId?: string | null, documentId?: string | null, targetScholar?: string | null): string {
   const encoded = Buffer.from(query).toString('base64url').slice(0, 64);
   const topicSuffix = topicTagId ? `:t:${topicTagId}` : '';
   const docSuffix = documentId ? `:d:${documentId}` : '';
-  return `rag:${mode}:${encoded}${topicSuffix}${docSuffix}`;
+  const scholarSuffix = targetScholar ? `:s:${Buffer.from(targetScholar).toString('base64url').slice(0, 32)}` : '';
+  return `rag:${mode}:${encoded}${topicSuffix}${docSuffix}${scholarSuffix}`;
 }
 
 /**
  * Determine whether this request should bypass the cache.
  *
  * Skip conditions:
- * - Mode is 'interpreted' (Lens essays may change frequently)
+ * - Mode is 'scholar_lens' (Lens essays may change frequently)
  * - Redis is not configured
  *
  * Note: we intentionally do not check chunk publication dates here because
- * `published_at` is not included in `RetrievedChunk`. Interpreted mode is the
+ * `published_at` is not included in `RetrievedChunk`. Scholar lens mode is the
  * practical safety net for freshness.
  */
 export function shouldSkipCache(mode: string, _chunks: RetrievedChunk[]): boolean {
-  if (mode === 'interpreted') return true;
+  if (mode === 'scholar_lens') return true;
   if (!process.env.UPSTASH_REDIS_REST_URL) return true;
   return false;
 }
@@ -133,6 +134,40 @@ export async function invalidateCatalogCache(): Promise<void> {
 
   try {
     await redis.del(CATALOG_KEY);
+  } catch {
+    // Degrade gracefully
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Embedding cache helpers
+// ---------------------------------------------------------------------------
+
+/** Build a deterministic cache key for an embedding query. */
+export function buildEmbeddingCacheKey(text: string): string {
+  const encoded = Buffer.from(text).toString('base64url').slice(0, 64);
+  return `emb:${encoded}`;
+}
+
+/** Retrieve a cached embedding vector. Returns null on miss or if Redis is not configured. */
+export async function getCachedEmbedding(key: string): Promise<string | null> {
+  const redis = getRedis();
+  if (!redis) return null;
+
+  try {
+    return await redis.get<string>(key) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/** Store an embedding vector in cache with a 7-day TTL. No-ops if Redis is not configured. */
+export async function setCachedEmbedding(key: string, vector: string): Promise<void> {
+  const redis = getRedis();
+  if (!redis) return;
+
+  try {
+    await redis.set(key, vector, { ex: EMBEDDING_CACHE_TTL_SECONDS });
   } catch {
     // Degrade gracefully
   }

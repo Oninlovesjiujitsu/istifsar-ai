@@ -145,11 +145,21 @@ export async function embedSentences(
 /**
  * Convenience wrapper for embedding a single query string at retrieval time.
  * Returns the halfvec-formatted string directly.
+ * Results are cached in Redis for 7 days (embeddings are deterministic).
  */
 export async function embedQuery(query: string): Promise<string> {
+  const { buildEmbeddingCacheKey, getCachedEmbedding, setCachedEmbedding } = await import('@/lib/cache/redis');
+
+  const cacheKey = buildEmbeddingCacheKey(query);
+  const cached = await getCachedEmbedding(cacheKey);
+  if (cached) return cached;
+
   const [result] = await embedChunks(
     [{ chunkIndex: 0, content: query }],
     'RETRIEVAL_QUERY',
   );
+
+  void setCachedEmbedding(cacheKey, result.vector);
+
   return result.vector;
 }

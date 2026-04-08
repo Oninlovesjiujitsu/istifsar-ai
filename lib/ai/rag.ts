@@ -4,7 +4,7 @@ import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { retrieveChunks } from './retriever';
 import { rerank } from './reranker';
 import { buildSystemPrompt, buildContextBlock } from './prompts';
-import { SIMILARITY_THRESHOLD, DOCUMENT_SCOPE_SIMILARITY_THRESHOLD, LENS_CHUNK_WEIGHT } from '@/lib/config/constants';
+import { SIMILARITY_THRESHOLD, DOCUMENT_SCOPE_SIMILARITY_THRESHOLD, SCHOLAR_SCOPE_GATE_OFFSET, LENS_CHUNK_WEIGHT } from '@/lib/config/constants';
 import { MODELS } from '@/lib/config/models';
 import {
   buildCacheKey,
@@ -22,12 +22,13 @@ export type RagParams = {
   query: string;
   conversationId: string;
   history: Array<{ role: 'user' | 'assistant'; content: string }>;
-  mode: 'raw_evidence' | 'interpreted';
+  mode: 'scholarly_consensus' | 'scholar_lens';
   lensTitle?: string | null;
   lensEssayId?: string | null;
   topicTagId?: string | null;
   documentId?: string | null;
   documentTitle?: string | null;
+  targetScholar?: string | null;
   userId: string;
   accessToken: string;
 };
@@ -46,6 +47,7 @@ export type CitationMeta = {
 export type RagMetadata = {
   citations?: CitationMeta[];
   noDocument?: boolean;
+  targetScholar?: string;
 };
 
 // UIMessage with our custom metadata type
@@ -72,7 +74,7 @@ export async function runRag(params: RagParams): Promise<Response> {
     apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
   });
 
-  const modelId = params.mode === 'interpreted' ? MODELS.deep : MODELS.fast;
+  const modelId = params.mode === 'scholar_lens' ? MODELS.deep : MODELS.fast;
 
   // ── Stage 1 & 2: Retrieve + Rerank ────────────────────────────────────────
   const candidates = await retrieveChunks(params.query, {
@@ -87,10 +89,10 @@ export async function runRag(params: RagParams): Promise<Response> {
     (params.documentId ? ` (document-scoped: ${params.documentId})` : ''),
   );
 
-  // ── Stage 2b: Lens essay boost (interpreted mode) ─────────────────────────
+  // ── Stage 2b: Lens essay boost (scholar_lens mode) ────────────────────────
   let lensEssay: { title: string; content: string } | null = null;
 
-  if (params.mode === 'interpreted' && params.lensEssayId) {
+  if (params.mode === 'scholar_lens' && params.lensEssayId) {
     const { data: essay } = await supabase
       .from('living_essays')
       .select('title, content, related_document_ids')
@@ -132,11 +134,28 @@ export async function runRag(params: RagParams): Promise<Response> {
     }
   }
 
+  // ── Stage 2d: Scholar post-filter (Dive Deeper) ──────────────────────────
+  const isDiveDeeper = !!params.targetScholar;
+  if (params.targetScholar) {
+    const scholarName = params.targetScholar;
+    rankedChunks = rankedChunks.filter((chunk) => {
+      const author = authorByDocId.get(chunk.documentId);
+      return author?.display_name === scholarName;
+    });
+
+    console.log(
+      `[RAG] Scholar filter: "${scholarName}" → ${rankedChunks.length} chunks remaining`,
+    );
+  }
+
   // ── Stage 3: Similarity gate ───────────────────────────────────────────────
   const topChunk = rankedChunks[0];
-  const similarityGate = params.documentId
+  let similarityGate = params.documentId
     ? DOCUMENT_SCOPE_SIMILARITY_THRESHOLD
     : SIMILARITY_THRESHOLD;
+  if (isDiveDeeper) {
+    similarityGate -= SCHOLAR_SCOPE_GATE_OFFSET;
+  }
 
   console.log(
     `[RAG] Similarity gate: top score=${topChunk?.cosineScore?.toFixed(4) ?? 'none'}, threshold=${similarityGate}, ${!topChunk || topChunk.cosineScore < similarityGate ? 'BLOCKED' : 'PASSED'
@@ -179,7 +198,7 @@ export async function runRag(params: RagParams): Promise<Response> {
   }
 
   // ── Stage 4: Cache check ───────────────────────────────────────────────────
-  const cacheKey = buildCacheKey(params.query, params.mode, params.topicTagId, params.documentId);
+  const cacheKey = buildCacheKey(params.query, params.mode, params.topicTagId, params.documentId, params.targetScholar);
   const skipCache = shouldSkipCache(params.mode, rankedChunks);
 
   if (!skipCache) {
@@ -219,8 +238,9 @@ export async function runRag(params: RagParams): Promise<Response> {
 
   // ── Stage 5: Build context ─────────────────────────────────────────────────
   const contextBlock = buildContextBlock(rankedChunks, lensEssay);
+  const effectiveLensTitle = isDiveDeeper ? params.targetScholar : params.lensTitle;
   const systemPrompt =
-    buildSystemPrompt(params.mode, params.lensTitle, params.documentTitle) + contextBlock;
+    buildSystemPrompt(params.mode, effectiveLensTitle, params.documentTitle, isDiveDeeper) + contextBlock;
 
   const citations: CitationMeta[] = rankedChunks.map((chunk, i) => {
     const author = authorByDocId.get(chunk.documentId);
@@ -239,10 +259,14 @@ export async function runRag(params: RagParams): Promise<Response> {
   // ── Stage 6 & 7: Stream + persist ─────────────────────────────────────────
   const ragStream = createUIMessageStream<RagUIMessage>({
     execute: async ({ writer }) => {
-      // Attach citations before streaming starts so the client can render chips
+      // Attach citations (and optional dive-deeper scholar) before streaming
+      const messageMetadata: RagMetadata = { citations };
+      if (isDiveDeeper && params.targetScholar) {
+        messageMetadata.targetScholar = params.targetScholar;
+      }
       writer.write({
         type: 'message-metadata',
-        messageMetadata: { citations },
+        messageMetadata,
       });
 
       const result = streamText({

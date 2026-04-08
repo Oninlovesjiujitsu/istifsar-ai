@@ -19,7 +19,7 @@ export default function DiscoveryPromptButton({ question }: Props) {
 
   function handleClick() {
     startTransition(async () => {
-      const result = await createConversation('raw_evidence');
+      const result = await createConversation('scholarly_consensus');
       if (result.success) {
         router.push(`/explore/${result.conversationId}`);
       }

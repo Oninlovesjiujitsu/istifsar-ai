@@ -3,6 +3,9 @@ export const SIMILARITY_THRESHOLD = 0.65;
 
 export const DOCUMENT_SCOPE_SIMILARITY_THRESHOLD = 0.50;
 
+/** Offset subtracted from the similarity threshold for scholar-scoped (Dive Deeper) queries. */
+export const SCHOLAR_SCOPE_GATE_OFFSET = 0.05;
+
 //Target token count per document chunk during ingestion. 
 export const CHUNK_SIZE_TOKENS = 600;
 
@@ -25,8 +28,11 @@ export const EMBEDDING_DIMENSIONS = 3072;
 // Default TTL for cached RAG responses, in seconds (1 hour). 
 export const CACHE_TTL_SECONDS = 60 * 60;
 
-// Skip cache for sources published more recently than this, in days. 
+// Skip cache for sources published more recently than this, in days.
 export const CACHE_SKIP_IF_SOURCE_NEWER_THAN_DAYS = 7;
+
+// TTL for cached embedding vectors, in seconds (7 days).
+export const EMBEDDING_CACHE_TTL_SECONDS = 60 * 60 * 24 * 7;
 
 // Validation Flow
 

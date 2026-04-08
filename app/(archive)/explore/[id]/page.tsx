@@ -114,7 +114,7 @@ export default async function ConversationPage({ params, searchParams }: Props) 
             metadata,
           };
         })}
-        initialMode={conv.mode as 'raw_evidence' | 'interpreted'}
+        initialMode={conv.mode as 'scholarly_consensus' | 'scholar_lens'}
         lensTitle={lensTitle}
         topics={effectiveDocId ? undefined : topics}
         initialTopicId={effectiveTopicId}

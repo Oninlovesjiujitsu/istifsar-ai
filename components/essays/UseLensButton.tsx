@@ -15,7 +15,7 @@ export default function UseLensButton({ essayId }: Props) {
 
   function handleClick() {
     startTransition(async () => {
-      const result = await createConversation('interpreted', essayId);
+      const result = await createConversation('scholar_lens', essayId);
       if (result.success) {
         router.push(`/explore/${result.conversationId}`);
       }

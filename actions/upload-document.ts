@@ -118,5 +118,43 @@ export async function uploadDocument(
     return { success: false, error: `Submission failed: ${docError.message}` };
   }
 
+  // -- Process tags (create new + link associations) --------------------------
+  const rawTags = formData.getAll('tags') as string[];
+  if (rawTags.length > 0) {
+    const parsed: { id: string; name: string; isNew: boolean }[] = rawTags.map(
+      (t) => JSON.parse(t),
+    );
+
+    const existingTagIds = parsed.filter((t) => !t.isNew).map((t) => t.id);
+    const newTags = parsed.filter((t) => t.isNew);
+
+    // Insert new tags and collect their IDs
+    const newTagIds: string[] = [];
+    for (const tag of newTags) {
+      const slug = tag.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '');
+
+      const { data, error } = await supabase
+        .from('tags')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .upsert({ name: tag.name, slug } as any, { onConflict: 'slug' })
+        .select('id')
+        .single();
+
+      if (!error && data) newTagIds.push(data.id);
+    }
+
+    // Link all tags to the document
+    const allTagIds = [...existingTagIds, ...newTagIds];
+    if (allTagIds.length > 0) {
+      await supabase
+        .from('document_tags')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .insert(allTagIds.map((tagId) => ({ document_id: docId, tag_id: tagId })) as any);
+    }
+  }
+
   return { success: true, documentId: docId };
 }

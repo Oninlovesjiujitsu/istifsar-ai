@@ -57,7 +57,7 @@ export default function SourceDetailsPanel({ citation, onClose }: Props) {
             {citation.documentDate && (
               <div>
                 <div className="text-[10px] text-text-muted-vault uppercase mb-1">
-                  Dating
+                  Date
                 </div>
                 <div className="font-heading text-white">
                   {citation.documentDate}

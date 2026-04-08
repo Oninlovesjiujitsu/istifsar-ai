@@ -28,7 +28,7 @@ export default function ReaderSidebarContent({
 
   function handleNewInquiry() {
     startCreateTransition(async () => {
-      const result = await createConversation('raw_evidence');
+      const result = await createConversation('scholarly_consensus');
       if (result.success) {
         close();
         router.push(`/explore/${result.conversationId}`);
@@ -38,7 +38,6 @@ export default function ReaderSidebarContent({
 
   return (
     <>
-      {/* Brand + Toggle */}
       <div className="px-4 flex items-center justify-between">
         <Link href="/explore" onClick={close} className="flex items-center gap-2 min-w-0">
           <HugeiconsIcon icon={QuillWrite01Icon} size={20} className="text-gold shrink-0" />
@@ -51,7 +50,6 @@ export default function ReaderSidebarContent({
         <SidebarToggle />
       </div>
 
-      {/* New Inquiry CTA */}
       <div className="px-4">
         <button
           onClick={handleNewInquiry}
@@ -71,7 +69,6 @@ export default function ReaderSidebarContent({
         </button>
       </div>
 
-      {/* Primary Navigation */}
       <nav className="flex flex-col flex-grow overflow-hidden">
         <div className="flex flex-col gap-0.5 px-2">
           <SidebarNavLink href="/explore" icon="archive" onNavigate={close}>
@@ -117,7 +114,6 @@ export default function ReaderSidebarContent({
   );
 }
 
-/* ── Nav link icons ────────────────────────────────────────────────────── */
 
 const ICONS: Record<string, React.ReactNode> = {
   archive: (
