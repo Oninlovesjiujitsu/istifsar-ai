@@ -60,7 +60,14 @@ export async function savePath(formData: FormData): Promise<
       return { success: false, error: 'Not authorized to edit this path.' };
     }
 
-    const updatePayload: Record<string, unknown> = {
+    const updatePayload: {
+      title: string;
+      slug: string;
+      description: string | null;
+      updated_at: string;
+      status?: string;
+      published_at?: string;
+    } = {
       title,
       slug,
       description,
