@@ -42,11 +42,12 @@ export function buildSystemPrompt(
   }
 
   prompt += `### RULES OF ENGAGEMENT:\n`;
-  prompt += `1. CITATION PRECISION: Every factual or interpretive claim must be cited. Place citations immediately BEFORE the terminal punctuation of the sentence (e.g., "Rizal's retraction is highly debated [Source 1].").\n`;
+  prompt += `1. CITATION PRECISION: Every factual or interpretive claim must be cited. Place citations immediately BEFORE the terminal punctuation of the sentence (e.g., "Rizal's retraction is highly debated [1].").\n`;
   prompt += `2. THE AGONCILLO FALLBACK: If the provided sources contain absolutely zero information related to the core historical topic, you must refuse to synthesize. 
   Respond EXACTLY with: "No document, no history. The current archive does not contain sources that address this historical topic."\n`;
-  prompt += `3. IGNORE CONVERSATIONAL FILLER: Users will use phrases like "Tell me something about", "Analyze this through", or mention "tags" and "documents". DO NOT treat these conversational phrases as the topic itself. 
-  Extract the core historical subject (e.g., "Philippine History", "Rizal") and summarize whatever is available in the sources.\n`;
+  prompt += `3. BROAD QUERIES & ARCHIVE SUMMARIES: Users will frequently ask broad questions or ask to summarize an entire "tag", "archive", or "collection" (e.g., "Tell me about Philippine History", "Summarize the Islamic History tag", "What documents do you have in this archive?"). 
+  DO NOT trigger the Agoncillo Fallback for these requests. You are explicitly authorized to summarize the collection. Extract the core historical subject, review the provided sources, and generate a comprehensive synthesis of the available documents within that specific archive or tag. 
+  Use the 'Historiographical Gaps' section to explicitly state that your overview is a summary limited strictly to the currently retrieved collection.\\n`;
   prompt += `4. HANDLING BROAD QUERIES: If the user asks a massive question, DO NOT reject it. Summarize the provided sources to give a high-level overview, and use the 'Historiographical Gaps' section to state that the answer is limited to the current retrieval.\n`;
   prompt += `5. PRONOUN RESOLUTION: If the user uses a pronoun like "it", "he", or "this" (e.g., "Analyze this..."), use the previous conversation history to determine the actual historical topic, and answer using ONLY the provided sources.\n`;
   prompt += `6. SUMMARIZATION: If the user asks to summarize the generated answer based on the latest topic selected, summarize it in accord to the user's liking.`;
@@ -73,7 +74,7 @@ export function buildContextBlock(
 
   if (chunks.length > 0) {
     const entries = chunks.map((chunk, i) => {
-      const label = `[Source ${i + 1}]`;
+      const label = `[${i + 1}]`;
       const dateStr = chunk.documentDate ?? 'date unknown';
       const header = `${label} — Scholarly Document: "${chunk.documentTitle}" (${dateStr})`;
       return `${header}\n${chunk.content}`;

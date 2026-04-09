@@ -1,0 +1,29 @@
+import { proxy } from '@/proxy';
+import { createClient } from '@/lib/supabase/server';
+import ChatInterface from '@/components/chat/ChatInterface';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = { title: 'New Inquiry — Istifsar AI' };
+
+export default async function NewConversationPage() {
+  await proxy({ requireAuth: true });
+
+  const supabase = await createClient();
+  const { data: tags } = await supabase
+    .from('tags')
+    .select('id, name')
+    .order('name');
+
+  const topics = (tags ?? []).map((t) => ({ id: t.id, name: t.name }));
+
+  return (
+    <div className="flex h-screen min-h-0 flex-col">
+      <ChatInterface
+        conversationId={null}
+        initialMessages={[]}
+        initialMode="scholarly_consensus"
+        topics={topics}
+      />
+    </div>
+  );
+}

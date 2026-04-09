@@ -14,7 +14,7 @@ import SourceDetailsPanel from './SourceDetailsPanel';
 import { createConversation } from '@/actions/conversation';
 
 type Props = {
-  conversationId: string;
+  conversationId: string | null;
   initialMessages: Array<{
     id: string;
     role: 'user' | 'assistant';
@@ -123,7 +123,7 @@ function toUIMessages(
 }
 
 export default function ChatInterface({
-  conversationId,
+  conversationId: initialConversationId,
   initialMessages,
   initialMode,
   lensTitle,
@@ -138,11 +138,16 @@ export default function ChatInterface({
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>(initialTopicId ?? null);
   const [selectedCitation, setSelectedCitation] = useState<CitationData | null>(null);
 
+  // Track the real conversation ID — null means draft (not yet persisted)
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(initialConversationId);
+  const [isCreatingConversation, setIsCreatingConversation] = useState(false);
+  const isDraft = activeConversationId === null;
+
   const { messages, sendMessage, status, setMessages, error } = useChat<RagUIMessage>({
     transport: new DefaultChatTransport({
       api: '/api/chat',
       body: {
-        conversationId,
+        conversationId: activeConversationId,
         lensTitle,
         topicTagId: documentId ? null : selectedTopicId,
         documentId: documentId ?? null,
@@ -164,9 +169,43 @@ export default function ChatInterface({
     el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
   }, [messages]);
 
-  function handleSubmit(text: string) {
+  async function handleSubmit(text: string) {
+    if (isDraft) {
+      // Create the conversation on first message, then redirect
+      setIsCreatingConversation(true);
+      try {
+        const result = await createConversation(
+          initialMode,
+          undefined,
+          documentId ?? undefined,
+          selectedTopicId ?? undefined,
+        );
+        if (result.success) {
+          setActiveConversationId(result.conversationId);
+          // Replace /explore/new with the real URL so back-button doesn't return to draft
+          window.history.replaceState(null, '', `/explore/${result.conversationId}`);
+          // sendMessage will now use the updated activeConversationId via the next render,
+          // but useChat's transport body is stale at this point. We need to send after state update.
+          // Use a ref-based approach: store the pending message and send after re-render.
+          pendingMessageRef.current = text;
+        }
+      } finally {
+        setIsCreatingConversation(false);
+      }
+      return;
+    }
     sendMessage({ text });
   }
+
+  // Send pending message after conversation ID is set
+  const pendingMessageRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (pendingMessageRef.current && activeConversationId) {
+      const text = pendingMessageRef.current;
+      pendingMessageRef.current = null;
+      sendMessage({ text });
+    }
+  }, [activeConversationId, sendMessage]);
 
   function handleDiveDeeper(scholarName: string) {
     // Find the last real user query (not a Dive Deeper "Analyze this..." message)
@@ -289,7 +328,7 @@ export default function ChatInterface({
         <div className="shrink-0 px-4 lg:px-12 pb-4 lg:pb-8 relative z-10">
           <ChatInput
             onSubmit={handleSubmit}
-            disabled={isLoading || isSwitching}
+            disabled={isLoading || isSwitching || isCreatingConversation}
             placeholder={documentTitle ? `Ask about "${documentTitle}"` : 'Deepen the investigation...'}
             topics={documentId ? undefined : topics}
             selectedTopicId={selectedTopicId}

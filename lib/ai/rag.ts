@@ -4,7 +4,7 @@ import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { retrieveChunks } from './retriever';
 import { rerank } from './reranker';
 import { buildSystemPrompt, buildContextBlock } from './prompts';
-import { SIMILARITY_THRESHOLD, DOCUMENT_SCOPE_SIMILARITY_THRESHOLD, SCHOLAR_SCOPE_GATE_OFFSET, LENS_CHUNK_WEIGHT } from '@/lib/config/constants';
+import { SIMILARITY_THRESHOLD, DOCUMENT_SCOPE_SIMILARITY_THRESHOLD, TOPIC_SCOPE_SIMILARITY_THRESHOLD, SCHOLAR_SCOPE_GATE_OFFSET, LENS_CHUNK_WEIGHT } from '@/lib/config/constants';
 import { MODELS } from '@/lib/config/models';
 import {
   buildCacheKey,
@@ -52,10 +52,6 @@ export type RagMetadata = {
 
 // UIMessage with our custom metadata type
 type RagUIMessage = UIMessage<RagMetadata>;
-
-const NO_DOCUMENT_MESSAGE =
-  "No document, no history. The current archive does not contain sources that address your question. This query has been recorded to help us identify gaps in the collection.";
-
 
 export async function runRag(params: RagParams): Promise<Response> {
   const supabase = createClient<Database>(
@@ -119,17 +115,20 @@ export async function runRag(params: RagParams): Promise<Response> {
 
   // ── Stage 2c: Fetch submitter profiles for cited documents ──────────────────
   const uniqueDocIds = [...new Set(rankedChunks.map((c) => c.documentId))];
-  const { data: docAuthors } = await supabase
-    .from('documents')
-    .select('id, submitter_id, profiles!documents_submitter_id_fkey(username, display_name)')
-    .in('id', uniqueDocIds);
-
   const authorByDocId = new Map<string, { username: string; display_name: string }>();
-  if (docAuthors) {
-    for (const doc of docAuthors) {
-      const profile = doc.profiles as unknown as { username: string; display_name: string } | null;
-      if (profile) {
-        authorByDocId.set(doc.id, profile);
+
+  if (uniqueDocIds.length > 0) {
+    const { data: docAuthors } = await supabase
+      .from('documents')
+      .select('id, submitter_id, profiles!documents_submitter_id_fkey(username, display_name)')
+      .in('id', uniqueDocIds);
+
+    if (docAuthors) {
+      for (const doc of docAuthors) {
+        const profile = doc.profiles as unknown as { username: string; display_name: string } | null;
+        if (profile) {
+          authorByDocId.set(doc.id, profile);
+        }
       }
     }
   }
@@ -152,7 +151,9 @@ export async function runRag(params: RagParams): Promise<Response> {
   const topChunk = rankedChunks[0];
   let similarityGate = params.documentId
     ? DOCUMENT_SCOPE_SIMILARITY_THRESHOLD
-    : SIMILARITY_THRESHOLD;
+    : params.topicTagId
+      ? TOPIC_SCOPE_SIMILARITY_THRESHOLD
+      : SIMILARITY_THRESHOLD;
   if (isDiveDeeper) {
     similarityGate -= SCHOLAR_SCOPE_GATE_OFFSET;
   }
@@ -163,7 +164,7 @@ export async function runRag(params: RagParams): Promise<Response> {
   );
 
   if (!topChunk || topChunk.cosineScore < similarityGate) {
-    // Log to archive_gaps (best-effort) and auto-categorize
+    // Log to archive_gaps (best-effort) and auto-categorize, then fall through to LLM
     try {
       const { data: gap } = await supabase.from('archive_gaps').insert({
         query_text: params.query,
@@ -172,7 +173,6 @@ export async function runRag(params: RagParams): Promise<Response> {
         mode: params.mode,
       }).select('id').single();
 
-      // Fire-and-forget background categorization
       if (gap?.id) {
         void categorizeArchiveGap(gap.id, params.query);
       }
@@ -180,24 +180,11 @@ export async function runRag(params: RagParams): Promise<Response> {
       // Non-fatal
     }
 
-    const noDocStream = createUIMessageStream<RagUIMessage>({
-      execute: async ({ writer }) => {
-        writer.write({
-          type: 'message-metadata',
-          messageMetadata: { noDocument: true },
-        });
-        const textId = crypto.randomUUID();
-        writer.write({ type: 'text-start', id: textId });
-        writer.write({ type: 'text-delta', delta: NO_DOCUMENT_MESSAGE, id: textId });
-        writer.write({ type: 'text-end', id: textId });
-      },
-      onError: (err) => String(err),
-    });
-
-    return createUIMessageStreamResponse({ stream: noDocStream });
+    // Clear chunks so downstream stages know context is empty
+    rankedChunks = [];
   }
 
-  // ── Stage 4: Cache check ───────────────────────────────────────────────────
+  // Stage 4: Cache check 
   const cacheKey = buildCacheKey(params.query, params.mode, params.topicTagId, params.documentId, params.targetScholar);
   const skipCache = shouldSkipCache(params.mode, rankedChunks);
 
@@ -236,7 +223,7 @@ export async function runRag(params: RagParams): Promise<Response> {
     }
   }
 
-  // ── Stage 5: Build context ─────────────────────────────────────────────────
+  // Stage 5: Build context
   const contextBlock = buildContextBlock(rankedChunks, lensEssay);
   const effectiveLensTitle = isDiveDeeper ? params.targetScholar : params.lensTitle;
   const systemPrompt =
@@ -256,7 +243,7 @@ export async function runRag(params: RagParams): Promise<Response> {
     };
   });
 
-  // ── Stage 6 & 7: Stream + persist ─────────────────────────────────────────
+  // Stage 6 & 7: Stream + persist
   const ragStream = createUIMessageStream<RagUIMessage>({
     execute: async ({ writer }) => {
       // Attach citations (and optional dive-deeper scholar) before streaming
@@ -317,7 +304,7 @@ export async function runRag(params: RagParams): Promise<Response> {
           console.log(`[RAG] Persisted assistant message: ${msg?.id}`);
         }
 
-        if (msg?.id) {
+        if (msg?.id && rankedChunks.length > 0) {
           const adminClient = createAdminClient();
           const { error: citError } = await adminClient.from('citations').insert(
             rankedChunks.map((chunk, i) => ({
@@ -337,8 +324,8 @@ export async function runRag(params: RagParams): Promise<Response> {
         console.error('[RAG] Exception during persist:', e);
       }
 
-      // Cache the response for future identical queries
-      if (!shouldSkipCache(params.mode, rankedChunks)) {
+      // Cache the response for future identical queries (skip empty-context fallbacks)
+      if (!shouldSkipCache(params.mode, rankedChunks) && rankedChunks.length > 0) {
         await setCachedResponse(cacheKey, { text: fullText, chunks: rankedChunks });
       }
     },

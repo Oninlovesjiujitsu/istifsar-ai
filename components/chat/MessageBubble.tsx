@@ -2,7 +2,6 @@
 
 import type { ReactNode } from 'react';
 import Markdown from 'react-markdown';
-import CitationChip from './CitationChip';
 
 export type CitationData = {
   documentId: string;
@@ -25,21 +24,23 @@ type Props = {
   onCitationClick?: (citation: CitationData) => void;
 };
 
-/**
- * Convert bare citation markers like [1], [2] into markdown links
- * using a custom protocol so react-markdown's `a` override can
- * render them as interactive buttons.
- *
- * "[1]" → "[\\[1\\]](cite:0)"   (cite: uses 0-based index)
- */
+
 function linkifyCitations(text: string, citationCount: number): string {
-  return text.replace(/\[(\d+)\]/g, (match, num) => {
-    const index = parseInt(num, 10) - 1;
-    if (index >= 0 && index < citationCount) {
-      // Escape the brackets in the link text so Markdown renders them literally
-      return `[\\[${num}\\]](cite:${index})`;
-    }
-    return match;
+  return text.replace(/\[(?:Source\s*)?[\d\s,(?:Source)]+\]/gi, (match) => {
+    const numbers = match.match(/\d+/g);
+    if (!numbers) return match;
+
+    const links = numbers
+      .map((n) => {
+        const index = parseInt(n, 10) - 1;
+        if (index >= 0 && index < citationCount) {
+          return `[\\[${n}\\]](#cite-${n})`;
+        }
+        return null;
+      })
+      .filter(Boolean);
+
+    return links.length > 0 ? links.join(', ') : match;
   });
 }
 
@@ -53,7 +54,6 @@ export default function MessageBubble({
   onDiveDeeper,
   onCitationClick,
 }: Props) {
-  /* ── User message ───────────────────────────────────────────────── */
   if (role === 'user') {
     return (
       <div className="flex justify-end">
@@ -70,10 +70,6 @@ export default function MessageBubble({
   const processedContent = hasCitations
     ? linkifyCitations(content, citations.length)
     : content;
-
-  /** Check if any [N] marker in the text matches a real citation. */
-  const hasInlineCitations =
-    hasCitations && citations.some((_, i) => content.includes(`[${i + 1}]`));
 
   return (
     <div className="flex justify-start">
@@ -107,22 +103,27 @@ export default function MessageBubble({
           <Markdown
             components={{
               a: ({ href, children }: { href?: string; children?: ReactNode }) => {
-                if (href?.startsWith('cite:')) {
-                  const citationIndex = parseInt(href.split(':')[1], 10);
+                if (href?.startsWith('#cite-')) {
+                  const sourceNum = parseInt(href.split('-')[1], 10);
+                  const citationIndex = sourceNum - 1;
                   const citation = citations?.[citationIndex];
-                  if (citation && onCitationClick) {
+                  if (citation) {
                     return (
                       <button
                         type="button"
-                        onClick={() => onCitationClick(citation)}
-                        className="not-prose inline-flex items-center px-2 py-0.5 rounded-full bg-surface-vault text-gold text-xs cursor-pointer hover:shadow-[0_0_10px_rgba(212,175,55,0.4)] transition-all font-mono mx-1 border border-gold/20"
-                        aria-label={`View source ${citationIndex + 1}: ${citation.documentTitle}`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          onCitationClick?.(citation);
+                        }}
+                        className="not-prose inline-flex items-center px-2 py-0.5 rounded-full bg-surface-vault !text-gold text-xs cursor-pointer hover:shadow-[0_0_10px_rgba(212,175,55,0.4)] transition-all font-mono mx-1 border border-gold/20"
+                        aria-label={`View source ${sourceNum}: ${citation.documentTitle}`}
                       >
                         {children}
                       </button>
                     );
                   }
-                  return <span>{children}</span>;
+                  return <span className="!text-gold">{children}</span>;
                 }
                 return (
                   <a href={href} target="_blank" rel="noopener noreferrer">
@@ -141,20 +142,6 @@ export default function MessageBubble({
 
           <div className="absolute -right-1 -bottom-1 w-8 h-8 border-b-2 border-r-2 border-gold/20 pointer-events-none" />
         </div>
-
-        {!hasInlineCitations && hasCitations && (
-          <div className="flex flex-wrap items-center gap-1.5 px-1">
-            <span className="text-xs text-text-muted-vault">Sources:</span>
-            {citations.map((citation, i) => (
-              <CitationChip
-                key={citation.documentId + i}
-                position={i}
-                documentTitle={citation.documentTitle}
-                onClick={() => onCitationClick?.(citation)}
-              />
-            ))}
-          </div>
-        )}
 
         {diveDeeperScholars && diveDeeperScholars.length > 0 && (
           <div className="flex flex-wrap gap-2 px-1 pt-1">

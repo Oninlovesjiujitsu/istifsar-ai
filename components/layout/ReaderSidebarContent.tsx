@@ -1,14 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useTransition } from 'react';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { QuillWrite01Icon } from '@hugeicons/core-free-icons';
 import SignOutButton from '@/components/layout/SignOutButton';
 import ConversationVault from '@/components/layout/ConversationVault';
 import { SidebarToggle, SidebarLabel, useSidebar } from '@/components/layout/SidebarShell';
-import { createConversation } from '@/actions/conversation';
 
 type Conversation = {
   id: string;
@@ -23,18 +20,6 @@ export default function ReaderSidebarContent({
   conversations: Conversation[];
 }) {
   const { expanded, close } = useSidebar();
-  const router = useRouter();
-  const [isCreating, startCreateTransition] = useTransition();
-
-  function handleNewInquiry() {
-    startCreateTransition(async () => {
-      const result = await createConversation('scholarly_consensus');
-      if (result.success) {
-        close();
-        router.push(`/explore/${result.conversationId}`);
-      }
-    });
-  }
 
   return (
     <>
@@ -51,13 +36,12 @@ export default function ReaderSidebarContent({
       </div>
 
       <div className="px-4">
-        <button
-          onClick={handleNewInquiry}
-          disabled={isCreating}
+        <Link
+          href="/explore/new"
+          onClick={close}
           className={[
             'flex items-center justify-center gap-2 bg-gold text-[#241a00] font-bold rounded-sm',
             'shadow-[0_4px_10px_rgba(212,175,55,0.2)] hover:bg-gold-bright transition-all text-sm uppercase tracking-tight',
-            'disabled:opacity-60 disabled:cursor-not-allowed',
             expanded ? 'w-full py-3' : 'lg:w-10 lg:h-10 lg:p-0 py-3 w-full',
           ].join(' ')}
           title="New Inquiry"
@@ -65,8 +49,8 @@ export default function ReaderSidebarContent({
           <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
-          <SidebarLabel>{isCreating ? 'Starting…' : 'New Inquiry'}</SidebarLabel>
-        </button>
+          <SidebarLabel>New Inquiry</SidebarLabel>
+        </Link>
       </div>
 
       <nav className="flex flex-col flex-grow overflow-hidden">
