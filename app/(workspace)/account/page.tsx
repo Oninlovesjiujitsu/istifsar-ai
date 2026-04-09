@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import SignOutButton from '@/components/layout/SignOutButton';
+import EditDisplayName from '@/components/settings/EditDisplayName';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 
@@ -29,10 +30,7 @@ export default async function HistorianSettingsPage() {
         <div className="rounded-lg border bg-card p-6 space-y-4">
           <h3 className="font-semibold">Profile</h3>
           <div className="grid gap-3 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Display name</span>
-              <span>{profile?.display_name ?? '—'}</span>
-            </div>
+            <EditDisplayName currentName={profile?.display_name ?? ''} />
             <div className="flex justify-between">
               <span className="text-muted-foreground">Username</span>
               <span>@{profile?.username ?? '—'}</span>

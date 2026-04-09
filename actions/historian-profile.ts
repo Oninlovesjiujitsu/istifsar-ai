@@ -1,6 +1,7 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 export type HistorianProfile = {
   displayName: string;
@@ -12,6 +13,7 @@ export type HistorianProfile = {
   joinedAt: string;
   publicationCount: number;
   essayCount: number;
+  citationCount: number;
 };
 
 export async function getHistorianProfile(
@@ -27,7 +29,7 @@ export async function getHistorianProfile(
 
   if (!profile) return null;
 
-  const [{ count: pubCount }, { count: essayCount }] = await Promise.all([
+  const [{ count: pubCount }, { count: essayCount }, { data: docs }] = await Promise.all([
     supabase
       .from('documents')
       .select('id', { count: 'exact', head: true })
@@ -38,7 +40,23 @@ export async function getHistorianProfile(
       .select('id', { count: 'exact', head: true })
       .eq('author_id', profile.id)
       .eq('status', 'published'),
+    supabase
+      .from('documents')
+      .select('id')
+      .eq('submitter_id', profile.id)
+      .eq('status', 'published'),
   ]);
+
+  let citationCount = 0;
+  const docIds = docs?.map((d) => d.id) ?? [];
+  if (docIds.length > 0) {
+    const admin = createAdminClient();
+    const { count } = await admin
+      .from('citations')
+      .select('id', { count: 'exact', head: true })
+      .in('document_id', docIds);
+    citationCount = count ?? 0;
+  }
 
   return {
     displayName: profile.display_name,
@@ -50,5 +68,6 @@ export async function getHistorianProfile(
     joinedAt: profile.created_at,
     publicationCount: pubCount ?? 0,
     essayCount: essayCount ?? 0,
+    citationCount,
   };
 }

@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { notFound } from 'next/navigation';
 import ProfileContent from '@/components/profile/ProfileContent';
 import type { Metadata } from 'next';
@@ -26,6 +27,7 @@ export default async function ProfilePage({ params }: Props) {
     { data: publications },
     { data: essays },
     { data: paths },
+    { data: allDocs },
   ] = await Promise.all([
     supabase
       .from('documents')
@@ -48,7 +50,23 @@ export default async function ProfilePage({ params }: Props) {
       .eq('status', 'published')
       .order('published_at', { ascending: false })
       .limit(6),
+    supabase
+      .from('documents')
+      .select('id')
+      .eq('submitter_id', profile.id)
+      .eq('status', 'published'),
   ]);
+
+  let citationCount = 0;
+  const docIds = allDocs?.map((d) => d.id) ?? [];
+  if (docIds.length > 0) {
+    const admin = createAdminClient();
+    const { count } = await admin
+      .from('citations')
+      .select('id', { count: 'exact', head: true })
+      .in('document_id', docIds);
+    citationCount = count ?? 0;
+  }
 
   return (
     <ProfileContent
@@ -56,6 +74,7 @@ export default async function ProfilePage({ params }: Props) {
       publications={publications}
       essays={essays}
       paths={paths}
+      citationCount={citationCount}
     />
   );
 }

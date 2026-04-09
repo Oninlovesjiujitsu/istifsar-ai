@@ -135,7 +135,7 @@ export default function HistorianProfileModal({ username, onClose }: Props) {
                 </div>
               )}
 
-              <div className="grid grid-cols-3 gap-3 pt-2">
+              <div className="grid grid-cols-4 gap-3 pt-2">
                 <div className="text-center">
                   <div className="font-heading text-gold text-lg font-bold">{profile.publicationCount}</div>
                   <div className="text-[10px] text-text-muted-vault uppercase">Sources</div>
@@ -143,6 +143,10 @@ export default function HistorianProfileModal({ username, onClose }: Props) {
                 <div className="text-center">
                   <div className="font-heading text-gold text-lg font-bold">{profile.essayCount}</div>
                   <div className="text-[10px] text-text-muted-vault uppercase">Essays</div>
+                </div>
+                <div className="text-center">
+                  <div className="font-heading text-gold text-lg font-bold">{profile.citationCount}</div>
+                  <div className="text-[10px] text-text-muted-vault uppercase">Citations</div>
                 </div>
                 <div className="text-center">
                   <div className="font-heading text-gold text-lg font-bold">

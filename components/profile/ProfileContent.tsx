@@ -51,11 +51,13 @@ export default function ProfileContent({
   publications,
   essays,
   paths,
+  citationCount = 0,
 }: {
   profile: Profile;
   publications: Document[] | null;
   essays: Essay[] | null;
   paths: KnowledgePath[] | null;
+  citationCount?: number;
 }) {
   const joinDate = new Date(profile.created_at).toLocaleDateString('en-US', {
     year: 'numeric',
@@ -97,6 +99,11 @@ export default function ProfileContent({
           )}
           {profile.bio && <p className="text-sm leading-relaxed">{profile.bio}</p>}
           <p className="text-xs text-muted-foreground">Exploring since {joinDate}</p>
+          {citationCount > 0 && (
+            <p className="text-xs text-muted-foreground">
+              {citationCount} {citationCount === 1 ? 'citation' : 'citations'} across published writings
+            </p>
+          )}
         </div>
       </div>
 
