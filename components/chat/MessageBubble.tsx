@@ -3,7 +3,7 @@
 import type { ReactNode } from 'react';
 import Markdown from 'react-markdown';
 import type { ContentionMeta } from '@/types/contention';
-import ContentionDisplay from './ContentionDisplay';
+import { cn } from '@/lib/utils';
 
 export type CitationData = {
   documentId: string;
@@ -25,6 +25,8 @@ type Props = {
   diveDeeperScholars?: string[];
   onDiveDeeper?: (scholarName: string) => void;
   onCitationClick?: (citation: CitationData) => void;
+  isContentionPanelOpen?: boolean;
+  onToggleContentionPanel?: () => void;
 };
 
 
@@ -57,6 +59,8 @@ export default function MessageBubble({
   diveDeeperScholars,
   onDiveDeeper,
   onCitationClick,
+  isContentionPanelOpen,
+  onToggleContentionPanel,
 }: Props) {
   if (role === 'user') {
     return (
@@ -146,8 +150,38 @@ export default function MessageBubble({
 
           <div className="absolute -right-1 -bottom-1 w-8 h-8 border-b-2 border-r-2 border-gold/20 pointer-events-none" />
 
-          {contentions && contentions.length > 0 && !isStreaming && (
-            <ContentionDisplay contentions={contentions} />
+          {contentions && contentions.length > 0 && !isStreaming && onToggleContentionPanel && (
+            <button
+              type="button"
+              onClick={onToggleContentionPanel}
+              aria-pressed={isContentionPanelOpen}
+              className={cn(
+                'mt-4 inline-flex items-center gap-2 rounded-sm border px-3 py-2 text-[10px] uppercase tracking-widest font-bold transition-colors',
+                isContentionPanelOpen
+                  ? 'border-gold/50 bg-gold/15 text-gold shadow-[0_0_10px_rgba(212,175,55,0.2)]'
+                  : 'border-gold/20 bg-gold/5 text-gold/80 hover:bg-gold/10 hover:border-gold/40 hover:text-gold',
+              )}
+            >
+              <svg
+                className="w-3.5 h-3.5 shrink-0"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 3v17.25m0 0c-1.472 0-2.882.265-4.185.75M12 20.25c1.472 0 2.882.265 4.185.75M18.75 4.97A48.416 48.416 0 0 0 12 4.5c-2.291 0-4.545.16-6.75.47m13.5 0c1.01.143 2.01.317 3 .52m-3-.52 2.62 10.726c.122.499-.106 1.028-.589 1.202a5.988 5.988 0 0 1-2.031.352 5.988 5.988 0 0 1-2.031-.352c-.483-.174-.711-.703-.59-1.202L18.75 4.971Zm-16.5.52c.99-.203 1.99-.377 3-.52m0 0 2.62 10.726c.122.499-.106 1.028-.589 1.202a5.989 5.989 0 0 1-2.031.352 5.989 5.989 0 0 1-2.031-.352c-.483-.174-.711-.703-.59-1.202L5.25 4.971Z"
+                />
+              </svg>
+              <span>
+                {contentions.length === 1
+                  ? 'View Node of Contention'
+                  : `View ${contentions.length} Nodes of Contention`}
+              </span>
+            </button>
           )}
         </div>
 

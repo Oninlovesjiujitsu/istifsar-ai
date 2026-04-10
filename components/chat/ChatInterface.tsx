@@ -12,7 +12,13 @@ import ChatInput from './ChatInput';
 import type { TopicOption } from './ChatInput';
 import ModeToggle from './ModeToggle';
 import SourceDetailsPanel from './SourceDetailsPanel';
+import ContentionCanvasPanel from './ContentionCanvasPanel';
 import { createConversation } from '@/actions/conversation';
+
+type RightPanelState =
+  | { kind: 'citation'; citation: CitationData }
+  | { kind: 'contention'; contentions: ContentionMeta[]; messageId: string }
+  | null;
 
 type Props = {
   conversationId: string | null;
@@ -151,7 +157,19 @@ export default function ChatInterface({
   const [isSwitching, startSwitchTransition] = useTransition();
   const messageListRef = useRef<HTMLDivElement>(null);
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>(initialTopicId ?? null);
-  const [selectedCitation, setSelectedCitation] = useState<CitationData | null>(null);
+  const [rightPanel, setRightPanel] = useState<RightPanelState>(null);
+
+  const openCitationPanel = (citation: CitationData) =>
+    setRightPanel({ kind: 'citation', citation });
+
+  const toggleContentionPanel = (messageId: string, contentions: ContentionMeta[]) =>
+    setRightPanel((prev) =>
+      prev?.kind === 'contention' && prev.messageId === messageId
+        ? null
+        : { kind: 'contention', contentions, messageId },
+    );
+
+  const closeRightPanel = () => setRightPanel(null);
 
   // Track the real conversation ID — null means draft (not yet persisted)
   const [activeConversationId, setActiveConversationId] = useState<string | null>(initialConversationId);
@@ -310,7 +328,15 @@ export default function ChatInterface({
                 targetScholar={targetScholar}
                 diveDeeperScholars={diveDeeperScholars}
                 onDiveDeeper={handleDiveDeeper}
-                onCitationClick={(citation) => setSelectedCitation(citation)}
+                onCitationClick={openCitationPanel}
+                isContentionPanelOpen={
+                  rightPanel?.kind === 'contention' && rightPanel.messageId === message.id
+                }
+                onToggleContentionPanel={
+                  contentions && contentions.length > 0
+                    ? () => toggleContentionPanel(message.id, contentions)
+                    : undefined
+                }
               />
             );
           })}
@@ -357,22 +383,23 @@ export default function ChatInterface({
         </div>
       </div>
 
-      {selectedCitation && (
-        <div className="hidden md:flex w-[40%] shrink-0 border-l border-white/[0.06]">
-          <SourceDetailsPanel
-            citation={selectedCitation}
-            onClose={() => setSelectedCitation(null)}
-          />
-        </div>
-      )}
-
-      {selectedCitation && (
-        <div className="md:hidden fixed inset-0 z-50">
-          <SourceDetailsPanel
-            citation={selectedCitation}
-            onClose={() => setSelectedCitation(null)}
-          />
-        </div>
+      {rightPanel && (
+        <>
+          <div className="hidden md:flex w-[40%] shrink-0 border-l border-white/[0.06]">
+            {rightPanel.kind === 'citation' ? (
+              <SourceDetailsPanel citation={rightPanel.citation} onClose={closeRightPanel} />
+            ) : (
+              <ContentionCanvasPanel contentions={rightPanel.contentions} onClose={closeRightPanel} />
+            )}
+          </div>
+          <div className="md:hidden fixed inset-0 z-50">
+            {rightPanel.kind === 'citation' ? (
+              <SourceDetailsPanel citation={rightPanel.citation} onClose={closeRightPanel} />
+            ) : (
+              <ContentionCanvasPanel contentions={rightPanel.contentions} onClose={closeRightPanel} />
+            )}
+          </div>
+        </>
       )}
     </div>
   );
