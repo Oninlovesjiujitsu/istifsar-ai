@@ -189,6 +189,7 @@ export type Database = {
       }
       contentions: {
         Row: {
+          claims: Json
           created_at: string
           description: string | null
           detected_by: string | null
@@ -198,9 +199,11 @@ export type Database = {
           resolution_notes: string | null
           status: string
           title: string
+          topic: string | null
           updated_at: string
         }
         Insert: {
+          claims?: Json
           created_at?: string
           description?: string | null
           detected_by?: string | null
@@ -210,9 +213,11 @@ export type Database = {
           resolution_notes?: string | null
           status?: string
           title: string
+          topic?: string | null
           updated_at?: string
         }
         Update: {
+          claims?: Json
           created_at?: string
           description?: string | null
           detected_by?: string | null
@@ -222,6 +227,7 @@ export type Database = {
           resolution_notes?: string | null
           status?: string
           title?: string
+          topic?: string | null
           updated_at?: string
         }
         Relationships: [

@@ -16,6 +16,8 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/types/database';
 import { categorizeArchiveGap } from './categorizeGap';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { queryContentions } from './contentionQuery';
+import type { ContentionMeta } from '@/types/contention';
 
 
 export type RagParams = {
@@ -46,6 +48,7 @@ export type CitationMeta = {
 
 export type RagMetadata = {
   citations?: CitationMeta[];
+  contentions?: ContentionMeta[];
   noDocument?: boolean;
   targetScholar?: string;
 };
@@ -133,6 +136,22 @@ export async function runRag(params: RagParams): Promise<Response> {
     }
   }
 
+  // ── Stage 2e: Fetch contentions for cited documents ──────────────────────
+  const titleByDocId = new Map<string, string>(
+    rankedChunks.map((c) => [c.documentId, c.documentTitle]),
+  );
+  const contentionsMeta = await queryContentions(
+    supabase,
+    uniqueDocIds,
+    authorByDocId,
+    titleByDocId,
+  );
+
+  console.log(`[RAG] Contention query: ${uniqueDocIds.length} doc IDs → ${contentionsMeta.length} contentions found`);
+  if (uniqueDocIds.length > 0) {
+    console.log(`[RAG] Doc IDs queried:`, uniqueDocIds);
+  }
+
   // ── Stage 2d: Scholar post-filter (Dive Deeper) ──────────────────────────
   const isDiveDeeper = !!params.targetScholar;
   if (params.targetScholar) {
@@ -164,7 +183,7 @@ export async function runRag(params: RagParams): Promise<Response> {
   );
 
   if (!topChunk || topChunk.cosineScore < similarityGate) {
-    // Log to archive_gaps (best-effort) and auto-categorize, then fall through to LLM
+    // Log to archive_gaps (best-effort) and auto-categorize
     try {
       const { data: gap } = await supabase.from('archive_gaps').insert({
         query_text: params.query,
@@ -182,6 +201,43 @@ export async function runRag(params: RagParams): Promise<Response> {
 
     // Clear chunks so downstream stages know context is empty
     rankedChunks = [];
+
+    // Short-circuit: server-enforced Agoncillo Fallback. Skip the LLM entirely
+    // so a borderline-passing gate can't be re-refused by the model, and a
+    // fully-failing gate always produces the canned string deterministically.
+    const fallbackText =
+      'No document, no history. The current archive does not contain sources that address this historical topic.';
+
+    const fallbackStream = createUIMessageStream<RagUIMessage>({
+      execute: async ({ writer }) => {
+        writer.write({
+          type: 'message-metadata',
+          messageMetadata: { citations: [], contentions: [], noDocument: true },
+        });
+        const textId = crypto.randomUUID();
+        writer.write({ type: 'text-start', id: textId });
+        writer.write({ type: 'text-delta', delta: fallbackText, id: textId });
+        writer.write({ type: 'text-end', id: textId });
+
+        // Persist the fallback assistant message so it appears in conversation
+        // history (matches the persistence pattern in the normal stream path).
+        try {
+          const { error: msgError } = await supabase.from('messages').insert({
+            conversation_id: params.conversationId,
+            role: 'assistant',
+            content: fallbackText,
+          });
+          if (msgError) {
+            console.error('[RAG] Failed to persist fallback assistant message:', msgError);
+          }
+        } catch (e) {
+          console.error('[RAG] Exception during fallback persist:', e);
+        }
+      },
+      onError: (err) => String(err),
+    });
+
+    return createUIMessageStreamResponse({ stream: fallbackStream });
   }
 
   // Stage 4: Cache check 
@@ -209,7 +265,7 @@ export async function runRag(params: RagParams): Promise<Response> {
         execute: async ({ writer }) => {
           writer.write({
             type: 'message-metadata',
-            messageMetadata: { citations },
+            messageMetadata: { citations, contentions: cached.contentions ?? [] },
           });
           const textId = crypto.randomUUID();
           writer.write({ type: 'text-start', id: textId });
@@ -224,7 +280,7 @@ export async function runRag(params: RagParams): Promise<Response> {
   }
 
   // Stage 5: Build context
-  const contextBlock = buildContextBlock(rankedChunks, lensEssay);
+  const contextBlock = buildContextBlock(rankedChunks, lensEssay, contentionsMeta);
   const effectiveLensTitle = isDiveDeeper ? params.targetScholar : params.lensTitle;
   const systemPrompt =
     buildSystemPrompt(params.mode, effectiveLensTitle, params.documentTitle, isDiveDeeper) + contextBlock;
@@ -246,8 +302,8 @@ export async function runRag(params: RagParams): Promise<Response> {
   // Stage 6 & 7: Stream + persist
   const ragStream = createUIMessageStream<RagUIMessage>({
     execute: async ({ writer }) => {
-      // Attach citations (and optional dive-deeper scholar) before streaming
-      const messageMetadata: RagMetadata = { citations };
+      // Attach citations, contentions, and optional dive-deeper scholar before streaming
+      const messageMetadata: RagMetadata = { citations, contentions: contentionsMeta };
       if (isDiveDeeper && params.targetScholar) {
         messageMetadata.targetScholar = params.targetScholar;
       }
@@ -326,7 +382,7 @@ export async function runRag(params: RagParams): Promise<Response> {
 
       // Cache the response for future identical queries (skip empty-context fallbacks)
       if (!shouldSkipCache(params.mode, rankedChunks) && rankedChunks.length > 0) {
-        await setCachedResponse(cacheKey, { text: fullText, chunks: rankedChunks });
+        await setCachedResponse(cacheKey, { text: fullText, chunks: rankedChunks, contentions: contentionsMeta });
       }
     },
     onError: (err) => {

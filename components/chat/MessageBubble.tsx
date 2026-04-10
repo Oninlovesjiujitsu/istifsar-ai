@@ -2,6 +2,8 @@
 
 import type { ReactNode } from 'react';
 import Markdown from 'react-markdown';
+import type { ContentionMeta } from '@/types/contention';
+import ContentionDisplay from './ContentionDisplay';
 
 export type CitationData = {
   documentId: string;
@@ -17,6 +19,7 @@ type Props = {
   role: 'user' | 'assistant';
   content: string;
   citations?: CitationData[];
+  contentions?: ContentionMeta[];
   isStreaming?: boolean;
   targetScholar?: string;
   diveDeeperScholars?: string[];
@@ -48,6 +51,7 @@ export default function MessageBubble({
   role,
   content,
   citations,
+  contentions,
   isStreaming,
   targetScholar,
   diveDeeperScholars,
@@ -141,6 +145,10 @@ export default function MessageBubble({
           </div>
 
           <div className="absolute -right-1 -bottom-1 w-8 h-8 border-b-2 border-r-2 border-gold/20 pointer-events-none" />
+
+          {contentions && contentions.length > 0 && !isStreaming && (
+            <ContentionDisplay contentions={contentions} />
+          )}
         </div>
 
         {diveDeeperScholars && diveDeeperScholars.length > 0 && (

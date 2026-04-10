@@ -1,9 +1,11 @@
 import { CACHE_TTL_SECONDS, EMBEDDING_CACHE_TTL_SECONDS } from '@/lib/config/constants';
 import type { RetrievedChunk } from '@/lib/ai/retriever';
+import type { ContentionMeta } from '@/types/contention';
 
 export type CachedRagResponse = {
   text: string;
   chunks: RetrievedChunk[];
+  contentions?: ContentionMeta[];
 };
 
 // ---------------------------------------------------------------------------

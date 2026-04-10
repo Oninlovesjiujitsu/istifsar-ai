@@ -7,6 +7,7 @@ import { DefaultChatTransport } from 'ai';
 import type { UIMessage } from 'ai';
 import MessageBubble from './MessageBubble';
 import type { CitationData } from './MessageBubble';
+import type { ContentionMeta } from '@/types/contention';
 import ChatInput from './ChatInput';
 import type { TopicOption } from './ChatInput';
 import ModeToggle from './ModeToggle';
@@ -42,6 +43,7 @@ type CitationMeta = {
 
 type RagMetadata = {
   citations?: CitationMeta[];
+  contentions?: ContentionMeta[];
   noDocument?: boolean;
   targetScholar?: string;
 };
@@ -86,6 +88,19 @@ function extractCitations(metadata: unknown): CitationData[] | undefined {
 function extractTargetScholar(metadata: unknown): string | undefined {
   if (!metadata || typeof metadata !== 'object') return undefined;
   return (metadata as RagMetadata).targetScholar;
+}
+
+/** Extract contention data from message metadata. */
+function extractContentions(metadata: unknown): ContentionMeta[] | undefined {
+  if (!metadata || typeof metadata !== 'object') return undefined;
+  const meta = metadata as RagMetadata;
+  console.log('[Client] Message metadata:', {
+    hasCitations: !!meta.citations?.length,
+    hasContentions: !!meta.contentions?.length,
+    contentionCount: meta.contentions?.length ?? 0,
+  });
+  if (!meta.contentions || meta.contentions.length === 0) return undefined;
+  return meta.contentions;
 }
 
 /**
@@ -275,6 +290,7 @@ export default function ChatInterface({
               isLastMessage && isLoading && message.role === 'assistant';
             const text = getMessageText(message);
             const citations = extractCitations(message.metadata);
+            const contentions = extractContentions(message.metadata);
             const targetScholar = extractTargetScholar(message.metadata);
 
             // Derive eligible scholars for Dive Deeper buttons
@@ -289,6 +305,7 @@ export default function ChatInterface({
                 role={message.role as 'user' | 'assistant'}
                 content={text}
                 citations={citations}
+                contentions={contentions}
                 isStreaming={isStreamingMessage}
                 targetScholar={targetScholar}
                 diveDeeperScholars={diveDeeperScholars}

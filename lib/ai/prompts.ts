@@ -1,4 +1,5 @@
 import type { RetrievedChunk } from './retriever';
+import type { ContentionMeta } from '@/types/contention';
 
 /**
  * Build the LLM system prompt based on the current conversation mode.
@@ -43,8 +44,9 @@ export function buildSystemPrompt(
 
   prompt += `### RULES OF ENGAGEMENT:\n`;
   prompt += `1. CITATION PRECISION: Every factual or interpretive claim must be cited. Place citations immediately BEFORE the terminal punctuation of the sentence (e.g., "Rizal's retraction is highly debated [1].").\n`;
-  prompt += `2. THE AGONCILLO FALLBACK: If the provided sources contain absolutely zero information related to the core historical topic, you must refuse to synthesize. 
-  Respond EXACTLY with: "No document, no history. The current archive does not contain sources that address this historical topic."\n`;
+  prompt += `2. THE AGONCILLO FALLBACK: Respond with the canned refusal ONLY if the "--- SCHOLARLY ARCHIVE ---" section below is completely empty or absent.
+  If ANY sources are listed in that section, you MUST synthesize them — never refuse. Use the "Historiographical Gaps" section to note what is missing or insufficient.
+  Never output the canned refusal when sources are present. If and only if the archive section is truly empty, respond EXACTLY with: "No document, no history. The current archive does not contain sources that address this historical topic."\n`;
   prompt += `3. BROAD QUERIES & ARCHIVE SUMMARIES: Users will frequently ask broad questions or ask to summarize an entire "tag", "archive", or "collection" (e.g., "Tell me about Philippine History", "Summarize the Islamic History tag", "What documents do you have in this archive?"). 
   DO NOT trigger the Agoncillo Fallback for these requests. You are explicitly authorized to summarize the collection. Extract the core historical subject, review the provided sources, and generate a comprehensive synthesis of the available documents within that specific archive or tag. 
   Use the 'Historiographical Gaps' section to explicitly state that your overview is a summary limited strictly to the currently retrieved collection.\\n`;
@@ -61,6 +63,7 @@ export function buildSystemPrompt(
 export function buildContextBlock(
   chunks: RetrievedChunk[],
   lensEssay?: { title: string; content: string } | null,
+  contentions?: ContentionMeta[],
 ): string {
   if (chunks.length === 0 && !lensEssay) return '';
 
@@ -82,6 +85,18 @@ export function buildContextBlock(
 
     parts.push(
       `--- SCHOLARLY ARCHIVE ---\n\n${entries.join('\n\n---\n\n')}\n\n--- END OF ARCHIVE ---`,
+    );
+  }
+
+  if (contentions && contentions.length > 0) {
+    const entries = contentions.map((c) => {
+      const scholars = c.scholarNames
+        .filter((n) => n !== 'Unknown Scholar')
+        .join(' vs. ');
+      return `- "${c.title}" (${scholars}): ${c.description ?? 'No details available.'}`;
+    });
+    parts.push(
+      `--- DETECTED CONTENTIONS ---\nThe following contradictions have been detected between sources in the archive:\n${entries.join('\n')}\n--- END CONTENTIONS ---`,
     );
   }
 

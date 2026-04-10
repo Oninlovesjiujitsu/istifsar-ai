@@ -16,18 +16,44 @@ import { MODELS } from '@/lib/config/models';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 const CONTENTION_PROMPT = ChatPromptTemplate.fromTemplate(`
-You are a historical fact-checker analyzing two primary source documents for factual contradictions.
+You are a historical fact-checker analyzing two academic history sources for
+factual contradictions.
 
-Document A (newly published) — "{titleA}":
+Source A — "{titleA}":
 {docA}
 
-Document B (existing archive) — "{titleB}":
+Source B — "{titleB}":
 {docB}
 
-Do these documents contradict each other on any specific historical facts, dates, people, or events?
-Respond with ONLY a JSON object in this exact format (no markdown, no explanation):
-{{"contradiction": true/false, "title": "brief title if contradiction found, or null", "description": "one-sentence description if contradiction found, or null"}}
+Do these sources contradict each other on any specific historical fact, date,
+person, event, or causal claim?
+
+Respond with ONLY a JSON object in this exact shape (no markdown, no prose):
+{{
+  "contradiction": true/false,
+  "topic":       "short phrase naming what is disputed, e.g. 'the date of Rizal's execution'",
+  "title":       "brief headline for this disagreement",
+  "description": "one-sentence explanation",
+  "claims": [
+    {{ "source": "A", "claim": "short version of what A says", "excerpt": "verbatim quote from A (max 40 words)" }},
+    {{ "source": "B", "claim": "short version of what B says", "excerpt": "verbatim quote from B (max 40 words)" }}
+  ]
+}}
+
+If no contradiction exists, return {{"contradiction": false, "topic": null, "title": null, "description": null, "claims": []}}.
 `);
+
+type ParsedContention = {
+  contradiction: boolean;
+  topic: string | null;
+  title: string | null;
+  description: string | null;
+  claims: Array<{
+    source: 'A' | 'B' | string;
+    claim: string;
+    excerpt: string | null;
+  }>;
+};
 
 export async function detectContentions(documentId: string): Promise<void> {
   try {
@@ -99,16 +125,20 @@ export async function detectContentions(documentId: string): Promise<void> {
 
         // Strip any accidental markdown fences
         const cleaned = result.replace(/```json|```/g, '').trim();
-        const parsed = JSON.parse(cleaned) as {
-          contradiction: boolean;
-          title: string | null;
-          description: string | null;
-        };
+        const parsed = JSON.parse(cleaned) as ParsedContention;
 
         if (parsed.contradiction) {
+          const claims = (parsed.claims ?? []).map((c) => ({
+            document_id: c.source === 'A' ? documentId : similar.document_id,
+            claim: c.claim,
+            excerpt: c.excerpt ?? null,
+          }));
+
           await db.from('contentions').insert({
             title: parsed.title ?? 'Potential contradiction detected',
             description: parsed.description ?? null,
+            topic: parsed.topic ?? null,
+            claims,
             document_ids: [documentId, similar.document_id],
             essay_ids: [],
             status: 'open',
