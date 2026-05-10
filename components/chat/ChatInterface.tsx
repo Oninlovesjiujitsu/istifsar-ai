@@ -201,6 +201,15 @@ export default function ChatInterface({
     transport,
     messages: toUIMessages(initialMessages),
     onError: (err) => console.error('[useChat error]', err),
+    onFinish: () => {
+      // Update URL only after streaming completes — doing it earlier races with
+      // revalidatePath('/explore') in the server action, causing Next.js to
+      // navigate to the [id] route and unmount this component mid-stream.
+      const id = conversationIdRef.current;
+      if (id && window.location.pathname === '/explore/new') {
+        window.history.replaceState(null, '', `/explore/${id}`);
+      }
+    },
   });
 
   const isLoading = status === 'streaming' || status === 'submitted';
@@ -229,8 +238,6 @@ export default function ChatInterface({
         if (result.success) {
           setActiveConversationId(result.conversationId);
           conversationIdRef.current = result.conversationId;
-          // Replace /explore/new with the real URL so back-button doesn't return to draft
-          window.history.replaceState(null, '', `/explore/${result.conversationId}`);
           sendMessage({ text });
         }
       } finally {
