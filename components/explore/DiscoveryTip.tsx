@@ -4,27 +4,31 @@ export default function DiscoveryTip() {
   return (
     <div className="bg-white/[0.02] p-10 lg:p-12 rounded-sm border border-white/5 backdrop-blur-sm">
       <div className="flex flex-col md:flex-row gap-10 items-center">
-        <div className="flex-1 space-y-5">
-          <span className="text-xs uppercase tracking-[0.2em] text-gold">
-            The Librarian&apos;s Tip
-          </span>
-          <blockquote className="text-2xl lg:text-3xl font-heading italic text-foreground leading-snug">
-            &ldquo;History is a set of lies agreed upon — unless you find the primary
-            sources.&rdquo;
-          </blockquote>
-          <p className="text-text-muted-vault text-sm leading-relaxed max-w-lg">
-            Start a new inquiry to explore the archive. Every answer is drawn from
-            verified scholarly sources — if the archive doesn&apos;t have it,
-            we&apos;ll say so honestly.
-          </p>
-          <Link
-            href="/documents"
-            className="inline-flex items-center gap-3 text-gold hover:text-foreground transition-colors uppercase text-xs tracking-widest font-bold group"
-          >
-            Browse the collection
-            <span className="block w-10 h-px bg-gold group-hover:w-14 transition-all duration-300" />
-          </Link>
-        </div>
+        <div className="flex-1">
+  <span className="inline-block text-xs uppercase tracking-[0.2em] text-gold mb-5">
+    The Librarian&apos;s Tip
+  </span>
+  
+  {/* Added mb-10 lg:mb-12 here to create that massive, even gap you want */}
+  <blockquote className="text-2xl lg:text-3xl font-heading italic text-foreground leading-snug mb-10 lg:mb-12">
+    &ldquo;History is a set of lies agreed upon — unless you find the primary
+    sources.&rdquo;
+  </blockquote>
+  
+  <p className="text-text-muted-vault text-sm leading-relaxed max-w-lg mb-6">
+    Start a new inquiry to explore the archive. Every answer is drawn from
+    verified scholarly sources — if the archive doesn&apos;t have it,
+    we&apos;ll say so honestly.
+  </p>
+  
+  <Link
+    href="/documents"
+    className="inline-flex items-center gap-3 text-gold hover:text-foreground transition-colors uppercase text-xs tracking-widest font-bold group"
+  >
+    Browse the collection
+    <span className="block w-10 h-px bg-gold group-hover:w-14 transition-all duration-300" />
+  </Link>
+</div>
 
         {/* Decorative element */}
         <div className="shrink-0 w-40 h-40 border border-gold/30 p-4 relative group hidden md:block">

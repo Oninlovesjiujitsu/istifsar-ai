@@ -15,8 +15,8 @@ type Props = {
 export default function AskAboutButton({
   topicId,
   documentId,
-  className = 'shrink-0 text-xs text-primary hover:underline disabled:opacity-60 disabled:cursor-not-allowed',
-  label = 'Ask about this →',
+  className="shrink-0 text-xs bg-gold text-[#241a00] font-semibold px-3 py-1.5 rounded-full hover:bg-gold/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed",
+  label="Ask about this →",
   pendingLabel = 'Starting…',
 }: Props) {
   const router = useRouter();

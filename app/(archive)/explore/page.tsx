@@ -46,7 +46,7 @@ export default async function ExplorePage() {
   return (
     <div className="min-h-screen p-4 sm:p-6 lg:p-16 xl:p-24 relative">
       {/* Editorial Header */}
-      <header className="max-w-6xl mx-auto mb-10 sm:mb-16 mt-4 sm:mt-8 lg:mt-12">
+      <header className="max-w-6xl mx-auto mb-10 sm:mb-16">
         <div className="flex flex-col gap-3 sm:gap-4">
           <span className="text-[10px] sm:text-xs uppercase tracking-[0.3em] sm:tracking-[0.4em] text-gold/60">
             {(totalDocs ?? 0).toLocaleString()} writings in the archive

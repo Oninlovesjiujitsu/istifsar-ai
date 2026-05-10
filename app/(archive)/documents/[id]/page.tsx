@@ -197,7 +197,7 @@ export default async function DocumentDetailPage({ params }: Props) {
           documentId={doc.id}
           label="Ask about this source"
           pendingLabel="Starting conversation…"
-          className="shrink-0 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/80 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          className="shrink-0 text-xs bg-gold text-[#241a00] font-semibold px-3 py-1.5 rounded-full hover:bg-gold/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         />
       </div>
     </div>

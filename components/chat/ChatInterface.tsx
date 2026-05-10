@@ -1,7 +1,7 @@
 'use client';
 
 import { useChat } from '@ai-sdk/react';
-import { useEffect, useRef, useState, useTransition } from 'react';
+import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { DefaultChatTransport } from 'ai';
 import type { UIMessage } from 'ai';
@@ -176,18 +176,31 @@ export default function ChatInterface({
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
   const isDraft = activeConversationId === null;
 
+  // Refs for values that change mid-conversation — read at request time via function body
+  const conversationIdRef = useRef(initialConversationId);
+  const selectedTopicRef = useRef<string | null>(initialTopicId ?? null);
+  conversationIdRef.current = activeConversationId;
+  selectedTopicRef.current = selectedTopicId;
+
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: '/api/chat',
+        body: () => ({
+          conversationId: conversationIdRef.current,
+          lensTitle,
+          topicTagId: documentId ? null : selectedTopicRef.current,
+          documentId: documentId ?? null,
+          documentTitle: documentId ? documentTitle : null,
+        }),
+      }),
+    [lensTitle, documentId, documentTitle],
+  );
+
   const { messages, sendMessage, status, setMessages, error } = useChat<RagUIMessage>({
-    transport: new DefaultChatTransport({
-      api: '/api/chat',
-      body: {
-        conversationId: activeConversationId,
-        lensTitle,
-        topicTagId: documentId ? null : selectedTopicId,
-        documentId: documentId ?? null,
-        documentTitle: documentId ? documentTitle : null,
-      },
-    }),
+    transport,
     messages: toUIMessages(initialMessages),
+    onError: (err) => console.error('[useChat error]', err),
   });
 
   const isLoading = status === 'streaming' || status === 'submitted';
@@ -215,12 +228,10 @@ export default function ChatInterface({
         );
         if (result.success) {
           setActiveConversationId(result.conversationId);
+          conversationIdRef.current = result.conversationId;
           // Replace /explore/new with the real URL so back-button doesn't return to draft
           window.history.replaceState(null, '', `/explore/${result.conversationId}`);
-          // sendMessage will now use the updated activeConversationId via the next render,
-          // but useChat's transport body is stale at this point. We need to send after state update.
-          // Use a ref-based approach: store the pending message and send after re-render.
-          pendingMessageRef.current = text;
+          sendMessage({ text });
         }
       } finally {
         setIsCreatingConversation(false);
@@ -229,16 +240,6 @@ export default function ChatInterface({
     }
     sendMessage({ text });
   }
-
-  // Send pending message after conversation ID is set
-  const pendingMessageRef = useRef<string | null>(null);
-  useEffect(() => {
-    if (pendingMessageRef.current && activeConversationId) {
-      const text = pendingMessageRef.current;
-      pendingMessageRef.current = null;
-      sendMessage({ text });
-    }
-  }, [activeConversationId, sendMessage]);
 
   function handleDiveDeeper(scholarName: string) {
     // Find the last real user query (not a Dive Deeper "Analyze this..." message)

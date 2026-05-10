@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+
 import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
 import type { ContentionClaim, ContentionMeta } from '@/types/contention';
@@ -22,11 +23,11 @@ export default function ContentionGraph({ contentions }: Props) {
 /* ── Palette ──────────────────────────────────────────────────────────── */
 
 const SCHOLAR_PALETTE = [
-  { hex: '#D4AF37', dash: undefined },   // 0: solid gold
-  { hex: '#F59E0B', dash: '4 4' },       // 1: dashed amber
-  { hex: '#B45309', dash: '2 3' },       // 2: dotted bronze
-  { hex: '#854D0E', dash: '6 3 2 3' },   // 3: dash-dot umber
-  { hex: '#EAB308', dash: '5 2' },       // 4: dashed yellow
+  { hex: '#d4af37', dash: '8 4' },
+  { hex: '#f2ca50', dash: '4 4' },
+  { hex: '#b8963f', dash: '12 4 4 4' },
+  { hex: '#e9c349', dash: '6 8' },
+  { hex: '#c9a84c', dash: '10 3' },
 ] as const;
 
 /* ── Position calculator ─────────────────────────────────────────────── */
@@ -34,8 +35,8 @@ const SCHOLAR_PALETTE = [
 function getScholarPositions(n: number): Array<{ x: number; y: number }> {
   if (n === 2) {
     return [
-      { x: 22, y: 28 },
-      { x: 78, y: 72 },
+      { x: 28, y: 30 },
+      { x: 72, y: 70 },
     ];
   }
   if (n === 3) {
@@ -85,6 +86,7 @@ function NodeGraph({
         !isFirst && 'border-t border-gold/10',
       )}
       aria-label={`Node of contention: ${topicLabel}`}
+      onClick={() => setActiveTooltipId(null)}
     >
       {/* Edges (absolute SVG overlay, below HTML nodes) */}
       {!isLegacy && (
@@ -94,29 +96,33 @@ function NodeGraph({
           preserveAspectRatio="none"
           aria-hidden="true"
         >
-          {positions.map((p, i) => {
-            const palette = SCHOLAR_PALETTE[i % SCHOLAR_PALETTE.length];
-            return (
-              <motion.line
-                key={`edge-${claims[i].documentId}`}
-                x1={50}
-                y1={50}
-                x2={p.x}
-                y2={p.y}
-                stroke={palette.hex}
-                strokeWidth={0.4}
-                strokeDasharray={palette.dash}
-                strokeOpacity={0.7}
-                initial={{ pathLength: 0, opacity: 0 }}
-                animate={{ pathLength: 1, opacity: 1 }}
-                transition={{
-                  duration: 0.7,
-                  delay: 0.25 + i * 0.08,
-                  ease: 'easeOut',
-                }}
-              />
-            );
-          })}
+          {positions.flatMap((pA, i) =>
+            positions.slice(i + 1).map((pB, j) => {
+              const idx = i + j + 1;
+              const palette = SCHOLAR_PALETTE[i % SCHOLAR_PALETTE.length];
+              return (
+                <motion.line
+                  key={`edge-${claims[i].documentId}-${claims[idx].documentId}`}
+                  x1={pA.x}
+                  y1={pA.y}
+                  x2={pB.x}
+                  y2={pB.y}
+                  stroke={palette.hex}
+                  strokeWidth={1}
+                  strokeDasharray={palette.dash}
+                  strokeOpacity={0.9}
+                  strokeLinecap="round"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{
+                    duration: 0.6,
+                    delay: 0.25 + i * 0.08,
+                    ease: 'easeOut',
+                  }}
+                />
+              );
+            }),
+          )}
         </svg>
       )}
 
@@ -142,15 +148,15 @@ function NodeGraph({
                   prev === claim.documentId ? null : claim.documentId,
                 )
               }
-              onClose={() => setActiveTooltipId(null)}
             />
           );
         })}
+
     </article>
   );
 }
 
-/* ── Center node (scales-of-justice + topic label) ───────────────────── */
+/* ── Center node (book glyph + topic label) ──────────────────────────── */
 
 function CenterNode({
   topicLabel,
@@ -168,33 +174,27 @@ function CenterNode({
     >
       <div
         className={cn(
-          'w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gold flex items-center justify-center',
+          'w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-gold flex items-center justify-center',
           'border-4 border-surface-elevated shadow-[0_0_15px_rgba(212,175,55,0.3)]',
         )}
       >
         <svg
           className="w-7 h-7 sm:w-9 sm:h-9 text-surface-vault"
-          fill="none"
+          fill="currentColor"
           viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
           aria-hidden="true"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 3v17.25m0 0c-1.472 0-2.882.265-4.185.75M12 20.25c1.472 0 2.882.265 4.185.75M18.75 4.97A48.416 48.416 0 0 0 12 4.5c-2.291 0-4.545.16-6.75.47m13.5 0c1.01.143 2.01.317 3 .52m-3-.52 2.62 10.726c.122.499-.106 1.028-.589 1.202a5.988 5.988 0 0 1-2.031.352 5.988 5.988 0 0 1-2.031-.352c-.483-.174-.711-.703-.59-1.202L18.75 4.971Zm-16.5.52c.99-.203 1.99-.377 3-.52m0 0 2.62 10.726c.122.499-.106 1.028-.589 1.202a5.989 5.989 0 0 1-2.031.352 5.989 5.989 0 0 1-2.031-.352c-.483-.174-.711-.703-.59-1.202L5.25 4.971Z"
-          />
+          <path d="M11.25 4.533A9.707 9.707 0 0 0 6 3a9.735 9.735 0 0 0-3.25.555.75.75 0 0 0-.5.707v14.25a.75.75 0 0 0 1 .707A8.237 8.237 0 0 1 6 18.75c1.995 0 3.823.707 5.25 1.886V4.533ZM12.75 20.636A8.214 8.214 0 0 1 18 18.75c.966 0 1.89.166 2.75.47a.75.75 0 0 0 1-.708V4.262a.75.75 0 0 0-.5-.707A9.735 9.735 0 0 0 18 3a9.707 9.707 0 0 0-5.25 1.533v16.103Z" />
         </svg>
       </div>
 
-      <div className="mt-4 bg-surface-elevated/90 backdrop-blur-sm px-4 py-2 border border-gold/30 text-center max-w-[240px] sm:max-w-[280px]">
-        <span className="text-[9px] uppercase tracking-tighter text-zinc-400 block">
-          Contested Topic
-        </span>
+      <div className="mt-4 bg-[#1a1a1c] px-6 py-2 border border-gold/50 rounded-sm text-center max-w-[240px] sm:max-w-[280px]">
         <h3 className="font-serif text-sm font-bold text-gold leading-snug">
           {topicLabel}
         </h3>
+        <span className="text-[9px] uppercase tracking-tighter text-zinc-400 block mt-1">
+          Contested Topic
+        </span>
       </div>
 
       {isLegacy && (
@@ -216,7 +216,6 @@ function ScholarNode({
   delay,
   isActive,
   onToggle,
-  onClose,
 }: {
   claim: ContentionClaim;
   x: number;
@@ -225,9 +224,10 @@ function ScholarNode({
   delay: number;
   isActive: boolean;
   onToggle: () => void;
-  onClose: () => void;
 }) {
   const flipBelow = y < 30;
+  const flipLeft = x > 75;
+  const flipRight = x < 25;
 
   return (
     <motion.div
@@ -239,28 +239,34 @@ function ScholarNode({
     >
       <div
         className="group relative flex flex-col items-center cursor-pointer"
+        role="button"
+        tabIndex={0}
+        aria-label={`${claim.scholarName}: view claim`}
+        aria-describedby={`tooltip-${claim.documentId}`}
         onClick={onToggle}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onToggle();
+          }
+        }}
       >
         <div
           className={cn(
-            'w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-surface-elevated border-2',
+            'w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-surface-elevated border-[1.5px]',
             'flex items-center justify-center transition-transform hover:scale-110',
+            'shadow-[0_0_8px_rgba(212,175,55,0.1)]',
+            'group-focus-visible:ring-2 group-focus-visible:ring-gold/60',
           )}
           style={{ borderColor: color }}
         >
           <svg
             className="w-6 h-6 sm:w-7 sm:h-7"
-            fill="none"
+            fill={color}
             viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke={color}
             aria-hidden="true"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
-            />
+            <path d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" />
           </svg>
         </div>
 
@@ -270,62 +276,38 @@ function ScholarNode({
 
         {/* Tooltip */}
         <div
+          id={`tooltip-${claim.documentId}`}
+          role="tooltip"
           className={cn(
-            'absolute left-1/2 -translate-x-1/2 w-56 sm:w-64 p-4 z-30',
+            'absolute w-[min(14rem,calc(100vw-3rem))] p-4 z-30',
             'bg-surface-elevated border border-gold/20 rounded-sm shadow-2xl',
-            'transition-all duration-200',
+            'transition-opacity duration-200',
             flipBelow ? 'top-full mt-3' : 'bottom-[calc(100%+0.75rem)]',
+            flipLeft
+              ? 'right-0 translate-x-0'
+              : flipRight
+                ? 'left-0 translate-x-0'
+                : 'left-1/2 -translate-x-1/2',
             isActive
-              ? 'opacity-100 scale-100 pointer-events-auto'
-              : 'opacity-0 scale-95 pointer-events-none',
-            'md:group-hover:opacity-100 md:group-hover:scale-100 md:group-hover:pointer-events-auto',
+              ? 'opacity-100 pointer-events-auto'
+              : 'opacity-0 pointer-events-none',
+            'md:group-hover:opacity-100 md:group-hover:pointer-events-auto',
           )}
           onClick={(e) => e.stopPropagation()}
         >
-          <header className="flex justify-between items-start mb-2 gap-2">
-            <span className="text-[9px] uppercase tracking-widest text-gold font-bold">
-              Scholarly Claim
-            </span>
-            <button
-              type="button"
-              className="text-zinc-500 hover:text-gold transition-colors shrink-0"
-              onClick={(e) => {
-                e.stopPropagation();
-                onClose();
-              }}
-              aria-label="Close claim"
-            >
-              <svg
-                className="w-3.5 h-3.5"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                stroke="currentColor"
-                aria-hidden="true"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </header>
-
-          <p className="font-serif italic text-xs text-zinc-200 leading-relaxed">
+          <p className="font-serif italic text-xs text-zinc-200 leading-loose">
             &ldquo;{claim.claim}&rdquo;
           </p>
-
-          {claim.excerpt && (
-            <p className="mt-2 border-l-2 border-gold/30 pl-3 text-[11px] text-zinc-400 italic line-clamp-3">
-              &ldquo;{claim.excerpt}&rdquo;
-            </p>
-          )}
-
-          <span className="mt-3 block text-[9px] uppercase tracking-widest text-zinc-500 truncate">
-            {claim.documentTitle}
-          </span>
 
           {/* Arrow */}
           <span
             className={cn(
-              'absolute left-1/2 -translate-x-1/2 w-3 h-3 bg-surface-elevated rotate-45',
+              'absolute w-3 h-3 bg-surface-elevated rotate-45',
+              flipLeft
+                ? 'right-4'
+                : flipRight
+                  ? 'left-4'
+                  : 'left-1/2 -translate-x-1/2',
               flipBelow
                 ? 'bottom-full -mb-1.5 border-l border-t border-gold/20'
                 : 'top-full -mt-1.5 border-r border-b border-gold/20',
