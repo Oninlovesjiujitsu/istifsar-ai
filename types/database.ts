@@ -647,6 +647,7 @@ export type Database = {
           created_at: string
           id: string
           role: string
+          topic_id: string | null
         }
         Insert: {
           content: string
@@ -654,6 +655,7 @@ export type Database = {
           created_at?: string
           id?: string
           role: string
+          topic_id?: string | null
         }
         Update: {
           content?: string
@@ -661,6 +663,7 @@ export type Database = {
           created_at?: string
           id?: string
           role?: string
+          topic_id?: string | null
         }
         Relationships: [
           {
@@ -668,6 +671,13 @@ export type Database = {
             columns: ["conversation_id"]
             isOneToOne: false
             referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
             referencedColumns: ["id"]
           },
         ]

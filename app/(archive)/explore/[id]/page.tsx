@@ -49,7 +49,7 @@ export default async function ConversationPage({ params, searchParams }: Props) 
     supabase
       .from('messages')
       .select(
-        'id, role, content, citations(position, excerpt, similarity_score, document_id, documents(title, date_of_origin, profiles!documents_submitter_id_fkey(username, display_name)))'
+        'id, role, content, topic_id, citations(position, excerpt, similarity_score, document_id, documents(title, date_of_origin, profiles!documents_submitter_id_fkey(username, display_name)))'
       )
       .eq('conversation_id', id)
       .order('created_at', { ascending: true }),
@@ -215,6 +215,7 @@ export default async function ConversationPage({ params, searchParams }: Props) 
             role: m.role as 'user' | 'assistant',
             content: m.content,
             metadata,
+            topicId: m.topic_id ?? null,
           };
         })}
         initialMode={conv.mode as 'scholarly_consensus' | 'scholar_lens'}

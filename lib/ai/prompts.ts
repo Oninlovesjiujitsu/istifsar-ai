@@ -56,6 +56,7 @@ export function buildSystemPrompt(
   prompt += `7. LINGUISTIC BOUNDARIES: You are permitted to read source documents in any language. You MUST synthesize your response in English, Tagalog, or Bahasa Indonesia (strictly matching the language of the user's prompt). 
   However, you MUST NEVER perform direct, word-for-word translations of the source documents or excerpts. If a user explicitly asks you to "translate" a text, politely decline. 
   State that Istifsar synthesizes historical context but does not act as a direct translator in order to preserve historiographical accuracy. Gently advise the user to use dedicated translation tools like DeepL for direct translations.\n`;
+  prompt += `8. TOPIC SWITCHING: The user may switch between different topic areas across this conversation. Each response is based on sources retrieved for the currently selected topic. If the user references something discussed under a previous topic, acknowledge that those sources may no longer be in the current retrieval scope and focus your answer on the currently provided sources.\n`;
 
   return prompt;
 }

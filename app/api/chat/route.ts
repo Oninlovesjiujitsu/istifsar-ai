@@ -67,12 +67,21 @@ export async function POST(req: Request): Promise<Response> {
     return new Response('No user message text', { status: 400 });
   }
 
-  // Persist the user message
+  // Persist the user message with topic context
   await supabase.from('messages').insert({
     conversation_id: conversationId,
     role: 'user',
     content: lastUserText,
+    topic_id: topicTagId ?? null,
   });
+
+  // Update conversation's scope_topic_id to reflect the latest topic used
+  if (topicTagId) {
+    await supabase
+      .from('conversations')
+      .update({ scope_topic_id: topicTagId })
+      .eq('id', conversationId);
+  }
 
   // Build history for the LLM 
   // Convert the prior messages (all but the last user turn) to model message format.

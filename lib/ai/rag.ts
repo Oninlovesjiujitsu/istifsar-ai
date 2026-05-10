@@ -226,6 +226,7 @@ export async function runRag(params: RagParams): Promise<Response> {
             conversation_id: params.conversationId,
             role: 'assistant',
             content: fallbackText,
+            topic_id: params.topicTagId ?? null,
           });
           if (msgError) {
             console.error('[RAG] Failed to persist fallback assistant message:', msgError);
@@ -346,6 +347,7 @@ export async function runRag(params: RagParams): Promise<Response> {
             conversation_id: params.conversationId,
             role: 'assistant',
             content: fullText,
+            topic_id: params.topicTagId ?? null,
           })
           .select('id')
           .single();

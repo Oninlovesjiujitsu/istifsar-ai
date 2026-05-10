@@ -22,6 +22,7 @@ type Props = {
   contentions?: ContentionMeta[];
   isStreaming?: boolean;
   targetScholar?: string;
+  topicName?: string | null;
   diveDeeperScholars?: string[];
   onDiveDeeper?: (scholarName: string) => void;
   onCitationClick?: (citation: CitationData) => void;
@@ -56,6 +57,7 @@ export default function MessageBubble({
   contentions,
   isStreaming,
   targetScholar,
+  topicName,
   diveDeeperScholars,
   onDiveDeeper,
   onCitationClick,
@@ -65,8 +67,15 @@ export default function MessageBubble({
   if (role === 'user') {
     return (
       <div className="flex justify-end">
-        <div className="max-w-[75%] lg:max-w-2xl bg-surface-elevated p-4 lg:p-6 rounded-sm text-zinc-100 text-sm leading-relaxed border-r-4 border-gold/20">
-          {content}
+        <div className="max-w-[75%] lg:max-w-2xl">
+          {topicName && (
+            <span className="text-[10px] uppercase tracking-wider text-text-muted-vault/60 mb-1 block text-right">
+              {topicName}
+            </span>
+          )}
+          <div className="bg-surface-elevated p-4 lg:p-6 rounded-sm text-zinc-100 text-sm leading-relaxed border-r-4 border-gold/20">
+            {content}
+          </div>
         </div>
       </div>
     );

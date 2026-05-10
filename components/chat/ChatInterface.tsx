@@ -27,6 +27,7 @@ type Props = {
     role: 'user' | 'assistant';
     content: string;
     metadata?: RagMetadata;
+    topicId?: string | null;
   }>;
   initialMode: 'scholarly_consensus' | 'scholar_lens';
   lensTitle?: string | null;
@@ -182,6 +183,15 @@ export default function ChatInterface({
   conversationIdRef.current = activeConversationId;
   selectedTopicRef.current = selectedTopicId;
 
+  // Track topic per message: message ID -> topic ID
+  const [messageTopics, setMessageTopics] = useState<Map<string, string | null>>(() => {
+    const map = new Map<string, string | null>();
+    for (const m of initialMessages) {
+      map.set(m.id, m.topicId ?? null);
+    }
+    return map;
+  });
+
   const transport = useMemo(
     () =>
       new DefaultChatTransport({
@@ -217,6 +227,21 @@ export default function ChatInterface({
   // Show Dive Deeper only in scholarly_consensus mode and not document-scoped
   const showDiveDeeper = initialMode === 'scholarly_consensus' && !documentId;
 
+  // Track topics for new messages (user messages get the current topic)
+  useEffect(() => {
+    setMessageTopics((prev) => {
+      let changed = false;
+      const next = new Map(prev);
+      for (const m of messages) {
+        if (!next.has(m.id)) {
+          next.set(m.id, m.role === 'user' ? pendingTopicRef.current : pendingTopicRef.current);
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [messages]);
+
   // Auto-scroll the message list
   useEffect(() => {
     const el = messageListRef.current;
@@ -224,7 +249,11 @@ export default function ChatInterface({
     el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
   }, [messages]);
 
+  // Track topic for newly sent messages
+  const pendingTopicRef = useRef<string | null>(null);
+
   async function handleSubmit(text: string) {
+    pendingTopicRef.current = selectedTopicId;
     if (isDraft) {
       // Create the conversation on first message, then redirect
       setIsCreatingConversation(true);
@@ -325,6 +354,26 @@ export default function ChatInterface({
                 ? getDiveDeeperScholars(citations)
                 : [];
 
+            // Compute topic badge: show only on user messages at switch boundaries
+            let topicBadgeName: string | null = null;
+            if (message.role === 'user' && topics) {
+              const msgTopicId = messageTopics.get(message.id) ?? pendingTopicRef.current;
+              if (msgTopicId) {
+                // Find the previous user message's topic
+                let prevTopicId: string | null = null;
+                for (let j = i - 1; j >= 0; j--) {
+                  if (messages[j].role === 'user') {
+                    prevTopicId = messageTopics.get(messages[j].id) ?? null;
+                    break;
+                  }
+                }
+                // Show badge if this is the first message or topic changed
+                if (prevTopicId !== msgTopicId) {
+                  topicBadgeName = topics?.find(t => t.id === msgTopicId)?.name ?? null;
+                }
+              }
+            }
+
             return (
               <MessageBubble
                 key={message.id}
@@ -334,6 +383,7 @@ export default function ChatInterface({
                 contentions={contentions}
                 isStreaming={isStreamingMessage}
                 targetScholar={targetScholar}
+                topicName={topicBadgeName}
                 diveDeeperScholars={diveDeeperScholars}
                 onDiveDeeper={handleDiveDeeper}
                 onCitationClick={openCitationPanel}
