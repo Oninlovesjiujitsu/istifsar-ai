@@ -252,9 +252,15 @@ export default function LandingPage() {
       </motion.nav>
 
       <main>
-        <section className="relative min-h-screen flex items-center justify-center pt-0 md:pt-0 px-4 sm:px-6 md:px-0 overflow-hidden">
+        <section className="relative min-h-[70vh] sm:min-h-screen flex items-start sm:items-center justify-center pt-24 sm:pt-0 px-4 sm:px-6 md:px-0 overflow-hidden">
           <div className="absolute inset-0 z-0">
-            <div className="absolute inset-0 bg-gradient-to-b from-gold/[0.03] via-background to-background" />
+            <img
+              src="/Background_Landing.jpg"
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover object-center"
+            />
+            <div className="absolute inset-0 bg-background/45 sm:bg-background/35" />
+            <div className="absolute inset-0 bg-gradient-to-b from-background/10 via-background/45 to-background" />
           </div>
 
           <div className="relative z-10 max-w-5xl text-center">
