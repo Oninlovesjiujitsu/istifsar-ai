@@ -252,7 +252,7 @@ export default function LandingPage() {
       </motion.nav>
 
       <main>
-        <section className="relative min-h-[70vh] sm:min-h-screen flex items-start sm:items-center justify-center pt-24 sm:pt-0 px-4 sm:px-6 md:px-0 overflow-hidden">
+        <section className="relative min-h-[70vh] sm:min-h-screen flex items-start sm:items-center justify-center pt-36 sm:pt-0 px-4 sm:px-6 md:px-0 overflow-hidden">
           <div className="absolute inset-0 z-0">
             <img
               src="/Background_Landing.jpg"

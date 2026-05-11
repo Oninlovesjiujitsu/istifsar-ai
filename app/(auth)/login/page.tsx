@@ -21,7 +21,7 @@ export default function LoginPage() {
         <div className="mb-8 space-y-2 text-center">
           <div className="flex items-center justify-center gap-2">
             <h1 className="text-2xl font-semibold tracking-wide text-amber-200/90 sm:text-3xl">
-              Istifsar
+              استفسار
             </h1>
             <svg
               viewBox="0 0 24 24"

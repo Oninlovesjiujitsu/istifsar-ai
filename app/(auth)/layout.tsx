@@ -8,6 +8,8 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
   await proxy({ redirectAuthenticated: '/' });
   return (
     <div className="dark relative flex min-h-svh items-center justify-center overflow-hidden bg-[#0e0d10] px-4 py-12">
+      <div className="pointer-events-none absolute inset-0 bg-[#0e0d10]/60 sm:bg-[#0e0d10]/50" />
+
       <div
         className="pointer-events-none absolute inset-0"
         style={{ backgroundImage: noiseSvg, backgroundRepeat: 'repeat' }}
