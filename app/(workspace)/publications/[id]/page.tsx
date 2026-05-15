@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import ContentionView from '@/components/shared/ContentionView';
+import DeleteDocumentButton from '@/components/publications/DeleteDocumentButton';
 import type { Metadata } from 'next';
 
 type Props = { params: Promise<{ id: string }> };
@@ -86,13 +87,16 @@ export default async function WorkspaceDocumentPage({ params }: Props) {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
-      {/* Back link */}
-      <Link
-        href="/publications"
-        className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-      >
-        ← My Publications
-      </Link>
+      {/* Header row */}
+      <div className="flex items-center justify-between gap-4">
+        <Link
+          href="/publications"
+          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          ← My Publications
+        </Link>
+        <DeleteDocumentButton documentId={doc.id} documentTitle={doc.title} />
+      </div>
 
       {/* Metadata bar */}
       <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">

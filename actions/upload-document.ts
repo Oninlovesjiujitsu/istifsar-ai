@@ -2,6 +2,7 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
+import { revalidatePath } from 'next/cache';
 import type { DocumentInsert, UploadDocumentResult } from '@/types/ingestion';
 import { isVerifiedHistorian, getUserRole } from '@/lib/ui/role-labels';
 
@@ -157,4 +158,55 @@ export async function uploadDocument(
   }
 
   return { success: true, documentId: docId };
+}
+
+export async function deleteDocument(
+  documentId: string,
+): Promise<{ success: true } | { success: false; error: string }> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { success: false, error: 'Not authenticated.' };
+
+  // Cast needed: transcription_path not in generated types yet (added in migration 0006)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: doc } = await (supabase
+    .from('documents')
+    .select('id, submitter_id, storage_path, transcription_path') as any)
+    .eq('id', documentId)
+    .single();
+
+  if (!doc) return { success: false, error: 'Document not found.' };
+
+  const role = getUserRole(user);
+  if (doc.submitter_id !== user.id && role !== 'admin') {
+    return { success: false, error: 'Not authorized.' };
+  }
+
+  // Delete the document row (cascades handle chunks, tags, validations)
+  const { error } = await supabase.from('documents').delete().eq('id', documentId);
+  if (error) {
+    // Citation RESTRICT constraint produces a foreign_key_violation
+    if (error.code === '23503') {
+      return {
+        success: false,
+        error: 'This document has been cited in conversations and cannot be deleted.',
+      };
+    }
+    return { success: false, error: error.message };
+  }
+
+  // Clean up storage (best-effort after successful row delete)
+  if (doc.storage_path) {
+    await supabase.storage.from('document-scans').remove([doc.storage_path]).catch(() => {});
+  }
+  if (doc.transcription_path) {
+    await supabase.storage.from('transcriptions').remove([doc.transcription_path]).catch(() => {});
+  }
+
+  revalidatePath('/publications');
+  return { success: true };
 }
