@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { QuillWrite01Icon } from '@hugeicons/core-free-icons';
 import SignOutButton from '@/components/layout/SignOutButton';
@@ -32,7 +33,7 @@ export default function AdminSidebarContent() {
       {/* Main Navigation */}
       <nav className="flex flex-col flex-grow overflow-hidden">
         <div className="flex flex-col gap-0.5 px-2">
-          <SidebarNavLink href="/admin" icon="dashboard" onNavigate={close}>
+          <SidebarNavLink href="/admin" icon="dashboard" onNavigate={close} exact>
             Dashboard
           </SidebarNavLink>
           <SidebarNavLink href="/admin/users" icon="users" onNavigate={close}>
@@ -124,13 +125,19 @@ function SidebarNavLink({
   icon,
   children,
   onNavigate,
+  exact,
 }: {
   href: string;
   icon: string;
   children: React.ReactNode;
   onNavigate?: () => void;
+  exact?: boolean;
 }) {
   const { expanded } = useSidebar();
+  const pathname = usePathname();
+  const isActive = exact
+    ? pathname === href
+    : pathname === href || pathname.startsWith(href + '/');
 
   return (
     <Link
@@ -138,7 +145,10 @@ function SidebarNavLink({
       onClick={onNavigate}
       title={typeof children === 'string' ? children : undefined}
       className={[
-        'text-text-muted-vault hover:text-foreground px-3 py-3 transition-colors hover:bg-white/[0.04] flex items-center font-serif text-sm tracking-tight',
+        'px-3 py-3 transition-colors flex items-center font-serif text-sm tracking-tight rounded-sm',
+        isActive
+          ? 'text-gold bg-gold/[0.08]'
+          : 'text-text-muted-vault hover:text-foreground hover:bg-white/[0.04]',
         expanded ? 'gap-3' : 'lg:justify-center gap-3',
       ].join(' ')}
     >
