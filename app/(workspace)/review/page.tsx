@@ -36,7 +36,7 @@ export default async function ValidateQueuePage() {
       <div className="mb-6 space-y-1">
         <h1 className="text-2xl font-bold">Validation queue</h1>
         <p className="text-muted-foreground">
-          Review submitted primary sources.
+          Review submitted primary sources. (This has not been implemented yet.)
         </p>
       </div>
 

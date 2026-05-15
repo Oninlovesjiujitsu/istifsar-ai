@@ -146,7 +146,7 @@ export default async function HistorianDashboard() {
       </div>
 
       {/* Metric Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 mb-10 md:mb-16">
         <MetricCard
           label="Total Citations"
           value={totalCitations ?? 0}
@@ -187,11 +187,11 @@ export default async function HistorianDashboard() {
         />
       </div>
 
-      {/* Top Cited Works Table */}
+      {/* Top Cited Works */}
       {topCited.length > 0 && (
         <div>
-          <div className="flex items-center justify-between mb-8">
-            <h4 className="font-heading text-2xl font-bold text-foreground">Top Cited Works</h4>
+          <div className="flex items-center justify-between mb-6 md:mb-8">
+            <h4 className="font-heading text-xl md:text-2xl font-bold text-foreground">Top Cited Works</h4>
             <Link
               href="/publications"
               className="text-[10px] uppercase tracking-widest text-gold hover:underline underline-offset-4 decoration-2 transition-all"
@@ -199,7 +199,34 @@ export default async function HistorianDashboard() {
               View All Publications
             </Link>
           </div>
-          <div className="bg-surface-elevated overflow-hidden">
+
+          {/* Mobile: card layout */}
+          <div className="space-y-3 md:hidden">
+            {topCited.map((doc) => (
+              <div key={doc.id} className="bg-surface-elevated p-4 space-y-3">
+                <Link
+                  href={`/publications/${doc.id}`}
+                  className="font-heading text-base text-foreground hover:text-gold transition-colors block"
+                >
+                  {doc.title}
+                </Link>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <span className="text-xs text-text-muted-vault">
+                      {doc.published_at
+                        ? new Date(doc.published_at).getFullYear()
+                        : new Date().getFullYear()}
+                    </span>
+                    <span className="font-heading text-lg text-gold font-bold">{doc.citations} <span className="text-xs font-normal text-text-muted-vault">citations</span></span>
+                  </div>
+                  <StatusBadge status={doc.status} />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop: table layout */}
+          <div className="bg-surface-elevated overflow-hidden hidden md:block">
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
@@ -285,12 +312,12 @@ function MetricCard({
   icon: React.ReactNode;
 }) {
   return (
-    <div className="bg-surface-elevated p-8 border-t-2 border-gold shadow-[0_0_20px_rgba(212,175,55,0.08)] relative overflow-hidden group hover:shadow-[0_0_25px_rgba(212,175,55,0.15)] transition-all duration-500">
+    <div className="bg-surface-elevated p-5 sm:p-6 md:p-8 border-t-2 border-gold shadow-[0_0_20px_rgba(212,175,55,0.08)] relative overflow-hidden group hover:shadow-[0_0_25px_rgba(212,175,55,0.15)] transition-all duration-500">
       <div className="absolute -right-4 -bottom-4 opacity-5 group-hover:opacity-10 transition-opacity text-foreground">
         {icon}
       </div>
-      <p className="text-[10px] uppercase tracking-widest text-text-muted-vault mb-6">{label}</p>
-      <h3 className="font-heading text-4xl font-bold text-gold mb-2">
+      <p className="text-[10px] uppercase tracking-widest text-text-muted-vault mb-3 md:mb-6">{label}</p>
+      <h3 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold text-gold mb-2">
         {value.toLocaleString()}
       </h3>
       {detail && (

@@ -1,5 +1,15 @@
 'use client';
 
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
+
 type MonthlyData = {
   month: string;
   currentYear: number;
@@ -12,16 +22,38 @@ type CitationsChartProps = {
   previousYearLabel: string;
 };
 
-function toPath(points: { x: number; y: number }[]): string {
-  if (points.length === 0) return '';
-  let d = `M${points[0].x},${points[0].y}`;
-  for (let i = 1; i < points.length; i++) {
-    const prev = points[i - 1];
-    const curr = points[i];
-    const cpx = (prev.x + curr.x) / 2;
-    d += ` C${cpx},${prev.y} ${cpx},${curr.y} ${curr.x},${curr.y}`;
-  }
-  return d;
+function CustomTooltip({
+  active,
+  payload,
+  label,
+  currentYearLabel,
+  previousYearLabel,
+}: {
+  active?: boolean;
+  payload?: { value: number; dataKey: string }[];
+  label?: string;
+  currentYearLabel: string;
+  previousYearLabel: string;
+}) {
+  if (!active || !payload?.length) return null;
+
+  return (
+    <div className="bg-surface-vault border border-zinc-700 rounded-md px-3 py-2 shadow-lg">
+      <p className="text-[10px] uppercase tracking-widest text-text-muted-vault mb-1">
+        {label}
+      </p>
+      {payload.map((entry) => (
+        <p
+          key={entry.dataKey}
+          className="text-xs"
+          style={{ color: entry.dataKey === 'currentYear' ? '#D4AF37' : '#71717a' }}
+        >
+          {entry.dataKey === 'currentYear' ? currentYearLabel : previousYearLabel}:{' '}
+          <span className="font-semibold">{entry.value}</span>
+        </p>
+      ))}
+    </div>
+  );
 }
 
 export default function CitationsChart({
@@ -31,8 +63,8 @@ export default function CitationsChart({
 }: CitationsChartProps) {
   if (data.length === 0) {
     return (
-      <div className="bg-surface-elevated p-10">
-        <h4 className="font-heading text-2xl font-bold text-foreground">Citations Over Time</h4>
+      <div className="bg-surface-elevated p-5 sm:p-6 md:p-10">
+        <h4 className="font-heading text-xl md:text-2xl font-bold text-foreground">Citations Over Time</h4>
         <p className="mt-2 text-xs text-text-muted-vault uppercase tracking-widest">
           No citation data yet
         </p>
@@ -40,33 +72,11 @@ export default function CitationsChart({
     );
   }
 
-  const allValues = data.flatMap((d) => [d.currentYear, d.previousYear]);
-  const maxVal = Math.max(...allValues, 1);
-
-  const W = 1000;
-  const H = 200;
-  const padX = 0;
-
-  const currentPoints = data.map((d, i) => ({
-    x: padX + (i / (data.length - 1)) * (W - padX * 2),
-    y: H - (d.currentYear / maxVal) * (H - 20),
-  }));
-
-  const previousPoints = data.map((d, i) => ({
-    x: padX + (i / (data.length - 1)) * (W - padX * 2),
-    y: H - (d.previousYear / maxVal) * (H - 20),
-  }));
-
-  const currentPath = toPath(currentPoints);
-  const previousPath = toPath(previousPoints);
-
-  const areaPath = `${currentPath} L${W},${H} L0,${H} Z`;
-
   return (
-    <div className="bg-surface-elevated p-10">
-      <div className="flex justify-between items-end mb-12">
+    <div className="bg-surface-elevated p-5 sm:p-6 md:p-10">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-3 mb-6 md:mb-12">
         <div>
-          <h4 className="font-heading text-2xl font-bold text-foreground">Citations Over Time</h4>
+          <h4 className="font-heading text-xl md:text-2xl font-bold text-foreground">Citations Over Time</h4>
           <p className="text-xs text-text-muted-vault uppercase tracking-widest mt-2">
             Aggregate growth across all manuscripts
           </p>
@@ -83,50 +93,71 @@ export default function CitationsChart({
         </div>
       </div>
 
-      <div className="relative h-64 w-full">
-        <svg className="w-full h-full overflow-visible" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
-          {/* Grid lines */}
-          {[0, 50, 100, 150].map((y) => (
-            <line key={y} x1="0" x2={W} y1={y} y2={y} stroke="#353534" strokeDasharray="4" strokeWidth="0.5" />
-          ))}
+      <div className="h-48 sm:h-56 md:h-64 w-full">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={data} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+            <defs>
+              <linearGradient id="citationGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#D4AF37" stopOpacity={0.2} />
+                <stop offset="100%" stopColor="#D4AF37" stopOpacity={0} />
+              </linearGradient>
+            </defs>
 
-          {/* Area gradient */}
-          <defs>
-            <linearGradient id="citationGradient" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0%" stopColor="#D4AF37" stopOpacity="0.2" />
-              <stop offset="100%" stopColor="#D4AF37" stopOpacity="0" />
-            </linearGradient>
-          </defs>
+            <CartesianGrid
+              stroke="#353534"
+              strokeDasharray="4"
+              strokeWidth={0.5}
+              vertical={false}
+            />
 
-          {/* Current year area fill */}
-          <path d={areaPath} fill="url(#citationGradient)" />
+            <XAxis
+              dataKey="month"
+              tick={{ fontSize: 10, fill: '#71717a' }}
+              tickFormatter={(value: string) => value.toUpperCase()}
+              axisLine={false}
+              tickLine={false}
+              dy={10}
+            />
 
-          {/* Current year line */}
-          <path d={currentPath} fill="none" stroke="#D4AF37" strokeWidth="3" strokeLinecap="round" />
+            <YAxis
+              tick={{ fontSize: 10, fill: '#71717a' }}
+              axisLine={false}
+              tickLine={false}
+              allowDecimals={false}
+            />
 
-          {/* Previous year line (dashed) */}
-          <path d={previousPath} fill="none" stroke="#353534" strokeWidth="2" strokeDasharray="8" />
+            <Tooltip
+              content={
+                <CustomTooltip
+                  currentYearLabel={currentYearLabel}
+                  previousYearLabel={previousYearLabel}
+                />
+              }
+              cursor={{ stroke: '#D4AF37', strokeWidth: 1, strokeDasharray: '4' }}
+            />
 
-          {/* Data points on current year */}
-          {currentPoints.map((pt, i) => {
-            if (i === currentPoints.length - 1) {
-              return <circle key={i} cx={pt.x} cy={pt.y} r="6" fill="#D4AF37" />;
-            }
-            if (i % 3 === 1) {
-              return (
-                <circle key={i} cx={pt.x} cy={pt.y} r="4" fill="#131313" stroke="#D4AF37" strokeWidth="2" />
-              );
-            }
-            return null;
-          })}
-        </svg>
+            <Area
+              type="monotone"
+              dataKey="currentYear"
+              stroke="#D4AF37"
+              strokeWidth={3}
+              fill="url(#citationGradient)"
+              dot={false}
+              activeDot={{ r: 5, fill: '#D4AF37', stroke: '#131313', strokeWidth: 2 }}
+            />
 
-        {/* Month axis labels */}
-        <div className="flex justify-between mt-6 text-[10px] text-zinc-500 uppercase tracking-tighter">
-          {data.map((d) => (
-            <span key={d.month}>{d.month}</span>
-          ))}
-        </div>
+            <Area
+              type="monotone"
+              dataKey="previousYear"
+              stroke="#525252"
+              strokeWidth={2}
+              strokeDasharray="8"
+              fill="none"
+              dot={false}
+              activeDot={{ r: 4, fill: '#525252', stroke: '#131313', strokeWidth: 2 }}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
       </div>
     </div>
   );
