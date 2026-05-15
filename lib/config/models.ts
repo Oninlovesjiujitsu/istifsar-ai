@@ -4,10 +4,8 @@
  */
 
 export const MODELS = {
-  /** Fast responses: retrieval-grounded Q&A (Raw Evidence mode) */
+  /** Fast responses: retrieval-grounded Q&A */
   fast: "gemini-2.5-flash",
-  /** Deep responses: analytical synthesis (Interpreted mode) */
-  deep: "gemini-2.5-pro",
   /** Text embeddings: 3072 dimensions */
   embedding: "gemini-embedding-001",
 } as const;

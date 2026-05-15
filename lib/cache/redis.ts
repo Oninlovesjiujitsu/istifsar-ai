@@ -52,15 +52,9 @@ export function buildCacheKey(query: string, mode: string, topicTagId?: string |
  * Determine whether this request should bypass the cache.
  *
  * Skip conditions:
- * - Mode is 'scholar_lens' (Lens essays may change frequently)
  * - Redis is not configured
- *
- * Note: we intentionally do not check chunk publication dates here because
- * `published_at` is not included in `RetrievedChunk`. Scholar lens mode is the
- * practical safety net for freshness.
  */
-export function shouldSkipCache(mode: string, _chunks: RetrievedChunk[]): boolean {
-  if (mode === 'scholar_lens') return true;
+export function shouldSkipCache(): boolean {
   if (!process.env.UPSTASH_REDIS_REST_URL) return true;
   return false;
 }

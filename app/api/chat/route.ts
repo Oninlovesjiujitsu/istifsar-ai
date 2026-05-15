@@ -28,10 +28,9 @@ export async function POST(req: Request): Promise<Response> {
   }
 
   // Parse request body 
-  const { messages, conversationId, lensTitle, topicTagId, documentId, documentTitle, targetScholar, semanticQuery } = (await req.json()) as {
+  const { messages, conversationId, topicTagId, documentId, documentTitle, targetScholar, semanticQuery } = (await req.json()) as {
     messages: UIMessage[];
     conversationId: string;
-    lensTitle?: string | null;
     topicTagId?: string | null;
     documentId?: string | null;
     documentTitle?: string | null;
@@ -42,7 +41,7 @@ export async function POST(req: Request): Promise<Response> {
   // Validate conversation ownership 
   const { data: conv } = await supabase
     .from('conversations')
-    .select('id, mode, active_lens_id')
+    .select('id')
     .eq('id', conversationId)
     .eq('user_id', user.id)
     .single();
@@ -100,9 +99,6 @@ export async function POST(req: Request): Promise<Response> {
       query: semanticQuery?.trim() || lastUserText,
       conversationId,
       history,
-      mode: conv.mode as 'scholarly_consensus' | 'scholar_lens',
-      lensTitle: lensTitle ?? null,
-      lensEssayId: conv.active_lens_id ?? null,
       topicTagId: topicTagId ?? null,
       documentId: documentId ?? null,
       documentTitle: documentTitle ?? null,

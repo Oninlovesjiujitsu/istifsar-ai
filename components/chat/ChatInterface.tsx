@@ -1,8 +1,7 @@
 'use client';
 
 import { useChat } from '@ai-sdk/react';
-import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { DefaultChatTransport } from 'ai';
 import type { UIMessage } from 'ai';
 import MessageBubble from './MessageBubble';
@@ -10,7 +9,6 @@ import type { CitationData } from './MessageBubble';
 import type { ContentionMeta } from '@/types/contention';
 import ChatInput from './ChatInput';
 import type { TopicOption } from './ChatInput';
-import ModeToggle from './ModeToggle';
 import SourceDetailsPanel from './SourceDetailsPanel';
 import ContentionCanvasPanel from './ContentionCanvasPanel';
 import { createConversation } from '@/actions/conversation';
@@ -29,8 +27,6 @@ type Props = {
     metadata?: RagMetadata;
     topicId?: string | null;
   }>;
-  initialMode: 'scholarly_consensus' | 'scholar_lens';
-  lensTitle?: string | null;
   topics?: TopicOption[];
   initialTopicId?: string | null;
   documentId?: string | null;
@@ -147,15 +143,11 @@ function toUIMessages(
 export default function ChatInterface({
   conversationId: initialConversationId,
   initialMessages,
-  initialMode,
-  lensTitle,
   topics,
   initialTopicId,
   documentId,
   documentTitle,
 }: Props) {
-  const router = useRouter();
-  const [isSwitching, startSwitchTransition] = useTransition();
   const messageListRef = useRef<HTMLDivElement>(null);
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>(initialTopicId ?? null);
   const [rightPanel, setRightPanel] = useState<RightPanelState>(null);
@@ -198,16 +190,15 @@ export default function ChatInterface({
         api: '/api/chat',
         body: () => ({
           conversationId: conversationIdRef.current,
-          lensTitle,
           topicTagId: documentId ? null : selectedTopicRef.current,
           documentId: documentId ?? null,
           documentTitle: documentId ? documentTitle : null,
         }),
       }),
-    [lensTitle, documentId, documentTitle],
+    [documentId, documentTitle],
   );
 
-  const { messages, sendMessage, status, setMessages, error } = useChat<RagUIMessage>({
+  const { messages, sendMessage, status, error } = useChat<RagUIMessage>({
     transport,
     messages: toUIMessages(initialMessages),
     onError: (err) => console.error('[useChat error]', err),
@@ -224,8 +215,8 @@ export default function ChatInterface({
 
   const isLoading = status === 'streaming' || status === 'submitted';
 
-  // Show Dive Deeper only in scholarly_consensus mode and not document-scoped
-  const showDiveDeeper = initialMode === 'scholarly_consensus' && !documentId;
+  // Show Dive Deeper only when not document-scoped
+  const showDiveDeeper = !documentId;
 
   // Track topics for new messages (user messages get the current topic)
   useEffect(() => {
@@ -259,8 +250,6 @@ export default function ChatInterface({
       setIsCreatingConversation(true);
       try {
         const result = await createConversation(
-          initialMode,
-          undefined,
           documentId ?? undefined,
           selectedTopicId ?? undefined,
         );
@@ -294,16 +283,6 @@ export default function ChatInterface({
     );
   }
 
-  function handleModeChange(nextMode: 'scholarly_consensus' | 'scholar_lens', essayId?: string) {
-    startSwitchTransition(async () => {
-      const result = await createConversation(nextMode, essayId);
-      if (result.success) {
-        setMessages([]);
-        router.push(`/explore/${result.conversationId}`);
-      }
-    });
-  }
-
   return (
     <div className="flex h-full min-h-0">
       <div className="flex flex-1 min-h-0 min-w-0 flex-col bg-[#131313] relative">
@@ -311,23 +290,13 @@ export default function ChatInterface({
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gold rounded-full blur-[120px]" />
         </div>
 
-        <div className="flex shrink-0 items-center justify-between gap-2 border-b border-white/[0.06] bg-surface-vault/50 backdrop-blur-sm px-4 lg:px-6 py-2 relative z-10">
-          <ModeToggle
-            mode={initialMode}
-            onChange={handleModeChange}
-            disabled={isLoading || isSwitching}
-          />
-          {documentTitle && (
+        {documentTitle && (
+          <div className="flex shrink-0 items-center gap-2 border-b border-white/[0.06] bg-surface-vault/50 backdrop-blur-sm px-4 lg:px-6 py-2 relative z-10">
             <span className="text-xs text-text-muted-vault truncate max-w-[60%]">
               Asking about: <span className="font-medium text-zinc-300">{documentTitle}</span>
             </span>
-          )}
-          {!documentTitle && lensTitle && (
-            <span className="text-xs text-text-muted-vault">
-              Lens: <span className="font-medium text-zinc-300">{lensTitle}</span>
-            </span>
-          )}
-        </div>
+          </div>
+        )}
 
         <div
           ref={messageListRef}
@@ -429,7 +398,7 @@ export default function ChatInterface({
         <div className="shrink-0 px-4 lg:px-12 pb-4 lg:pb-8 relative z-10">
           <ChatInput
             onSubmit={handleSubmit}
-            disabled={isLoading || isSwitching || isCreatingConversation}
+            disabled={isLoading || isCreatingConversation}
             placeholder={documentTitle ? `Ask about "${documentTitle}"` : 'Deepen the investigation...'}
             topics={documentId ? undefined : topics}
             selectedTopicId={selectedTopicId}

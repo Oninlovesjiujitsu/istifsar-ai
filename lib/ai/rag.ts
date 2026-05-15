@@ -4,7 +4,7 @@ import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { retrieveChunks } from './retriever';
 import { rerank } from './reranker';
 import { buildSystemPrompt, buildContextBlock } from './prompts';
-import { SIMILARITY_THRESHOLD, DOCUMENT_SCOPE_SIMILARITY_THRESHOLD, TOPIC_SCOPE_SIMILARITY_THRESHOLD, SCHOLAR_SCOPE_GATE_OFFSET, LENS_CHUNK_WEIGHT } from '@/lib/config/constants';
+import { SIMILARITY_THRESHOLD, DOCUMENT_SCOPE_SIMILARITY_THRESHOLD, TOPIC_SCOPE_SIMILARITY_THRESHOLD, SCHOLAR_SCOPE_GATE_OFFSET } from '@/lib/config/constants';
 import { MODELS } from '@/lib/config/models';
 import {
   buildCacheKey,
@@ -24,9 +24,6 @@ export type RagParams = {
   query: string;
   conversationId: string;
   history: Array<{ role: 'user' | 'assistant'; content: string }>;
-  mode: 'scholarly_consensus' | 'scholar_lens';
-  lensTitle?: string | null;
-  lensEssayId?: string | null;
   topicTagId?: string | null;
   documentId?: string | null;
   documentTitle?: string | null;
@@ -73,7 +70,7 @@ export async function runRag(params: RagParams): Promise<Response> {
     apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
   });
 
-  const modelId = params.mode === 'scholar_lens' ? MODELS.deep : MODELS.fast;
+  const modelId = MODELS.fast;
 
   // ── Stage 1 & 2: Retrieve + Rerank ────────────────────────────────────────
   const candidates = await retrieveChunks(params.query, {
@@ -87,34 +84,6 @@ export async function runRag(params: RagParams): Promise<Response> {
     `[RAG] Retrieved ${candidates.length} candidates → ${rankedChunks.length} after rerank` +
     (params.documentId ? ` (document-scoped: ${params.documentId})` : ''),
   );
-
-  // ── Stage 2b: Lens essay boost (scholar_lens mode) ────────────────────────
-  let lensEssay: { title: string; content: string } | null = null;
-
-  if (params.mode === 'scholar_lens' && params.lensEssayId) {
-    const { data: essay } = await supabase
-      .from('living_essays')
-      .select('title, content, related_document_ids')
-      .eq('id', params.lensEssayId)
-      .single();
-
-    if (essay) {
-      lensEssay = { title: essay.title, content: essay.content };
-      params.lensTitle = essay.title;
-
-      // Boost chunks from the lens essay's related documents
-      const relatedIds = new Set<string>(essay.related_document_ids ?? []);
-      if (relatedIds.size > 0) {
-        rankedChunks = rankedChunks.map((chunk) => {
-          if (relatedIds.has(chunk.documentId)) {
-            return { ...chunk, cosineScore: chunk.cosineScore + LENS_CHUNK_WEIGHT };
-          }
-          return chunk;
-        });
-        rankedChunks.sort((a, b) => b.cosineScore - a.cosineScore);
-      }
-    }
-  }
 
   // ── Stage 2c: Fetch submitter profiles for cited documents ──────────────────
   const uniqueDocIds = [...new Set(rankedChunks.map((c) => c.documentId))];
@@ -189,7 +158,7 @@ export async function runRag(params: RagParams): Promise<Response> {
         query_text: params.query,
         user_id: params.userId,
         similarity_score: topChunk?.cosineScore ?? 0,
-        mode: params.mode,
+        mode: 'scholarly_consensus',
       }).select('id').single();
 
       if (gap?.id) {
@@ -242,8 +211,8 @@ export async function runRag(params: RagParams): Promise<Response> {
   }
 
   // Stage 4: Cache check 
-  const cacheKey = buildCacheKey(params.query, params.mode, params.topicTagId, params.documentId, params.targetScholar);
-  const skipCache = shouldSkipCache(params.mode, rankedChunks);
+  const cacheKey = buildCacheKey(params.query, 'scholarly_consensus', params.topicTagId, params.documentId, params.targetScholar);
+  const skipCache = shouldSkipCache();
 
   if (!skipCache) {
     const cached = await getCachedResponse(cacheKey);
@@ -281,10 +250,9 @@ export async function runRag(params: RagParams): Promise<Response> {
   }
 
   // Stage 5: Build context
-  const contextBlock = buildContextBlock(rankedChunks, lensEssay, contentionsMeta);
-  const effectiveLensTitle = isDiveDeeper ? params.targetScholar : params.lensTitle;
+  const contextBlock = buildContextBlock(rankedChunks, contentionsMeta);
   const systemPrompt =
-    buildSystemPrompt(params.mode, effectiveLensTitle, params.documentTitle, isDiveDeeper) + contextBlock;
+    buildSystemPrompt(params.targetScholar, params.documentTitle, isDiveDeeper) + contextBlock;
 
   const citations: CitationMeta[] = rankedChunks.map((chunk, i) => {
     const author = authorByDocId.get(chunk.documentId);
@@ -383,7 +351,7 @@ export async function runRag(params: RagParams): Promise<Response> {
       }
 
       // Cache the response for future identical queries (skip empty-context fallbacks)
-      if (!shouldSkipCache(params.mode, rankedChunks) && rankedChunks.length > 0) {
+      if (!shouldSkipCache() && rankedChunks.length > 0) {
         await setCachedResponse(cacheKey, { text: fullText, chunks: rankedChunks, contentions: contentionsMeta });
       }
     },

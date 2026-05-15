@@ -35,7 +35,7 @@ export default async function ConversationPage({ params, searchParams }: Props) 
 
   const { data: conv } = await supabase
     .from('conversations')
-    .select('id, title, mode, active_lens_id, scope_document_id, scope_topic_id')
+    .select('id, title, mode, scope_document_id, scope_topic_id')
     .eq('id', id)
     .eq('user_id', user!.id)
     .single();
@@ -58,16 +58,6 @@ export default async function ConversationPage({ params, searchParams }: Props) 
       .select('id, name')
       .order('name'),
   ]);
-
-  let lensTitle: string | null = null;
-  if (conv.active_lens_id) {
-    const { data: lens } = await supabase
-      .from('living_essays')
-      .select('title')
-      .eq('id', conv.active_lens_id)
-      .single();
-    lensTitle = lens?.title ?? null;
-  }
 
   let docTitle: string | null = null;
   if (effectiveDocId) {
@@ -218,8 +208,6 @@ export default async function ConversationPage({ params, searchParams }: Props) 
             topicId: m.topic_id ?? null,
           };
         })}
-        initialMode={conv.mode as 'scholarly_consensus' | 'scholar_lens'}
-        lensTitle={lensTitle}
         topics={effectiveDocId ? undefined : topics}
         initialTopicId={effectiveTopicId}
         documentId={effectiveDocId}

@@ -7,8 +7,7 @@ import type { ContentionMeta } from '@/types/contention';
  * and outputs structured Markdown for advanced UI parsing.
  */
 export function buildSystemPrompt(
-  mode: 'scholarly_consensus' | 'scholar_lens',
-  lensTitle?: string | null,
+  scholarName?: string | null,
   documentTitle?: string | null,
   isDiveDeeper?: boolean,
 ): string {
@@ -16,20 +15,13 @@ export function buildSystemPrompt(
   prompt += `### TONE & STYLE\n`;
   prompt += `Maintain strict academic neutrality. You must be dry, objective, and analytical. Avoid moralizing, dramatic adjectives, or presentism. State the claims, the evidence, and the historiographical context objectively.\n\n`;
 
-  if (isDiveDeeper && lensTitle) {
+  if (isDiveDeeper && scholarName) {
     prompt += `### MODE: Scholar's Perspective (Dive Deeper)\n`;
-    prompt += `Analyze the historical topic through the methodological framework of ${lensTitle} based on the retrieved documents below. Focus on how this scholar's body of work addresses the topic.\n`;
+    prompt += `Analyze the historical topic through the methodological framework of ${scholarName} based on the retrieved documents below. Focus on how this scholar's body of work addresses the topic.\n`;
     prompt += `STRUCTURE YOUR RESPONSE using the following Markdown headers:\n`;
     prompt += `- ### The Scholar's Argument\n`;
     prompt += `- ### Supporting Evidence\n`;
     prompt += `- ### Historiographical Gaps (State what this scholar's retrieved writings fail to address regarding the topic)\n\n`;
-  } else if (mode === 'scholar_lens' && lensTitle) {
-    prompt += `### MODE: Scholar's Lens\n`;
-    prompt += `The sources below include a specific historian's essay by ${lensTitle}. Analyze the topic specifically through this scholar's methodological framework and arguments.\n`;
-    prompt += `STRUCTURE YOUR RESPONSE using the following Markdown headers:\n`;
-    prompt += `- ### The Scholar's Argument\n`;
-    prompt += `- ### Supporting Evidence\n`;
-    prompt += `- ### Historiographical Gaps (State what this specific text fails to address regarding the topic)\n\n`;
   } else {
     prompt += `### MODE: Scholarly Consensus\n`;
     prompt += `Synthesize the provided scholarly writings to map the academic landscape of the user's historical topic.\n`;
@@ -63,18 +55,11 @@ export function buildSystemPrompt(
 
 export function buildContextBlock(
   chunks: RetrievedChunk[],
-  lensEssay?: { title: string; content: string } | null,
   contentions?: ContentionMeta[],
 ): string {
-  if (chunks.length === 0 && !lensEssay) return '';
+  if (chunks.length === 0) return '';
 
   const parts: string[] = [];
-
-  if (lensEssay) {
-    parts.push(
-      `--- HISTORIAN'S PERSPECTIVE: "${lensEssay.title}" ---\n\n${lensEssay.content}\n\n--- END PERSPECTIVE ---`,
-    );
-  }
 
   if (chunks.length > 0) {
     const entries = chunks.map((chunk, i) => {

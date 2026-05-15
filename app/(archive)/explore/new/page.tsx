@@ -21,7 +21,6 @@ export default async function NewConversationPage() {
       <ChatInterface
         conversationId={null}
         initialMessages={[]}
-        initialMode="scholarly_consensus"
         topics={topics}
       />
     </div>

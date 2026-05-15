@@ -13,8 +13,6 @@ export type ConversationRow = {
   updated_at: string;
 };
 export async function createConversation(
-  mode: 'scholarly_consensus' | 'scholar_lens' = 'scholarly_consensus',
-  lensId?: string,
   scopeDocumentId?: string,
   scopeTopicId?: string,
 ): Promise<{ success: true; conversationId: string } | { success: false; error: string }> {
@@ -32,8 +30,7 @@ export async function createConversation(
     .from('conversations')
     .insert({
       user_id: user.id,
-      mode,
-      active_lens_id: lensId ?? null,
+      mode: 'scholarly_consensus',
       scope_document_id: scopeDocumentId ?? null,
       scope_topic_id: scopeTopicId ?? null,
     })
