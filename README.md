@@ -1,6 +1,6 @@
 # 📜 Istifsar AI
 
-A history exploration platform powered by RAG where every AI answer is grounded in verified primary sources. Users can query a vault of historical documents — letters, decrees, diaries, photographs — through a conversational interface that cites its sources the way a librarian would. No document, no history.
+Istifsar comes from the Arabic root word (f-s-r) which relates to interpreting, explaining, and uncovering. A history exploration platform powered by RAG where every AI answer is grounded in verified scholarly sources. This idea stems from the profound statement and principle penned by the late historian, Teodoro Agoncillo, _"No Document, No History"._
 
 > **Istifsar** (Arabic: استفسار) — "inquiry."
 
@@ -21,25 +21,13 @@ A history exploration platform powered by RAG where every AI answer is grounded 
 
 ## 🦄 Features
 
-- **Ask History, Get Sources**: Query a vault of validated primary sources through a streaming AI chat. Every claim in the response maps to a cited, validated document — not the LLM's training data.
+- **Ask History, Get Sources**: Query a vault of validated scholarly sources through a streaming AI chat. Every claim in the response maps to a cited, validated document—not the LLM's training data.
 
-- **Split-Pane Viewer**: Click any inline citation chip and the original document scan opens side-by-side with its transcription, scrolled to the exact passage. The signature interaction of the platform.
+- **Split-Pane Viewer**: Click any inline citation chip and the original document scan opens side-by-side with its transcription (chunked text), scrolled to the exact passage. The signature interaction of the platform.
 
-- **Two Inquiry Modes**: Switch between Raw Evidence Mode (neutral, factual, primary sources only) and Interpreted Mode (analytical synthesis through a historian's published essay as a "lens"). The two modes are visually unmistakable — different color schemes, persistent banners, and distinct UI signals.
-
-- **Contention System**: When primary sources contradict each other, the AI doesn't pick a side. It surfaces a Contention Card showing both sources, their claims, and community signal votes — then stops. Resolution requires a Tier 1 validator to cite a resolving source.
-
-- **Citation Graph**: An interactive React Flow graph where documents and essays are nodes, citations are blue edges, and contentions are red edges. Node size reflects how many essays cite a document. Hover for previews, click to expand, double-click to navigate.
-
-- **Living Essays**: Historians publish original analytical essays on the platform. Each essay links its claims to vault documents through a citation mapper. Published essays become selectable "lenses" in Interpreted Mode.
-
-- **Discovery Layer**: The homepage drops you into something specific — Today in History, a Featured Curated Path, an Open Contention Spotlight, and an animated Citation Graph teaser. No dead ends; every view has a rabbit hole exit.
-
-- **Curated Paths**: Historians assemble ordered sequences of documents with narrative commentary between each item, displayed as timeline card sequences. A guided tour through the archive.
+- **Contention System**: When scholarly sources contradict each other, the AI doesn't pick a side. It surfaces a Contention Card showing both scholarly sources, their claims, and community signal votes—then stops. 
 
 - **Archive Gaps**: When the AI can't answer a query, it logs the question to a public board ranked by how often it's been asked. This doubles as a mystery board for hobbyists and a research agenda for historians.
-
-- **Tiered Contributor System**: Five contributor tiers (Reader, Community Custodian, Independent Researcher, Affiliated Academic, Admin) with distinct upload, validation, and publishing permissions enforced at the database level via Row-Level Security.
 
 ### 🎯 The Agoncillo Constraint:
 
@@ -48,66 +36,42 @@ The AI is strictly forbidden from answering based on its general training data. 
 - **No Wikipedia, no open web, no parametric LLM knowledge** in answers.
 - **Every claim** maps to a cited, validated document.
 - **Similarity gate at 0.65**: If the top retrieved chunk falls below this threshold, the system returns _"No document, no history"_ and logs the query to Archive Gaps.
-- **Oral history** has a place but is explicitly tagged with additional metadata.
 - **The platform owns its limitations**: it tells you what it doesn't know.
 
 ## 👩🏽‍🍳 The Process
 
-I started by writing a comprehensive architecture blueprint before any code. This covered the core philosophy (the Agoncillo Constraint), data model (17 PostgreSQL tables with RLS policies), ingestion pipeline (9 stages from upload to validation), RAG pipeline (10 stages from query intake to cached response), the two inquiry modes, authentication flows for five contributor tiers, a full page map, the contention detection system, citation graph structure, and discovery layer design.
+Istifsar was built to solve a specific problem: LLMs answer historical questions confidently but without sources, while the scholarly record sits locked in PDFs and archives. Agoncillo's dictum—"No Document, No History"—became the design constraint: every answer must trace back to a verified historian publication, or the system refuses to answer.
 
-With the architecture locked, I defined the tech stack around a single-vendor AI ecosystem (Google Gemini for all LLM, reranking, and embedding operations) backed by Supabase as the unified data layer — PostgreSQL for relational data, pgvector for semantic search, Storage for document scans, Auth for tier-based access control, and Edge Functions for the ingestion pipeline. This avoids the operational overhead of stitching together separate vector databases, auth providers, and job queues.
+**Stack choice:** Google Gemini for all LLM and embedding operations, Supabase as the unified data layer (PostgreSQL + pgvector + Auth + Storage + Edge Functions). One AI vendor, one infrastructure vendor, no glue services.
 
-The ingestion pipeline was designed as the first build target because the platform has no value without documents. A Supabase database webhook triggers an Edge Function that orchestrates text extraction (historian-provided transcription preferred, Unstructured.io as fallback for scans), chunking (600-token windows with 100-token overlap), embedding (3072-dimension vectors via `gemini-embedding-001`), full-text search indexing, auto-tagging (era, locations, persons, events via Gemini Flash), and contention detection against existing published chunks.
+**Ingestion pipeline** (first build target—no documents, no platform). A database webhook triggers an Edge Function: text extraction (historian-provided text preferred, Unstructured.io fallback for scans) → semantic chunking (Greg Kamradt method—embedding similarity between consecutive sentences to find natural topic boundaries) with recursive character splitter as fallback → 3072-dim embedding via `gemini-embedding-001` → full-text search indexing → contention detection against existing publications.
 
-The RAG pipeline uses hybrid retrieval — pgvector cosine similarity and Postgres full-text search run in parallel, merged via Reciprocal Rank Fusion — followed by LLM-based reranking (top 30 → top 8) and a hard similarity gate. Context construction injects the Agoncillo Constraint system prompt, mode-specific instructions, numbered source passages with metadata, and conversation history before streaming the response through Vercel AI SDK.
+**RAG pipeline.** Hybrid retrieval (pgvector cosine similarity + Postgres full-text search, merged via Reciprocal Rank Fusion) → cosine-similarity rerank (top 30 → top-K) → hard similarity gate → context construction with Agoncillo Constraint system prompt, numbered source passages, and conversation history → streamed response via Vercel AI SDK.
 
-The contributor tier system enforces trust at the database layer: JWT custom claims carry the user's tier, and RLS policies read the claim directly. Documents require two Tier 1 approvals to publish. Tier 3 uploads are auto-assigned a co-validator. Validators cannot approve their own submissions. This is a peer-review workflow baked into the schema, not bolted on as application logic.
-
-The build order follows eight phases: Foundation → Ingestion Pipeline → Query Core → Modes & Conversations → Discovery Layer → Contention System → Citation Graph → Living Essays & Profiles → Polish.
+**Role-based access.** Three roles (Reader, Verified Historian, Admin) enforced at the database layer—JWT custom claims carry the user's role, RLS policies read the claim directly. Validators cannot approve their own submissions.
 
 ## 📚 What I Learned
 
-### 🧠 Architecture-First Development:
+- **Architecture-first development** caught design conflicts on paper—e.g., realizing contention detection needed chunk-level granularity, not document-level—before they became expensive to fix in code.
 
-- **Blueprint Before Code**: Writing the full system architecture (data model, pipelines, page map, state machines) before touching code caught design conflicts on paper — like realizing the contention system needed chunk-level granularity, not document-level — that would have been expensive to fix mid-implementation.
+- **Hybrid retrieval + RRF** outperforms either search alone for historical text. Semantic search misses exact names/dates; keyword search misses paraphrased concepts. RRF merges both ranking signals without a trained model.
 
-### 🔍 RAG Pipeline Engineering:
+- **Hard similarity gate > soft hedging.** A 0.65 threshold with a deterministic fallback ("No document, no history" + Archive Gaps logging) is more trustworthy than asking the LLM to qualify its confidence.
 
-- **Hybrid Retrieval + RRF**: I learned that neither semantic search nor keyword search alone is sufficient for historical documents. Semantic search misses exact names and dates; keyword search misses paraphrased concepts. Reciprocal Rank Fusion merges both ranking lists into a stronger combined signal without requiring a trained model.
-- **The Similarity Gate**: Setting a hard threshold (0.65) and designing a graceful fallback ("No document, no history" + Archive Gaps logging) was more valuable than trying to make the LLM hedge. The system either has evidence or it doesn't.
+- **Defense-in-depth constraining.** The Agoncillo Constraint works because it's enforced at every layer—system prompt, retrieval scope, similarity gate, and UI citation chips. A single-layer constraint is trivially bypassed by hallucination.
 
-### 🏛️ The Agoncillo Constraint as a Design Pattern:
+- **RLS as authorization.** Encoding the role-based permission system into PostgreSQL RLS policies (reading JWT claims directly) means access control holds even if the application layer has a bug.
 
-- **Constraining the LLM**: Forcing the AI to act as a Librarian (cite-only, no parametric knowledge) required enforcement at multiple layers — system prompt, retrieval scope filtering, similarity gating, and UI-level citation chips. A single-layer constraint is trivially bypassed by hallucination; defense in depth makes it robust.
+- **pgvector inside Supabase** eliminated a separate vector DB from the architecture. Same PostgreSQL instance handles relational data, auth, embeddings, and full-text search.
 
-### 🔐 Row-Level Security as Authorization:
-
-- **RLS Over Application Logic**: Encoding the entire tier-based permission system into PostgreSQL RLS policies (reading JWT claims directly) means authorization is enforced even if the application layer has a bug. It's the database equivalent of a seatbelt — it works even when the driver makes a mistake.
-
-### 📊 pgvector on Supabase:
-
-- **Avoiding a Separate Vector DB**: Running pgvector with HNSW indexes inside the same Supabase PostgreSQL instance that holds relational data, auth, and storage eliminated an entire service from the architecture. The tradeoff is tuning index parameters (ef_construction, m) for recall vs. speed, but for a document vault that grows slowly, this is the right call.
-
-### ⚔️ Contention Detection:
-
-- **LLM-as-Judge for Contradictions**: Using Gemini Flash as a binary classifier ("Do these two passages make contradictory factual claims?") during ingestion was a pragmatic approach. It's not perfect — it sometimes flags stylistic differences as contradictions — but surfacing potential conflicts for human review is safer than silently presenting contradictory sources as equivalent.
-
-### 📈 Overall Growth:
-
-This project deepened my understanding of retrieval-augmented generation, database-level authorization patterns, hybrid search architectures, and the challenge of building AI systems that are honest about what they don't know. Designing the constraint system (Agoncillo) before the capability system (RAG pipeline) set the right priorities: trustworthiness first, intelligence second.
+- **LLM-as-judge for contradictions.** Using Gemini as a pairwise classifier during ingestion surfaces potential conflicts between historian writings for human review—imperfect, but safer than silently presenting contradictory sources as equivalent.
 
 ## 💭 How can it be improved?
 
-- Add end-to-end tests with Playwright for critical paths (upload → validation → query → citation).
-- Add multi-language document support with language-aware chunking and cross-lingual retrieval.
-- Add oral history integration with speaker diarization, consent metadata, and community review workflows.
-- Add multi-source contention support (v1 is limited to binary, two-source conflicts).
-- Add real-time collaborative annotation on document scans.
+- Implement Knowledge Graph RAG for dynamic connection and data points analysis within a network for a superior context-aware retrieval.
 - Add export functionality for citation chains (BibTeX, Chicago, Turabian formats).
-- Add a public API for institutional partners to query the vault programmatically.
 - Add accessibility audit (screen reader support for Citation Graph, keyboard navigation for Split-Pane).
 - Add rate limiting and abuse detection on the query endpoint.
-- Add contributor analytics dashboard (upload frequency, validation turnaround time, citation impact).
 
 ## 🚦 Running the Project
 
@@ -146,48 +110,3 @@ To run the project in your local environment, follow these steps:
    ```
 6. Run `npm run dev` to start the development server.
 7. Open [http://localhost:3000](http://localhost:3000) in your web browser to view the app.
-
-## 🏗️ Project Structure
-
-```
-istifsar-ai/
-├── app/                        # Next.js App Router
-│   ├── (auth)/                 # Login, signup (no main layout)
-│   ├── (main)/                 # All main pages (with navbar + footer)
-│   │   ├── page.tsx            # Homepage — discovery layer
-│   │   ├── ask/                # Split-Pane AI chat
-│   │   ├── explore/            # Browse surface + citation graph
-│   │   ├── document/[id]/      # Single document view + contentions
-│   │   ├── paths/              # Curated Paths
-│   │   ├── gaps/               # Archive Gaps
-│   │   ├── contribute/         # Upload, essay editor, validation queue
-│   │   ├── profile/[id]/       # Public historian profile
-│   │   └── settings/           # Account settings
-│   ├── admin/                  # Platform admin (admin role only)
-│   └── api/                    # API routes (chat, citations, documents, etc.)
-├── components/
-│   ├── ui/                     # shadcn/ui components
-│   ├── chat/                   # ChatPane, CitationChip, ContentionCard, ModeToggle
-│   ├── document/               # SplitPane, DocumentViewer, MetadataPanel
-│   ├── graph/                  # CitationGraph (React Flow), GraphNode, GraphEdge
-│   ├── discovery/              # TodayInHistory, FeaturedPath, GraphTeaser
-│   ├── contribute/             # UploadForm, EssayEditor, CitationMapper
-│   ├── contention/             # ContentionDetail, CommunityVote
-│   ├── layout/                 # Navbar, Footer, InterpretedModeBanner
-│   └── shared/                 # TierBadge, RabbitHolePanel, NoDocumentFallback
-├── lib/
-│   ├── config/                 # Model names, similarity thresholds, TTLs
-│   ├── supabase/               # Browser, server, and admin clients
-│   ├── ai/                     # Embed, retrieve, rerank, prompts, gate, cache
-│   ├── ingestion/              # Parse, chunk, tag, contention detection
-│   └── utils/                  # Hash, dates, signed URLs
-├── hooks/                      # useChat, useMode, useConversation, useSplitPane
-├── actions/                    # Server Actions (documents, essays, auth, votes)
-├── types/                      # Generated DB types + domain types
-├── supabase/
-│   ├── migrations/             # Schema, RLS policies, indexes
-│   ├── functions/              # Edge Functions (ingestion orchestrator)
-│   └── seed/                   # Approved institutions seed data
-├── proxy.ts                    # Route protection (Next.js 16 — not middleware.ts)
-└── package.json
-```
