@@ -13,6 +13,7 @@ import {
   ArrowDown01Icon,
 } from '@hugeicons/core-free-icons';
 import type { IconSvgElement } from '@hugeicons/react';
+import ContactModal from '@/components/contact/ContactModal';
 import ArchiveCatalog from '@/components/discovery/ArchiveCatalog';
 
 const navSections = ['agoncillo', 'boundaries', 'historians'] as const;
@@ -80,6 +81,7 @@ const valueProps: { icon: IconSvgElement; title: string; text: string }[] = [
 export default function LandingPage() {
   const [activeSection, setActiveSection] = useState<SectionId | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
 
   const closeMobileMenu = useCallback(() => setMobileMenuOpen(false), []);
 
@@ -435,8 +437,7 @@ export default function LandingPage() {
             transition={{ duration: 1.0, delay: 0.5, ease: 'easeOut' }}
             className="text-muted-foreground mb-10 sm:mb-16 text-sm sm:text-base md:text-lg leading-relaxed"
           >
-            Access to the Istifsar engine is currently by institutional
-            invitation. We invite historians to help us curate the future of our
+            Access to the Istifsar engine is by Admin Verification. We invite historians to help us curate the future of our
             shared past.
           </motion.p>
 
@@ -451,7 +452,7 @@ export default function LandingPage() {
               href="/signup"
               className="inline-flex items-center bg-transparent border border-gold text-gold px-6 sm:px-8 md:px-12 py-3 sm:py-4 md:py-5 rounded-sm uppercase tracking-widest text-xs sm:text-sm hover:bg-gold/5 transition-all group"
             >
-              Apply for Historian Access
+              Sign Up for Historian Access
               <HugeiconsIcon
                 icon={BookOpen02Icon}
                 size={20}
@@ -473,21 +474,36 @@ export default function LandingPage() {
           <p className="text-xs sm:text-sm tracking-widest uppercase text-text-muted-vault text-center md:text-left">
             &copy; 2026 Istifsar AI. All rights reserved. The Digital Curator.
           </p>
-          <div className="flex flex-wrap justify-center gap-4 sm:gap-6 md:gap-12">
-            {['Archives', 'Methodology', 'Privacy Policy', 'Contact'].map(
-              (label) => (
-                <a
-                  key={label}
-                  href="#"
-                  className="text-xs sm:text-sm tracking-wider sm:tracking-widest uppercase text-text-muted-vault hover:text-gold transition-all opacity-80 hover:opacity-100"
-                >
-                  {label}
-                </a>
-              ),
-            )}
+          <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-6 md:gap-12">
+            <a
+              href="#"
+              className="text-xs sm:text-sm tracking-wider sm:tracking-widest uppercase text-text-muted-vault hover:text-gold transition-all opacity-80 hover:opacity-100"
+            >
+              Privacy Policy
+            </a>
+            <button
+              type="button"
+              onClick={() => setContactOpen(true)}
+              className="text-xs sm:text-sm tracking-wider sm:tracking-widest uppercase text-text-muted-vault hover:text-gold transition-all opacity-80 hover:opacity-100"
+            >
+              Contact
+            </button>
+            <a
+              href="https://github.com/Oninlovesjiujitsu/istifsar-ai"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-text-muted-vault hover:text-gold transition-all opacity-80 hover:opacity-100"
+              aria-label="GitHub Repository"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
+              </svg>
+            </a>
           </div>
         </div>
       </motion.footer>
+
+      <ContactModal open={contactOpen} onClose={() => setContactOpen(false)} />
     </div>
   );
 }
