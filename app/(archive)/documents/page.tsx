@@ -54,7 +54,7 @@ export default async function DocumentsPage({ searchParams }: Props) {
     .order('name');
 
   return (
-    <div className="min-h-screen p-4 sm:p-6 lg:p-16 xl:p-24 relative">
+    <div className="min-h-full p-4 sm:p-6 lg:p-16 xl:p-24 relative">
       {/* Header */}
       <header className="max-w-6xl mx-auto mb-10 sm:mb-16 mt-4 sm:mt-8 lg:mt-12">
         <div className="flex flex-col gap-3 sm:gap-4">

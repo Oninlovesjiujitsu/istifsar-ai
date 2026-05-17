@@ -169,7 +169,7 @@ export default async function ConversationPage({ params, searchParams }: Props) 
   }
 
   return (
-    <div className="flex h-screen min-h-0 flex-col">
+    <div className="flex h-full min-h-0 flex-col">
       <ChatInterface
         conversationId={id}
         initialMessages={(messagesRaw ?? []).map((m) => {

@@ -17,7 +17,7 @@ export default async function NewConversationPage() {
   const topics = (tags ?? []).map((t) => ({ id: t.id, name: t.name }));
 
   return (
-    <div className="flex h-screen min-h-0 flex-col">
+    <div className="flex h-full min-h-0 flex-col">
       <ChatInterface
         conversationId={null}
         initialMessages={[]}

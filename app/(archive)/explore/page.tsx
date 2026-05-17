@@ -44,7 +44,7 @@ export default async function ExplorePage() {
   );
 
   return (
-    <div className="min-h-screen p-4 sm:p-6 lg:p-16 xl:p-24 relative">
+    <div className="min-h-full p-4 sm:p-6 lg:p-16 xl:p-24 relative">
       {/* Editorial Header */}
       <header className="max-w-6xl mx-auto mb-10 sm:mb-16">
         <div className="flex flex-col gap-3 sm:gap-4">

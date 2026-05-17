@@ -73,7 +73,7 @@ export default function SidebarShell({
 
   return (
     <SidebarContext.Provider value={{ expanded, toggle, close }}>
-      <div className="flex min-h-screen">
+      <div className="flex h-dvh">
         {/* ── Mobile backdrop ───────────────────────────────────────────── */}
         {mobileOpen && (
           <div
@@ -86,7 +86,7 @@ export default function SidebarShell({
         {/* ── Sidebar panel ────────────────────────────────────────────── */}
         <aside
           className={[
-            'fixed top-0 left-0 z-50 h-screen bg-surface-vault border-r border-white/[0.06]',
+            'fixed top-0 left-0 z-50 h-dvh bg-surface-vault border-r border-white/[0.06]',
             'shadow-[0_0_15px_rgba(212,175,55,0.08)] flex flex-col py-6 gap-6',
             'transition-all duration-300 ease-in-out overflow-hidden',
             expanded ? 'lg:w-64' : 'lg:w-16',
@@ -117,7 +117,7 @@ export default function SidebarShell({
         {/* ── Main content area ─────────────────────────────────────────── */}
         <div
           className={[
-            'flex-1 bg-background relative overflow-hidden transition-[margin] duration-300 ease-in-out',
+            'flex-1 bg-background relative overflow-y-auto transition-[margin] duration-300 ease-in-out',
             /* Mobile: full width with top padding for the fixed bar */
             'pt-14 lg:pt-0',
             /* Desktop: margin matches sidebar width */

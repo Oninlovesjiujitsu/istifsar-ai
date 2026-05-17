@@ -37,7 +37,7 @@ export default async function BountyBoardPage({ searchParams }: Props) {
   const hasFilters = !!(filters.era || filters.geography || filters.subject);
 
   return (
-    <div className="min-h-screen p-4 sm:p-6 lg:p-16 xl:p-24 relative">
+    <div className="min-h-full p-4 sm:p-6 lg:p-16 xl:p-24 relative">
       <header className="max-w-4xl mx-auto mb-8 sm:mb-12 mt-4 sm:mt-8 lg:mt-12">
         <span className="text-[10px] sm:text-xs uppercase tracking-[0.3em] sm:tracking-[0.4em] text-gold/60">
           Unanswered questions

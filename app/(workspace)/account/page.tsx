@@ -19,7 +19,7 @@ export default async function HistorianSettingsPage() {
     .single();
 
   return (
-    <div className="min-h-screen p-8 lg:p-16 xl:p-24 relative">
+    <div className="min-h-full p-8 lg:p-16 xl:p-24 relative">
       <header className="max-w-2xl mx-auto mb-12 mt-8 lg:mt-12">
         <h2 className="text-3xl font-heading text-gold">Settings</h2>
         <div className="h-px w-24 bg-gradient-to-r from-gold to-transparent mt-4" />
