@@ -4,7 +4,7 @@ import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { retrieveChunks } from './retriever';
 import { rerank } from './reranker';
 import { buildSystemPrompt, buildContextBlock } from './prompts';
-import { SIMILARITY_THRESHOLD, DOCUMENT_SCOPE_SIMILARITY_THRESHOLD, TOPIC_SCOPE_SIMILARITY_THRESHOLD, SCHOLAR_SCOPE_GATE_OFFSET } from '@/lib/config/constants';
+import { SIMILARITY_THRESHOLD, DOCUMENT_SCOPE_SIMILARITY_THRESHOLD, TOPIC_SCOPE_SIMILARITY_THRESHOLD, SCHOLAR_SCOPE_GATE_OFFSET, GRAPH_GATE_BYPASS_MAX_RANK } from '@/lib/config/constants';
 import { MODELS } from '@/lib/config/models';
 import {
   buildCacheKey,
@@ -18,6 +18,7 @@ import { categorizeArchiveGap } from './categorizeGap';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { queryContentions } from './contentionQuery';
 import type { ContentionMeta } from '@/types/contention';
+import { fetchEntityConnections } from './kg/graphRetriever';
 
 
 export type RagParams = {
@@ -80,8 +81,10 @@ export async function runRag(params: RagParams): Promise<Response> {
   });
   let rankedChunks = rerank(candidates);
 
+  const graphCount = rankedChunks.filter((c) => c.graphRank > 0).length;
   console.log(
     `[RAG] Retrieved ${candidates.length} candidates → ${rankedChunks.length} after rerank` +
+    (graphCount > 0 ? ` (${graphCount} graph-enriched)` : '') +
     (params.documentId ? ` (document-scoped: ${params.documentId})` : ''),
   );
 
@@ -135,7 +138,9 @@ export async function runRag(params: RagParams): Promise<Response> {
     );
   }
 
-  // ── Stage 3: Similarity gate ───────────────────────────────────────────────
+  // ── Stage 3: Similarity gate (signal-aware) ──────────────────────────────
+  // The gate now considers both cosine similarity AND graph rank.
+  // A chunk with low cosine but strong graph connectivity can pass.
   const topChunk = rankedChunks[0];
   let similarityGate = params.documentId
     ? DOCUMENT_SCOPE_SIMILARITY_THRESHOLD
@@ -146,12 +151,21 @@ export async function runRag(params: RagParams): Promise<Response> {
     similarityGate -= SCHOLAR_SCOPE_GATE_OFFSET;
   }
 
+  // Signal-aware gate: passes if cosine threshold met OR if any chunk
+  // has a strong graph rank (close to seed entity in the knowledge graph)
+  const hasStrongGraphSignal = rankedChunks.some(
+    (c) => c.graphRank > 0 && c.graphRank <= GRAPH_GATE_BYPASS_MAX_RANK,
+  );
+  const cosineGatePassed = topChunk && topChunk.cosineScore >= similarityGate;
+  const gatePassed = cosineGatePassed || hasStrongGraphSignal;
+
   console.log(
-    `[RAG] Similarity gate: top score=${topChunk?.cosineScore?.toFixed(4) ?? 'none'}, threshold=${similarityGate}, ${!topChunk || topChunk.cosineScore < similarityGate ? 'BLOCKED' : 'PASSED'
-    }`,
+    `[RAG] Similarity gate: top score=${topChunk?.cosineScore?.toFixed(4) ?? 'none'}, threshold=${similarityGate}, ` +
+    `cosine=${cosineGatePassed ? 'PASSED' : 'BLOCKED'}, graph=${hasStrongGraphSignal ? 'BYPASS' : 'none'}, ` +
+    `final=${gatePassed ? 'PASSED' : 'BLOCKED'}`,
   );
 
-  if (!topChunk || topChunk.cosineScore < similarityGate) {
+  if (!gatePassed) {
     // Log to archive_gaps (best-effort) and auto-categorize
     try {
       const { data: gap } = await supabase.from('archive_gaps').insert({
@@ -249,8 +263,45 @@ export async function runRag(params: RagParams): Promise<Response> {
     }
   }
 
+  // ── Stage 4b: Fetch entity connections for graph-enriched context ────────
+  // Collect KG entity IDs from graph-retrieved chunks for context enrichment.
+  // This is best-effort — if it fails, we proceed without entity connections.
+  const graphChunkEntityIds: string[] = [];
+  if (rankedChunks.some((c) => c.graphRank > 0)) {
+    try {
+      // Look up entity IDs from mentions for the graph-retrieved chunks
+      const graphChunkIds = rankedChunks
+        .filter((c) => c.graphRank > 0)
+        .map((c) => c.chunkId);
+      if (graphChunkIds.length > 0) {
+        // Cast to any: kg_entity_mentions not in generated types yet
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: mentions } = await (supabase as any)
+          .from('kg_entity_mentions')
+          .select('entity_id')
+          .in('chunk_id', graphChunkIds)
+          .limit(10);
+        if (mentions) {
+          for (const m of mentions as Array<{ entity_id: string }>) {
+            graphChunkEntityIds.push(m.entity_id);
+          }
+        }
+      }
+    } catch {
+      // Non-fatal
+    }
+  }
+
+  const entityConnections = graphChunkEntityIds.length > 0
+    ? await fetchEntityConnections(supabase, [...new Set(graphChunkEntityIds)])
+    : [];
+
+  if (entityConnections.length > 0) {
+    console.log(`[RAG] Entity connections: ${entityConnections.length} entities with graph context`);
+  }
+
   // Stage 5: Build context
-  const contextBlock = buildContextBlock(rankedChunks, contentionsMeta);
+  const contextBlock = buildContextBlock(rankedChunks, contentionsMeta, entityConnections);
   const systemPrompt =
     buildSystemPrompt(params.targetScholar, params.documentTitle, isDiveDeeper) + contextBlock;
 

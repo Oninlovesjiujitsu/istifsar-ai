@@ -125,12 +125,16 @@ Deno.serve(async (req: Request) => {
 
       await setStatus(db, doc.id, 'done');
 
-      // Auto-tag — disabled for now; re-enable when ready
-      // try {
-      //   await autoTag(db, doc.id, text);
-      // } catch (e) {
-      //   console.warn('[ingest-document] Auto-tagging failed:', e);
-      // }
+      // KG extraction — runs after chunking is done (non-blocking).
+      // Extracts entities + relationships from the full text and persists
+      // them into kg_entities / kg_entity_mentions / kg_relationships.
+      try {
+        const docTitle = (await db.from('documents').select('title, submitter_id, profiles!documents_submitter_id_fkey(display_name)').eq('id', doc.id).single()).data;
+        const authorName = (docTitle?.profiles as { display_name?: string } | null)?.display_name ?? null;
+        await extractAndLinkKG(db, doc.id, text, docTitle?.title ?? 'Unknown', authorName);
+      } catch (kgErr) {
+        console.warn('[ingest-document] KG extraction failed (non-fatal):', kgErr);
+      }
 
       return ok({ chunks: semanticChunks.length, method: 'semantic' });
     } catch (inner) {
@@ -666,4 +670,294 @@ async function autoTag(
       { onConflict: 'document_id,tag_id', ignoreDuplicates: true },
     );
   }
+}
+
+// ─── Knowledge Graph extraction ───────────────────────────────────────────────
+
+type KGEntity = {
+  name: string;
+  type: string;
+  aliases: string[];
+  excerpt: string;
+  confidence: number;
+};
+
+type KGRelationship = {
+  sourceEntity: string;
+  targetEntity: string;
+  type: string;
+  evidence: string;
+  weight: number;
+};
+
+const KG_EXTRACTION_PROMPT = `You are a knowledge graph extraction assistant specialized in historiography.
+Given a scholarly document text, extract structured entities and relationships.
+
+## Entity Types
+- HISTORIAN: Named scholars, authors, or academics referenced in the text
+- EVENT: Historical events (battles, treaties, revolutions, etc.)
+- DATE: Specific dates, years, or time periods mentioned
+- LOCATION: Geographic locations (cities, countries, regions, landmarks)
+- CLAIM: Specific historical claims or arguments made by scholars
+- SOURCE_REFERENCE: Primary sources, manuscripts, or documents cited
+- CONCEPT: Historical concepts, movements, ideologies, or themes
+
+## Relationship Types
+- ARGUES: A historian makes a specific claim (HISTORIAN → CLAIM)
+- CONTRADICTS: Two claims or entities are in factual contradiction (CLAIM → CLAIM)
+- OCCURRED_AT: An event happened at a location (EVENT → LOCATION)
+- PARTICIPATED_IN: A person was involved in an event (HISTORIAN/entity → EVENT)
+- CITES: A historian references a primary source (HISTORIAN → SOURCE_REFERENCE)
+- SUPPORTS: Evidence or a claim supports another claim (CLAIM → CLAIM)
+- AUTHORED: A historian wrote a document or source (HISTORIAN → SOURCE_REFERENCE)
+- ABOUT: An entity is about a topic/concept (any → CONCEPT)
+- OCCURRED_DURING: An event happened during a time period (EVENT → DATE)
+- RELATED_TO: General thematic or contextual connection
+
+## Rules
+1. Extract ALL meaningful entities — err on the side of inclusion
+2. Entity names should be the most complete/formal version used in the text
+3. Include aliases (alternative names, abbreviations, transliterations)
+4. For CLAIM entities, state the claim concisely (under 30 words)
+5. Confidence: 1.0 for explicitly stated, 0.8 for strongly implied, 0.6 for inferred
+6. Excerpt: include a brief verbatim quote (max 40 words) where the entity appears
+7. Weight: 1.0 for explicitly stated relationships, 0.7 for implied, 0.5 for inferred
+
+Respond with ONLY a JSON object (no markdown, no prose):
+{
+  "entities": [
+    { "name": "string", "type": "ENTITY_TYPE", "aliases": ["string"], "excerpt": "verbatim quote", "confidence": 0.0-1.0 }
+  ],
+  "relationships": [
+    { "sourceEntity": "entity name", "targetEntity": "entity name", "type": "RELATIONSHIP_TYPE", "evidence": "brief excerpt", "weight": 0.0-1.0 }
+  ]
+}`;
+
+const VALID_ENTITY_TYPES = new Set([
+  'HISTORIAN', 'EVENT', 'DATE', 'LOCATION', 'CLAIM', 'SOURCE_REFERENCE', 'CONCEPT',
+]);
+const VALID_REL_TYPES = new Set([
+  'ARGUES', 'CONTRADICTS', 'OCCURRED_AT', 'PARTICIPATED_IN',
+  'CITES', 'SUPPORTS', 'AUTHORED', 'ABOUT', 'OCCURRED_DURING', 'RELATED_TO',
+]);
+
+const ENTITY_SIMILARITY_THRESHOLD = 0.85;
+
+/**
+ * Extract entities and relationships from document text, then persist
+ * them into the KG tables with cross-document deduplication.
+ */
+async function extractAndLinkKG(
+  db: ReturnType<typeof createClient>,
+  docId: string,
+  text: string,
+  title: string,
+  author: string | null,
+): Promise<void> {
+  // Truncate to keep extraction focused (~30k chars ≈ 7.5k tokens)
+  const maxChars = 30_000;
+  const snippet = text.length > maxChars
+    ? text.slice(0, maxChars) + '\n\n[... document truncated for extraction ...]'
+    : text;
+
+  const userPrompt = [
+    `Document Title: "${title}"`,
+    author ? `Author/Historian: ${author}` : null,
+    `\n--- DOCUMENT TEXT ---\n${snippet}\n--- END DOCUMENT TEXT ---`,
+    `\nExtract all entities and relationships from this document.`,
+  ].filter(Boolean).join('\n');
+
+  // Call Gemini Flash for extraction
+  const res = await fetch(
+    `${GEMINI_API_BASE}/models/${GEMINI_FLASH_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [
+          { parts: [{ text: KG_EXTRACTION_PROMPT + '\n\n' + userPrompt }] },
+        ],
+        generationConfig: {
+          responseMimeType: 'application/json',
+          maxOutputTokens: 8192,
+        },
+      }),
+    },
+  );
+
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Gemini KG extraction error ${res.status}: ${body}`);
+  }
+
+  const geminiResult = (await res.json()) as {
+    candidates?: Array<{ content: { parts: Array<{ text: string }> } }>;
+  };
+
+  const rawText = geminiResult.candidates?.[0]?.content?.parts?.[0]?.text ?? '{}';
+  const cleaned = rawText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim();
+  const parsed = JSON.parse(cleaned) as {
+    entities?: KGEntity[];
+    relationships?: KGRelationship[];
+  };
+
+  // Validate entities
+  const entities = (parsed.entities ?? []).filter(
+    (e) => typeof e.name === 'string' && e.name.trim() && VALID_ENTITY_TYPES.has(e.type),
+  );
+
+  if (entities.length === 0) {
+    console.log('[ingest-document] KG: no entities extracted');
+    return;
+  }
+
+  // Clean prior KG data for this document (handles re-ingestion)
+  await db.from('kg_relationships').delete().eq('document_id', docId);
+  await db.from('kg_entity_mentions').delete().eq('document_id', docId);
+
+  // Embed entity names for deduplication
+  const entityVectors = await embedBatch(entities.map((e) => e.name));
+
+  // Resolve each entity (dedup against existing graph)
+  const entityIdMap = new Map<string, string>();
+
+  for (let i = 0; i < entities.length; i++) {
+    const entity = entities[i];
+    const vectorStr = `[${entityVectors[i].join(',')}]`;
+
+    const resolvedId = await resolveKGEntity(db, entity, vectorStr);
+    entityIdMap.set(entity.name, resolvedId);
+
+    // Create mention linking entity to this document
+    await db.from('kg_entity_mentions').insert({
+      entity_id: resolvedId,
+      document_id: docId,
+      chunk_id: null,
+      excerpt: (entity.excerpt ?? '').slice(0, 200) || null,
+      confidence: typeof entity.confidence === 'number'
+        ? Math.max(0, Math.min(1, entity.confidence))
+        : 0.8,
+    });
+  }
+
+  // Validate and insert relationships
+  const entityNames = new Set(entities.map((e) => e.name));
+  const relationships = (parsed.relationships ?? []).filter(
+    (r) =>
+      typeof r.sourceEntity === 'string' &&
+      typeof r.targetEntity === 'string' &&
+      VALID_REL_TYPES.has(r.type) &&
+      entityNames.has(r.sourceEntity) &&
+      entityNames.has(r.targetEntity),
+  );
+
+  let relCount = 0;
+  for (const rel of relationships) {
+    const sourceId = entityIdMap.get(rel.sourceEntity);
+    const targetId = entityIdMap.get(rel.targetEntity);
+    if (!sourceId || !targetId) continue;
+
+    const { error } = await db.from('kg_relationships').upsert(
+      {
+        source_entity_id: sourceId,
+        target_entity_id: targetId,
+        relationship_type: rel.type,
+        document_id: docId,
+        weight: typeof rel.weight === 'number' ? Math.max(0, Math.min(1, rel.weight)) : 0.7,
+        evidence_excerpt: (rel.evidence ?? '').slice(0, 200) || null,
+      },
+      {
+        onConflict: 'source_entity_id,target_entity_id,relationship_type,document_id',
+        ignoreDuplicates: true,
+      },
+    );
+    if (!error) relCount++;
+  }
+
+  console.log(
+    `[ingest-document] KG: ${entities.length} entities → ${entityIdMap.size} resolved, ${relCount} relationships`,
+  );
+}
+
+/**
+ * Resolve an entity against the existing KG graph.
+ * Tries: exact name → alias → embedding similarity → create new.
+ */
+async function resolveKGEntity(
+  db: ReturnType<typeof createClient>,
+  entity: KGEntity,
+  vectorStr: string,
+): Promise<string> {
+  const name = entity.name.trim();
+
+  // 1. Exact name match
+  const { data: exactMatch } = await db
+    .from('kg_entities')
+    .select('id')
+    .eq('name', name)
+    .eq('entity_type', entity.type)
+    .limit(1)
+    .single();
+
+  if (exactMatch) return exactMatch.id;
+
+  // 2. Alias match
+  const { data: aliasMatch } = await db
+    .from('kg_entities')
+    .select('id')
+    .eq('entity_type', entity.type)
+    .contains('aliases', [name])
+    .limit(1)
+    .single();
+
+  if (aliasMatch) return aliasMatch.id;
+
+  // 3. Embedding similarity
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: similar } = await (db as any).rpc('find_kg_entities_by_embedding', {
+    query_vector: vectorStr,
+    match_count: 3,
+    min_similarity: ENTITY_SIMILARITY_THRESHOLD,
+  });
+
+  if (similar && similar.length > 0) {
+    const sameType = (similar as Array<{ entity_id: string; entity_type: string }>)
+      .find((e) => e.entity_type === entity.type);
+    if (sameType) {
+      // Add current name as alias
+      const { data: existing } = await db
+        .from('kg_entities')
+        .select('aliases')
+        .eq('id', sameType.entity_id)
+        .single();
+      if (existing) {
+        const aliases = new Set<string>((existing.aliases as string[]) ?? []);
+        aliases.add(name);
+        for (const a of entity.aliases ?? []) {
+          if (typeof a === 'string' && a.trim()) aliases.add(a.trim());
+        }
+        await db.from('kg_entities').update({ aliases: [...aliases] }).eq('id', sameType.entity_id);
+      }
+      return sameType.entity_id;
+    }
+  }
+
+  // 4. Create new entity
+  const { data: newEntity, error } = await db
+    .from('kg_entities')
+    .insert({
+      name,
+      entity_type: entity.type,
+      aliases: (entity.aliases ?? []).filter((a: string) => typeof a === 'string' && a.trim()),
+      embedding: vectorStr,
+      metadata: {},
+    })
+    .select('id')
+    .single();
+
+  if (error || !newEntity) {
+    throw new Error(`Failed to create KG entity "${name}": ${error?.message}`);
+  }
+
+  return newEntity.id;
 }

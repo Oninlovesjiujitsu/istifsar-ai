@@ -1,6 +1,7 @@
 import { embedQuery } from '@/lib/ingestion/embedder';
 import { createClient } from '@/lib/supabase/server';
-import { RETRIEVAL_CANDIDATE_COUNT } from '@/lib/config/constants';
+import { RETRIEVAL_CANDIDATE_COUNT, GRAPH_CANDIDATE_COUNT, GRAPH_MAX_HOPS } from '@/lib/config/constants';
+import { retrieveGraphChunks, type GraphRetrievedChunk } from './kg/graphRetriever';
 
 export type RetrievedChunk = {
   chunkId: string;
@@ -11,6 +12,8 @@ export type RetrievedChunk = {
   content: string;
   cosineScore: number;
   rrfScore: number;
+  /** Graph rank (1 = closest to seed entity). 0 means not graph-retrieved. */
+  graphRank: number;
 };
 
 /**
@@ -42,16 +45,24 @@ export async function retrieveChunks(
     rpcParams.scope_document_id = options.documentId;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any).rpc('hybrid_search', rpcParams);
+  // Run hybrid search and graph search in parallel
+  const [hybridResult, graphChunks] = await Promise.all([
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (supabase as any).rpc('hybrid_search', rpcParams),
+    // Graph search — skip for document-scoped queries (already narrowed)
+    options.documentId
+      ? Promise.resolve([] as GraphRetrievedChunk[])
+      : retrieveGraphChunks(query, supabase, {
+          maxHops: GRAPH_MAX_HOPS,
+          matchCount: GRAPH_CANDIDATE_COUNT,
+        }),
+  ]);
 
-  if (error) {
-    throw new Error(`hybrid_search RPC failed: ${error.message}`);
+  if (hybridResult.error) {
+    throw new Error(`hybrid_search RPC failed: ${hybridResult.error.message}`);
   }
 
-  if (!data) return [];
-
-  return (data as Array<{
+  const hybridData = hybridResult.data as Array<{
     chunk_id: string;
     document_id: string;
     document_title: string;
@@ -60,7 +71,10 @@ export async function retrieveChunks(
     content: string;
     cosine_score: number;
     rrf_score: number;
-  }>).map((row) => ({
+  }> | null;
+
+  // Map hybrid results
+  const hybridChunks: RetrievedChunk[] = (hybridData ?? []).map((row) => ({
     chunkId: row.chunk_id,
     documentId: row.document_id,
     documentTitle: row.document_title,
@@ -69,5 +83,56 @@ export async function retrieveChunks(
     content: row.content,
     cosineScore: row.cosine_score,
     rrfScore: row.rrf_score,
+    graphRank: 0,
   }));
+
+  // Merge graph results into hybrid results
+  return mergeGraphResults(hybridChunks, graphChunks);
+}
+
+/**
+ * Merge graph-retrieved chunks into hybrid results.
+ * Graph chunks that already appear in hybrid results get their graphRank annotated.
+ * New graph-only chunks are appended with extended RRF scoring.
+ */
+function mergeGraphResults(
+  hybridChunks: RetrievedChunk[],
+  graphChunks: GraphRetrievedChunk[],
+): RetrievedChunk[] {
+  if (graphChunks.length === 0) return hybridChunks;
+
+  const RRF_K = 60;
+  const hybridById = new Map<string, RetrievedChunk>();
+  for (const chunk of hybridChunks) {
+    hybridById.set(chunk.chunkId, chunk);
+  }
+
+  // Annotate existing hybrid chunks with graph rank
+  for (const gc of graphChunks) {
+    const existing = hybridById.get(gc.chunkId);
+    if (existing) {
+      existing.graphRank = gc.graphRank;
+      // Boost RRF score with graph signal: 1/(k + graph_rank)
+      existing.rrfScore += 1.0 / (RRF_K + gc.graphRank);
+    }
+  }
+
+  // Add graph-only chunks (not in hybrid results)
+  for (const gc of graphChunks) {
+    if (!hybridById.has(gc.chunkId)) {
+      hybridChunks.push({
+        chunkId: gc.chunkId,
+        documentId: gc.documentId,
+        documentTitle: gc.documentTitle,
+        documentDate: gc.documentDate,
+        chunkIndex: gc.chunkIndex,
+        content: gc.content,
+        cosineScore: 0,
+        rrfScore: 1.0 / (RRF_K + gc.graphRank), // Graph-only RRF score
+        graphRank: gc.graphRank,
+      });
+    }
+  }
+
+  return hybridChunks;
 }

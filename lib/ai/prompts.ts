@@ -1,5 +1,6 @@
 import type { RetrievedChunk } from './retriever';
 import type { ContentionMeta } from '@/types/contention';
+import type { EntityConnection } from './kg/graphRetriever';
 
 /**
  * Build the LLM system prompt based on the current conversation mode.
@@ -56,6 +57,7 @@ export function buildSystemPrompt(
 export function buildContextBlock(
   chunks: RetrievedChunk[],
   contentions?: ContentionMeta[],
+  entityConnections?: EntityConnection[],
 ): string {
   if (chunks.length === 0) return '';
 
@@ -72,6 +74,28 @@ export function buildContextBlock(
     parts.push(
       `--- SCHOLARLY ARCHIVE ---\n\n${entries.join('\n\n---\n\n')}\n\n--- END OF ARCHIVE ---`,
     );
+  }
+
+  // Entity connections from the knowledge graph (KG-RAG signal)
+  if (entityConnections && entityConnections.length > 0) {
+    const lines: string[] = [];
+    for (const ec of entityConnections) {
+      const conns = ec.connections
+        .slice(0, 8)
+        .map((c) => `${c.relatedEntity} (${c.relationship})`)
+        .join(', ');
+      if (conns) {
+        lines.push(`"${ec.entityName}" connects to: ${conns}`);
+      }
+      for (const d of ec.disputes) {
+        lines.push(`Disputed: ${d.entityA} CONTRADICTS ${d.entityB}: ${d.evidence}`);
+      }
+    }
+    if (lines.length > 0) {
+      parts.push(
+        `--- ENTITY CONNECTIONS ---\n${lines.join('\n')}\n--- END ENTITY CONNECTIONS ---`,
+      );
+    }
   }
 
   if (contentions && contentions.length > 0) {
