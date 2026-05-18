@@ -6,6 +6,7 @@ values (
   52428800,
   array[
     'application/pdf',
+    'application/epub+zip',
     'image/jpeg',
     'image/png',
     'image/tiff',

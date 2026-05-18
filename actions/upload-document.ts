@@ -8,6 +8,7 @@ import { isVerifiedHistorian, getUserRole } from '@/lib/ui/role-labels';
 
 const ALLOWED_SCAN_TYPES = new Set([
   'application/pdf',
+  'application/epub+zip',
   'image/jpeg',
   'image/png',
   'image/tiff',
@@ -40,7 +41,7 @@ export async function uploadDocument(
     return { success: false, error: 'A document scan is required.' };
   }
   if (!ALLOWED_SCAN_TYPES.has(scanFile.type)) {
-    return { success: false, error: 'Scan must be a PDF, JPEG, PNG, TIFF, or WEBP file.' };
+    return { success: false, error: 'Scan must be a PDF, EPUB, JPEG, PNG, TIFF, or WEBP file.' };
   }
   if (scanFile.size > MAX_SCAN_BYTES) {
     return { success: false, error: 'Scan file exceeds the 50 MB limit.' };

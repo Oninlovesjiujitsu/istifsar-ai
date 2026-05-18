@@ -143,14 +143,14 @@ export default function UploadForm() {
           label="Document scan"
           htmlFor="scan"
           required
-          hint="PDF, JPEG, PNG, TIFF, or WEBP · max 50 MB"
+          hint="PDF, EPUB, JPEG, PNG, TIFF, or WEBP · max 50 MB"
         >
           <input
             id="scan"
             name="scan"
             type="file"
             required
-            accept=".pdf,.jpg,.jpeg,.png,.tiff,.tif,.webp"
+            accept=".pdf,.epub,.jpg,.jpeg,.png,.tiff,.tif,.webp"
             onChange={(e) => {
               const file = e.target.files?.[0];
               if (file && file.size > MAX_SCAN_BYTES) {

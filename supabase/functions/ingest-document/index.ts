@@ -199,14 +199,18 @@ async function extractText(
   if (dlErr) throw new Error(`Scan download failed: ${dlErr.message}`);
 
   // 2. Primary: Gemini multimodal extraction (fast, works for text PDFs).
-  try {
-    const text = await extractWithGemini(fileBlob, doc.mime_type);
-    if (text?.trim()) return text;
-  } catch (e) {
-    console.warn('[ingest-document] Gemini extraction failed, trying Unstructured.io:', e);
+  // Skip Gemini for EPUB — it doesn't support application/epub+zip.
+  const isEpub = doc.mime_type === 'application/epub+zip';
+  if (!isEpub) {
+    try {
+      const text = await extractWithGemini(fileBlob, doc.mime_type);
+      if (text?.trim()) return text;
+    } catch (e) {
+      console.warn('[ingest-document] Gemini extraction failed, trying Unstructured.io:', e);
+    }
   }
 
-  // 3. Fallback: Unstructured.io with 'fast' strategy (for scanned/image docs).
+  // 3. Fallback: Unstructured.io with 'fast' strategy (for scanned/image docs + EPUB).
   return extractWithUnstructured(fileBlob, doc.original_filename);
 }
 

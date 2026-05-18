@@ -28,7 +28,7 @@ export default async function DocumentDetailPage({ params }: Props) {
   const { data: doc } = await supabase
     .from('documents')
     .select(
-      'id, title, description, document_type, date_of_origin, origin_location, language, status, published_at, storage_path, mime_type, document_tags(tag_id, tags(name, slug))',
+      'id, title, description, document_type, date_of_origin, origin_location, language, status, published_at, storage_path, mime_type, original_filename, document_tags(tag_id, tags(name, slug))',
     )
     .eq('id', id)
     .eq('status', 'published')
@@ -74,6 +74,7 @@ export default async function DocumentDetailPage({ params }: Props) {
   });
 
   const isPDF = doc.mime_type?.includes('pdf');
+  const isImage = doc.mime_type?.startsWith('image/');
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
@@ -129,13 +130,26 @@ export default async function DocumentDetailPage({ params }: Props) {
                   title={doc.title}
                   className="w-full h-[600px]"
                 />
-              ) : (
+              ) : isImage ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={signedUrl}
                   alt={doc.title}
                   className="max-w-full max-h-[600px] object-contain"
                 />
+              ) : (
+                <div className="flex flex-col items-center gap-3 p-8">
+                  <p className="text-sm text-muted-foreground">
+                    This file format cannot be previewed in the browser.
+                  </p>
+                  <a
+                    href={signedUrl}
+                    download={doc.original_filename ?? 'document'}
+                    className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+                  >
+                    Download file
+                  </a>
+                </div>
               )
             ) : (
               <p className="text-sm text-muted-foreground p-8 text-center">
