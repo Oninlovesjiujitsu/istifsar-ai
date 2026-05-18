@@ -38,7 +38,7 @@ create trigger kg_entities_updated_at
 
 -- Indexes
 create index kg_entities_type_idx on public.kg_entities (entity_type);
-create index kg_entities_name_idx on public.kg_entities using gin (name gin_trgm_ops);
+create index kg_entities_name_idx on public.kg_entities (name);
 create index kg_entities_embedding_idx on public.kg_entities
   using ivfflat (embedding halfvec_cosine_ops) with (lists = 50);
 
@@ -277,8 +277,3 @@ comment on function public.find_kg_entities_by_embedding(halfvec, int, float) is
 grant execute on function public.find_kg_entities_by_embedding(halfvec, int, float) to authenticated;
 grant execute on function public.find_kg_entities_by_embedding(halfvec, int, float) to service_role;
 
--- ---------------------------------------------------------------------------
--- Enable pg_trgm extension for fuzzy entity name matching
--- ---------------------------------------------------------------------------
-
-create extension if not exists pg_trgm;
