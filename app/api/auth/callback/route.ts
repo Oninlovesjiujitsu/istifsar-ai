@@ -31,6 +31,12 @@ export async function GET(request: Request) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error && data.session) {
+      // Password recovery flow — redirect to the reset-password page
+      const next = searchParams.get('next');
+      if (next === '/reset-password') {
+        return NextResponse.redirect(`${origin}/reset-password`);
+      }
+
       let role = (data.session.user.app_metadata?.role as string) ?? 'reader';
 
       // Fallback: if the JWT hook hasn't synced the role, query profiles directly
