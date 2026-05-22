@@ -25,6 +25,13 @@ const UNSTRUCTURED_API_URL =
   Deno.env.get('UNSTRUCTURED_API_URL') ??
   'https://api.unstructuredapp.io/general/v0/general';
 
+// Fast→hi_res fallback config
+const FAST_MIN_CHARS_PER_PAGE = parseInt(
+  Deno.env.get('FAST_MIN_CHARS_PER_PAGE') ?? '100', 10,
+);
+const FORCE_STRATEGY = Deno.env.get('UNSTRUCTURED_FORCE_STRATEGY') ?? '';
+// Valid: 'fast' | 'hi_res' | '' (empty = default auto behavior)
+
 const EMBEDDING_MODEL = 'gemini-embedding-001';
 const GEMINI_FLASH_MODEL = 'gemini-2.5-flash';
 const EMBED_BATCH = 100;  // Gemini batchEmbedContents limit
@@ -272,26 +279,77 @@ async function extractWithGemini(
 }
 
 /**
- * Fallback: extract text via Unstructured.io using 'fast' strategy.
+ * Fallback: extract text via Unstructured.io.
+ * Tries 'fast' first; if the result is empty or near-empty (custom Type1 font
+ * encoding issue), automatically retries with 'hi_res'.
  */
 async function extractWithUnstructured(
   fileBlob: Blob,
   originalFilename: string | null,
 ): Promise<string> {
+  // Allow forcing a specific strategy via env var
+  if (FORCE_STRATEGY === 'fast' || FORCE_STRATEGY === 'hi_res') {
+    console.log(`[ingest-document] Unstructured: using forced strategy="${FORCE_STRATEGY}"`);
+    return callUnstructured(fileBlob, originalFilename, FORCE_STRATEGY as 'fast' | 'hi_res');
+  }
+
+  // Phase 1: Try fast
+  const fastText = await callUnstructured(fileBlob, originalFilename, 'fast');
+
+  // Estimate page count from blob size (conservative ~3KB/page for text PDFs).
+  // Real PDFs are often 50-100KB/page, so this over-estimates pages and
+  // lowers the per-page average — erring on the side of triggering fallback.
+  const estimatedPages = Math.max(1, Math.round(fileBlob.size / 3000));
+  const avgCharsPerPage = fastText.length / estimatedPages;
+
+  if (fastText.length > 0 && avgCharsPerPage >= FAST_MIN_CHARS_PER_PAGE) {
+    console.log(
+      `[ingest-document] Unstructured: strategy="fast" succeeded ` +
+      `(${fastText.length} chars, ~${avgCharsPerPage.toFixed(0)} chars/page)`,
+    );
+    return fastText;
+  }
+
+  // Phase 2: fast yielded insufficient text — retry with hi_res
+  console.warn(
+    `[ingest-document] Unstructured: strategy="fast" yielded only ` +
+    `${fastText.length} chars (~${avgCharsPerPage.toFixed(0)} chars/page, ` +
+    `threshold=${FAST_MIN_CHARS_PER_PAGE}). Retrying with strategy="hi_res".`,
+  );
+
+  const hiResText = await callUnstructured(fileBlob, originalFilename, 'hi_res');
+
+  console.log(
+    `[ingest-document] Unstructured: strategy="hi_res" fallback ` +
+    `yielded ${hiResText.length} chars`,
+  );
+
+  return hiResText;
+}
+
+/**
+ * Raw Unstructured.io API call with a specific strategy.
+ * hi_res gets a longer timeout (120s) since it runs OCR.
+ */
+async function callUnstructured(
+  fileBlob: Blob,
+  originalFilename: string | null,
+  strategy: 'fast' | 'hi_res',
+): Promise<string> {
   const formData = new FormData();
   formData.append('files', fileBlob, originalFilename ?? 'document');
-  formData.append('strategy', 'fast');
+  formData.append('strategy', strategy);
 
   const res = await fetch(UNSTRUCTURED_API_URL, {
     method: 'POST',
     headers: { 'unstructured-api-key': UNSTRUCTURED_API_KEY },
     body: formData,
-    signal: AbortSignal.timeout(45_000), // 45s — leaves headroom within Edge Function 60s limit
+    signal: AbortSignal.timeout(strategy === 'hi_res' ? 120_000 : 45_000),
   });
 
   if (!res.ok) {
     const body = await res.text();
-    throw new Error(`Unstructured.io error ${res.status}: ${body}`);
+    throw new Error(`Unstructured.io error ${res.status} (strategy=${strategy}): ${body}`);
   }
 
   const elements = (await res.json()) as Array<{ text?: string }>;
