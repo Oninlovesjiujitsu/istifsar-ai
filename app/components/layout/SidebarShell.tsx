@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { usePathname } from 'next/navigation';
 
 type SidebarContextValue = {
   expanded: boolean;
@@ -10,8 +11,8 @@ type SidebarContextValue = {
 
 const SidebarContext = createContext<SidebarContextValue>({
   expanded: true,
-  toggle: () => {},
-  close: () => {},
+  toggle: () => { },
+  close: () => { },
 });
 
 export function useSidebar() {
@@ -71,6 +72,9 @@ export default function SidebarShell({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  const pathname = usePathname();
+  const isChatPage = pathname.startsWith('/explore/') && pathname !== '/explore';
+
   return (
     <SidebarContext.Provider value={{ expanded, toggle, close }}>
       <div className="flex h-dvh">
@@ -117,7 +121,8 @@ export default function SidebarShell({
         {/* ── Main content area ─────────────────────────────────────────── */}
         <div
           className={[
-            'flex-1 bg-background relative overflow-y-auto transition-[margin] duration-300 ease-in-out',
+            'flex-1 bg-background relative transition-[margin] duration-300 ease-in-out',
+            isChatPage ? 'h-full flex flex-col min-h-0 overflow-hidden' : 'overflow-y-auto',
             /* Mobile: full width with top padding for the fixed bar */
             'pt-14 lg:pt-0',
             /* Desktop: margin matches sidebar width */
