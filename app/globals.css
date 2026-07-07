@@ -207,3 +207,51 @@
     @apply font-sans;
   }
 }
+
+/* ============================================================
+ * FIREFLY PARTICLES ANIMATIONS
+ * ============================================================ */
+
+/* Firefly wander — 3 independent 2D paths so the swarm looks alive.
+   Each is a closed loop so motion is seamless when looping. */
+@keyframes firefly-wander-1 {
+  0%   { transform: translate(0,    0); }
+  20%  { transform: translate(38px, -42px); }
+  40%  { transform: translate(-22px, -86px); }
+  60%  { transform: translate(44px, -60px); }
+  80%  { transform: translate(-28px, -28px); }
+  100% { transform: translate(0,    0); }
+}
+@keyframes firefly-wander-2 {
+  0%   { transform: translate(0,    0); }
+  25%  { transform: translate(-46px, 22px); }
+  50%  { transform: translate(20px,  56px); }
+  75%  { transform: translate(54px, -12px); }
+  100% { transform: translate(0,    0); }
+}
+@keyframes firefly-wander-3 {
+  0%   { transform: translate(0,    0); }
+  16%  { transform: translate(34px,  28px); }
+  33%  { transform: translate(62px, -22px); }
+  50%  { transform: translate(20px, -54px); }
+  66%  { transform: translate(-32px, -30px); }
+  83%  { transform: translate(-52px,  12px); }
+  100% { transform: translate(0,    0); }
+}
+
+/* Firefly blink — opacity pulse layered on top of the wander */
+@keyframes firefly-blink {
+  0%, 100% { opacity: 0.25; }
+  50%      { opacity: 1;   }
+}
+
+.seasonal-particle {
+  will-change: transform, opacity;
+  display: inline-block;
+}
+
+/* Firefly wander — three variants for path diversity across the swarm */
+.firefly-wander-1 { animation: firefly-wander-1 14s ease-in-out infinite; }
+.firefly-wander-2 { animation: firefly-wander-2 16s ease-in-out infinite; }
+.firefly-wander-3 { animation: firefly-wander-3 18s ease-in-out infinite; }
+.firefly-blink    { animation: firefly-blink 2.4s ease-in-out infinite; }

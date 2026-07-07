@@ -1,4 +1,7 @@
 import { proxy } from '@/proxy';
+import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
+import FireFlyBackground from '@/app/components/layout/FireFlyBackground';
 
 const noiseSvg = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E")`;
 
@@ -8,6 +11,18 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
   await proxy({ redirectAuthenticated: '/' });
   return (
     <div className="dark relative flex min-h-svh items-center justify-center overflow-hidden bg-[#0e0d10] px-4 py-12">
+      <FireFlyBackground className="z-5" />
+
+      {/* Back to Landing Page */}
+      <div className="absolute top-6 left-6 z-30">
+        <Link
+          href="/"
+          className="group flex items-center gap-2 rounded-full border border-[#a08430]/15 bg-[#1a1720]/50 px-4 py-2 text-xs uppercase tracking-widest text-amber-200/70 backdrop-blur-sm transition-all duration-300 hover:border-[#a08430]/30 hover:text-amber-100 hover:shadow-[0_0_15px_rgba(160,120,40,0.1)]"
+        >
+          <ArrowLeft className="size-4 transition-transform duration-300 group-hover:-translate-x-1" />
+          <span>Back to Istifsar</span>
+        </Link>
+      </div>
       <div className="pointer-events-none absolute inset-0 bg-[#0e0d10]/60 sm:bg-[#0e0d10]/50" />
 
       <div

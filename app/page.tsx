@@ -15,6 +15,7 @@ import {
 import type { IconSvgElement } from '@hugeicons/react';
 import ContactModal from '@/app/components/contact/ContactModal';
 import ArchiveCatalog from '@/app/components/discovery/ArchiveCatalog';
+import FireFlyBackground from '@/app/components/layout/FireFlyBackground';
 
 const navSections = ['agoncillo', 'boundaries', 'historians'] as const;
 type SectionId = (typeof navSections)[number];
@@ -121,6 +122,7 @@ export default function LandingPage() {
 
   return (
     <div className="selection:bg-gold/30">
+      <FireFlyBackground />
       <motion.nav
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
