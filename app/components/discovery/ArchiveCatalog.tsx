@@ -29,12 +29,17 @@ export default function ArchiveCatalog() {
 
   useEffect(() => {
     getArchiveCatalog()
-      .then(setCollections)
+      .then((data) => {
+        const topThree = [...data]
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 3);
+        setCollections(topThree);
+      })
       .finally(() => setLoading(false));
   }, []);
 
   return (
-    <section className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-12 py-16 sm:py-24 md:py-32">
+    <section id="collections" className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-12 py-16 sm:py-24 md:py-32">
       <motion.div
         initial="hidden"
         whileInView="visible"

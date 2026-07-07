@@ -17,7 +17,7 @@ import ContactModal from '@/app/components/contact/ContactModal';
 import ArchiveCatalog from '@/app/components/discovery/ArchiveCatalog';
 import FireFlyBackground from '@/app/components/layout/FireFlyBackground';
 
-const navSections = ['agoncillo', 'boundaries', 'historians'] as const;
+const navSections = ['collections', 'agoncillo', 'boundaries', 'historians'] as const;
 type SectionId = (typeof navSections)[number];
 
 const fadeUp = {
@@ -86,6 +86,22 @@ export default function LandingPage() {
 
   const closeMobileMenu = useCallback(() => setMobileMenuOpen(false), []);
 
+  const handleScrollToSection = useCallback((e: React.MouseEvent<HTMLAnchorElement>, id: string, closeMenu = false) => {
+    e.preventDefault();
+    if (closeMenu) {
+      setMobileMenuOpen(false);
+      document.body.style.overflow = ''; // Unlock body scroll lock immediately
+    }
+    
+    // Defer scroll to allow mobile menu to start closing and layout to update
+    setTimeout(() => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, closeMenu ? 150 : 0);
+  }, []);
+
   useEffect(() => {
     if (mobileMenuOpen) {
       document.body.style.overflow = 'hidden';
@@ -121,7 +137,7 @@ export default function LandingPage() {
       : 'font-serif font-light tracking-tight text-text-muted-vault hover:text-foreground hover:border-b-2 hover:border-gold/40 pb-1 transition-all duration-300';
 
   return (
-    <div className="selection:bg-gold/30">
+    <div>
       <FireFlyBackground />
       <motion.nav
         initial={{ opacity: 0, y: -20 }}
@@ -150,13 +166,32 @@ export default function LandingPage() {
 
           {/* Desktop nav links */}
           <div className="hidden md:flex items-center space-x-12">
-            <a href="#agoncillo" className={navLinkClass('agoncillo')}>
+            <a
+              href="#collections"
+              className={navLinkClass('collections')}
+              onClick={(e) => handleScrollToSection(e, 'collections')}
+            >
+              Digital Collections
+            </a>
+            <a
+              href="#agoncillo"
+              className={navLinkClass('agoncillo')}
+              onClick={(e) => handleScrollToSection(e, 'agoncillo')}
+            >
               The Agoncillo Constraint
             </a>
-            <a href="#boundaries" className={navLinkClass('boundaries')}>
+            <a
+              href="#boundaries"
+              className={navLinkClass('boundaries')}
+              onClick={(e) => handleScrollToSection(e, 'boundaries')}
+            >
               Platform Boundaries
             </a>
-            <a href="#historians" className={navLinkClass('historians')}>
+            <a
+              href="#historians"
+              className={navLinkClass('historians')}
+              onClick={(e) => handleScrollToSection(e, 'historians')}
+            >
               For Historians
             </a>
           </div>
@@ -210,22 +245,29 @@ export default function LandingPage() {
             >
               <div className="flex flex-col px-6 py-6 gap-6">
                 <a
+                  href="#collections"
+                  onClick={(e) => handleScrollToSection(e, 'collections', true)}
+                  className="font-serif font-light tracking-tight text-text-muted-vault hover:text-gold transition-colors text-lg"
+                >
+                  Digital Collections
+                </a>
+                <a
                   href="#agoncillo"
-                  onClick={closeMobileMenu}
+                  onClick={(e) => handleScrollToSection(e, 'agoncillo', true)}
                   className="font-serif font-light tracking-tight text-text-muted-vault hover:text-gold transition-colors text-lg"
                 >
                   The Agoncillo Constraint
                 </a>
                 <a
                   href="#boundaries"
-                  onClick={closeMobileMenu}
+                  onClick={(e) => handleScrollToSection(e, 'boundaries', true)}
                   className="font-serif font-light tracking-tight text-text-muted-vault hover:text-gold transition-colors text-lg"
                 >
                   Platform Boundaries
                 </a>
                 <a
                   href="#historians"
-                  onClick={closeMobileMenu}
+                  onClick={(e) => handleScrollToSection(e, 'historians', true)}
                   className="font-serif font-light tracking-tight text-text-muted-vault hover:text-gold transition-colors text-lg"
                 >
                   For Historians

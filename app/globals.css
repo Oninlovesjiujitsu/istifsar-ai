@@ -254,4 +254,18 @@
 .firefly-wander-1 { animation: firefly-wander-1 14s ease-in-out infinite; }
 .firefly-wander-2 { animation: firefly-wander-2 16s ease-in-out infinite; }
 .firefly-wander-3 { animation: firefly-wander-3 18s ease-in-out infinite; }
-.firefly-blink    { animation: firefly-blink 2.4s ease-in-out infinite; }
+.firefly-blink    { animation: firefly-blink 2.4s ease-in-out infinite; }
+
+/* ============================================================
+ * SELECTION STYLING (reflecting summer-night theme selection colors)
+ * ============================================================ */
+::selection {
+  background-color: hsl(40 75% 62% / 0.9); /* summer-night primary (sunlit gold) */
+  color: hsl(30 15% 8%);                    /* summer-night primary-foreground (dark warm gray) */
+}
+
+::-moz-selection {
+  background-color: hsl(40 75% 62% / 0.9); /* summer-night primary (sunlit gold) */
+  color: hsl(30 15% 8%);                    /* summer-night primary-foreground (dark warm gray) */
+}
+
