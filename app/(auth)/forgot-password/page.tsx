@@ -30,13 +30,14 @@ export default function ForgotPasswordPage() {
         <ForgotPasswordForm />
       </div>
 
-      <p className="mt-6 text-center text-sm text-neutral-500">
+      <p className="mt-6 text-center text-sm text-neutral-500 flex items-center justify-center gap-2">
         <Link
           href="/login"
           className="text-amber-300/70 underline-offset-4 transition-colors hover:text-amber-200 hover:underline"
         >
           Back to sign in
         </Link>
+        <span className="text-neutral-600 select-none">·</span>
       </p>
     </div>
   );

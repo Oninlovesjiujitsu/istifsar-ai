@@ -303,7 +303,7 @@ export default function LandingPage() {
       </motion.nav>
 
       <main>
-        <section className="relative min-h-[70vh] sm:min-h-screen flex items-start sm:items-center justify-center pt-36 sm:pt-0 px-4 sm:px-6 md:px-0 overflow-hidden">
+        <section className="relative min-h-screen flex items-start sm:items-center justify-center pt-36 sm:pt-0 px-4 sm:px-6 md:px-0 overflow-hidden">
           <div className="absolute inset-0 z-0">
             <img
               src="/Background_Landing.jpg"
@@ -379,13 +379,14 @@ export default function LandingPage() {
           </div>
 
           {/* Scroll affordance */}
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center animate-bounce z-10">
+          <div className="absolute bottom-6 sm:bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center animate-bounce z-10">
             <a
               href="#collections"
               onClick={(e) => handleScrollToSection(e, 'collections')}
-              className="flex flex-col items-center text-gold/60 hover:text-gold transition-colors duration-300 group"
+              className="flex flex-col items-center justify-center p-4 -m-4 min-w-[48px] min-h-[48px] text-gold/60 hover:text-gold transition-colors duration-300 group"
+              aria-label="Scroll down to collections"
             >
-              <span className="text-[10px] uppercase tracking-[0.2em] mb-2 font-serif font-light">Scroll</span>
+              <span className="hidden sm:inline text-[10px] uppercase tracking-[0.2em] mb-2 font-serif font-light">Scroll</span>
               <ArrowDown className="h-5 w-5" />
             </a>
           </div>
@@ -542,7 +543,7 @@ export default function LandingPage() {
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6 }}
-        className="w-full border-t border-border"
+        className="w-full border-t border-border relative z-20 bg-background"
       >
         <div className="flex flex-col md:flex-row justify-between items-center px-4 sm:px-6 md:px-16 py-6 md:py-8 w-full max-w-[1440px] mx-auto gap-6 md:gap-8">
           <p className="text-xs sm:text-sm tracking-widest uppercase text-text-muted-vault text-center md:text-left">

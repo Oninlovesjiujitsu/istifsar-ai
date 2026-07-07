@@ -47,12 +47,19 @@ export default function LoginPage() {
 
         <LoginForm />
 
-        <div className="mt-4 text-center">
+        <div className="mt-5 flex items-center justify-center gap-2 text-xs sm:text-sm">
           <Link
             href="/forgot-password"
-            className="text-sm text-amber-300/60 underline-offset-4 transition-colors hover:text-amber-200 hover:underline"
+            className="text-amber-300/60 underline-offset-4 transition-colors hover:text-amber-200 hover:underline"
           >
             Forgot password?
+          </Link>
+          <span className="text-neutral-600 select-none">·</span>
+          <Link
+            href="/"
+            className="text-amber-300/60 underline-offset-4 transition-colors hover:text-amber-200 hover:underline"
+          >
+            Landing Page
           </Link>
         </div>
       </div>

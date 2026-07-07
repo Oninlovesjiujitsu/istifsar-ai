@@ -45,6 +45,7 @@ export default function SignUpPage() {
         </div>
 
         <SignUpForm />
+
       </div>
 
       <p className="mt-6 text-center text-sm text-neutral-500">
