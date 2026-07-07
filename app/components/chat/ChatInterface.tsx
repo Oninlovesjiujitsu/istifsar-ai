@@ -412,7 +412,7 @@ export default function ChatInterface({
 
       {rightPanel && (
         <>
-          <div className="hidden md:flex w-[40%] shrink-0 border-l border-white/[0.06]">
+          <div className="hidden md:flex w-[40%] shrink-0 border-l border-white/[0.06] flex-col h-full min-h-0">
             {rightPanel.kind === 'citation' ? (
               <SourceDetailsPanel citation={rightPanel.citation} onClose={closeRightPanel} />
             ) : (

@@ -27,7 +27,7 @@ export default function EssayCard({
 
   return (
     <Link href={`/essays/${slug}`} className="group block">
-      <div className="rounded-lg border bg-card hover:shadow-sm transition-shadow p-5 h-full flex flex-col gap-3">
+      <div className="rounded-lg border bg-card transition-all duration-300 ease-out hover:-translate-y-1.5 hover:scale-[1.01] hover:shadow-md hover:border-gold/30 dark:hover:border-gold/40 p-5 h-full flex flex-col gap-3">
         <div className="flex flex-wrap items-start gap-2">
           <h3 className="font-semibold leading-snug group-hover:text-primary transition-colors line-clamp-2 flex-1">
             {title}

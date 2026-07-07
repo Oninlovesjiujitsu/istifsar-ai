@@ -16,6 +16,10 @@ import type { IconSvgElement } from '@hugeicons/react';
 import ContactModal from '@/app/components/contact/ContactModal';
 import ArchiveCatalog from '@/app/components/discovery/ArchiveCatalog';
 import FireFlyBackground from '@/app/components/layout/FireFlyBackground';
+import ArchiveBookshelfSilhouette from '@/app/components/layout/ArchiveBookshelfSilhouette';
+import FloatingBackToTop from '@/app/components/layout/FloatingBackToTheTop';
+import { ArrowDown } from 'lucide-react';
+import { TypeAnimation } from 'react-type-animation';
 
 const navSections = ['collections', 'agoncillo', 'boundaries', 'historians'] as const;
 type SectionId = (typeof navSections)[number];
@@ -92,7 +96,7 @@ export default function LandingPage() {
       setMobileMenuOpen(false);
       document.body.style.overflow = ''; // Unlock body scroll lock immediately
     }
-    
+
     // Defer scroll to allow mobile menu to start closing and layout to update
     setTimeout(() => {
       const el = document.getElementById(id);
@@ -139,6 +143,7 @@ export default function LandingPage() {
   return (
     <div>
       <FireFlyBackground />
+      <ArchiveBookshelfSilhouette />
       <motion.nav
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -323,7 +328,20 @@ export default function LandingPage() {
                 transition={{ duration: 1, delay: 1 }}
                 className="italic font-light font-serif"
               >
-                of the Past.
+                <TypeAnimation
+                  sequence={[
+                    'of the Past.',
+                    2500,
+                    'of the Archives.',
+                    2500,
+                    'of the Documents.',
+                    2500,
+                  ]}
+                  wrapper="span"
+                  speed={30}
+                  repeat={Infinity}
+                  className="inline-block"
+                />
               </motion.span>
             </motion.h1>
 
@@ -358,6 +376,18 @@ export default function LandingPage() {
                 ),
               )}
             </motion.div>
+          </div>
+
+          {/* Scroll affordance */}
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center animate-bounce z-10">
+            <a
+              href="#collections"
+              onClick={(e) => handleScrollToSection(e, 'collections')}
+              className="flex flex-col items-center text-gold/60 hover:text-gold transition-colors duration-300 group"
+            >
+              <span className="text-[10px] uppercase tracking-[0.2em] mb-2 font-serif font-light">Scroll</span>
+              <ArrowDown className="h-5 w-5" />
+            </a>
           </div>
         </section>
 
@@ -548,6 +578,7 @@ export default function LandingPage() {
       </motion.footer>
 
       <ContactModal open={contactOpen} onClose={() => setContactOpen(false)} />
+      <FloatingBackToTop />
     </div>
   );
 }

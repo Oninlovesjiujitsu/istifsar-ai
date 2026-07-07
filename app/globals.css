@@ -268,4 +268,26 @@
   background-color: hsl(40 75% 62% / 0.9); /* summer-night primary (sunlit gold) */
   color: hsl(30 15% 8%);                    /* summer-night primary-foreground (dark warm gray) */
 }
+
+/* ============================================================
+ * REACT FLOW EDGE OVERRIDES
+ * ============================================================ */
+.react-flow__edge {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.react-flow__edge-path.center-edge-path {
+  stroke: #fbbf24 !important;
+  stroke-width: 2px !important;
+  stroke-dasharray: 4 4 !important;
+  opacity: 0.9 !important;
+}
+
+.react-flow__edge-path.contention-edge-path {
+  stroke: #f87171 !important;
+  stroke-width: 2.2px !important;
+  stroke-dasharray: 5 5 !important;
+  opacity: 0.9 !important;
+}
 

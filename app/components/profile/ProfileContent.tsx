@@ -165,7 +165,7 @@ export default function ProfileContent({
               <Link
                 key={doc.id}
                 href={`/documents/${doc.id}`}
-                className="group rounded-lg border bg-card p-4 transition-all hover:shadow-sm hover:border-gold/30 space-y-2"
+                className="group rounded-lg border bg-card p-4 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:scale-[1.01] hover:shadow-md hover:border-gold/30 space-y-2"
               >
                 <p className="font-medium leading-snug line-clamp-2 group-hover:text-primary transition-colors text-sm">
                   {doc.title}
@@ -200,7 +200,7 @@ export default function ProfileContent({
               <Link
                 key={essay.id}
                 href={`/essays/${essay.slug}`}
-                className="group rounded-lg border bg-card p-4 transition-all hover:shadow-sm hover:border-gold/30 space-y-2"
+                className="group rounded-lg border bg-card p-4 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:scale-[1.01] hover:shadow-md hover:border-gold/30 space-y-2"
               >
                 <p className="font-medium leading-snug line-clamp-2 group-hover:text-primary transition-colors text-sm">
                   {essay.title}
@@ -228,7 +228,7 @@ export default function ProfileContent({
               <Link
                 key={path.id}
                 href={`/paths/${path.slug}`}
-                className="group rounded-lg border bg-card p-4 transition-all hover:shadow-sm hover:border-gold/30 space-y-2"
+                className="group rounded-lg border bg-card p-4 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:scale-[1.01] hover:shadow-md hover:border-gold/30 space-y-2"
               >
                 <p className="font-medium leading-snug line-clamp-2 group-hover:text-primary transition-colors text-sm">
                   {path.title}

@@ -11,7 +11,7 @@ export default function ArchiveCard({ href, title, description, stat }: ArchiveC
   return (
     <Link
       href={href}
-      className="group relative bg-surface-elevated p-8 rounded-sm border border-border dark:border-l dark:border-t dark:border-white/5 transition-all duration-500 hover:shadow-[0_0_20px_rgba(212,175,55,0.15)] dark:hover:shadow-[0_0_20px_rgba(212,175,55,0.15)] hover:shadow-lg hover:-translate-y-1 overflow-hidden"
+      className="group relative bg-surface-elevated p-8 rounded-sm border border-border dark:border-l dark:border-t dark:border-white/5 transition-all duration-500 hover:shadow-[0_0_20px_rgba(212,175,55,0.15)] dark:hover:shadow-[0_0_20px_rgba(212,175,55,0.15)] hover:shadow-lg hover:-translate-y-2 hover:scale-[1.01] overflow-hidden"
     >
       {/* Gold glow on hover (dark only) */}
       <div className="absolute -inset-px bg-gold opacity-0 dark:group-hover:opacity-[0.15] transition-opacity duration-500 -z-10 blur-sm" />

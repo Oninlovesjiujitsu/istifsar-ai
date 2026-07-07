@@ -91,7 +91,7 @@ export default function ArchiveCatalog() {
             >
               <Link
                 href={`/explore?era=${collection.slug}`}
-                className="group relative block bg-card p-8 md:p-10 rounded-sm border border-gold/20 hover:border-gold/60 transition-all duration-500 hover:shadow-[0_0_30px_rgba(212,175,55,0.15)] overflow-hidden"
+                className="group relative block bg-card p-8 md:p-10 rounded-sm border border-gold/20 hover:border-gold/60 transition-all duration-500 hover:shadow-[0_0_30px_rgba(212,175,55,0.15)] hover:-translate-y-2 hover:scale-[1.01] overflow-hidden"
               >
                 <div className="absolute -right-6 -top-6 text-gold/5 group-hover:text-gold/10 transition-colors duration-500">
                   <HugeiconsIcon icon={BookOpen01Icon} size={96} strokeWidth={0.5} />
