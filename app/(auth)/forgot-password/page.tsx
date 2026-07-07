@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import ForgotPasswordForm from '@/components/auth/ForgotPasswordForm';
+import ForgotPasswordForm from '@/app/components/auth/ForgotPasswordForm';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = { title: 'Forgot password — Istifsar' };

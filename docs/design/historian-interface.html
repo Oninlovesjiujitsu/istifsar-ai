@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Impact Dashboard | Istifsar AI</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&amp;family=Inter:wght@300;400;500;600;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+        }
+
+        .font-serif {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .font-sans {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Custom scrollbar for the dark archive aesthetic */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0e0e0e;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #353534;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #d4af37;
+        }
+    </style>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary-fixed": "#ffe088",
+                        "surface-container": "#201f1f",
+                        "background": "#131313",
+                        "on-tertiary-fixed": "#00174b",
+                        "on-surface": "#e5e2e1",
+                        "surface-container-low": "#1c1b1b",
+                        "error-container": "#93000a",
+                        "surface-container-highest": "#353534",
+                        "on-surface-variant": "#d0c5af",
+                        "primary-container": "#d4af37",
+                        "outline-variant": "#4d4635",
+                        "on-secondary-fixed-variant": "#544519",
+                        "primary-fixed-dim": "#e9c349",
+                        "on-tertiary-container": "#254188",
+                        "inverse-surface": "#e5e2e1",
+                        "surface-container-lowest": "#0e0e0e",
+                        "on-secondary": "#3c2f05",
+                        "on-primary-fixed-variant": "#574500",
+                        "secondary-fixed-dim": "#dac58d",
+                        "on-background": "#e5e2e1",
+                        "secondary": "#dac58d",
+                        "error": "#ffb4ab",
+                        "surface-tint": "#e9c349",
+                        "on-primary-container": "#554300",
+                        "tertiary-fixed-dim": "#b4c5ff",
+                        "surface-dim": "#131313",
+                        "tertiary-fixed": "#dbe1ff",
+                        "surface-bright": "#393939",
+                        "inverse-on-surface": "#313030",
+                        "on-secondary-container": "#c8b37d",
+                        "on-primary": "#3c2f00",
+                        "on-tertiary-fixed-variant": "#27438a",
+                        "on-primary-fixed": "#241a00",
+                        "surface": "#131313",
+                        "on-tertiary": "#082b72",
+                        "on-error": "#690005",
+                        "on-error-container": "#ffdad6",
+                        "outline": "#99907c",
+                        "surface-variant": "#353534",
+                        "secondary-fixed": "#f7e1a6",
+                        "primary": "#f2ca50",
+                        "tertiary": "#bfcdff",
+                        "surface-container-high": "#2a2a2a",
+                        "inverse-primary": "#735c00",
+                        "secondary-container": "#544519",
+                        "tertiary-container": "#97b0ff",
+                        "on-secondary-fixed": "#241a00"
+                    },
+                    fontFamily: {
+                        "headline": ["Playfair Display"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+                },
+            },
+        }
+    </script>
+</head>
+
+<body class="bg-background text-on-surface font-body selection:bg-primary-container selection:text-on-primary">
+    <!-- SideNavBar Anchor -->
+    <aside
+        class="w-[260px] h-screen fixed left-0 top-0 border-r border-stone-800/20 bg-stone-950 dark:bg-[#131313] flex flex-col h-full py-8 px-6 tonal-shift shadow-[0_0_15px_rgba(212,175,55,0.1)] z-50">
+        <div class="mb-12">
+            <h1 class="font-serif text-2xl font-bold text-[#D4AF37]">Istifsar AI</h1>
+            <div class="flex items-center mt-6 gap-3">
+                <div class="w-10 h-10 rounded-sm overflow-hidden bg-surface-container-highest">
+                    <img alt="Historian Profile Avatar" class="w-full h-full object-cover"
+                        data-alt="Close-up portrait of an elderly distinguished scholar with spectacles in a library filled with leather-bound books, soft candlelight"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuCc26FLjTrsfFHsYtXhp1eRSssmi_PBl739lwsUB_agNHp3C3mneZxHwJWeVHbK68DWXzTqcHKEQDz1-Fe66mWIEdZDp3TonxQRk2SOw6AMvt29-I9cDeagLsLuRTuLNfc4mwIV_4NN-P1gRTOBq5SkN9LyAmco_W7pt-MLUMJVVUDQHAsV1xHRGGUguI0FNXuI9Gq5PapbEyVN8ZAbL2JGkupdD_xF8EmZmphmHAFrPQWxMGrJefV6y__88D-hii5uRcvcV8PY36Y" />
+                </div>
+                <div>
+                    <p class="text-xs font-serif text-[#A1A1AA] uppercase tracking-wider">Verified Historian</p>
+                    <p class="text-sm font-medium text-on-surface">Dr. Elias Thorne</p>
+                </div>
+            </div>
+        </div>
+        <nav class="flex-1 flex flex-col gap-2">
+            <a class="flex items-center gap-4 py-3 text-[#D4AF37] font-bold border-l-2 border-[#D4AF37] pl-4 transition-all duration-300"
+                href="#">
+                <span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+                <span class="font-serif text-sm uppercase tracking-wider">Impact Dashboard</span>
+            </a>
+            <a class="flex items-center gap-4 py-3 pl-4 text-stone-500 hover:text-stone-300 transition-all duration-300 hover:bg-stone-900/50"
+                href="#">
+                <span class="material-symbols-outlined" data-icon="auto_stories">auto_stories</span>
+                <span class="font-serif text-sm uppercase tracking-wider">My Publications</span>
+            </a>
+            <a class="flex items-center gap-4 py-3 pl-4 text-stone-500 hover:text-stone-300 transition-all duration-300 hover:bg-stone-900/50"
+                href="#">
+                <span class="material-symbols-outlined" data-icon="military_tech">military_tech</span>
+                <span class="font-serif text-sm uppercase tracking-wider">Target Bounties</span>
+            </a>
+            <a class="flex items-center gap-4 py-3 pl-4 text-stone-500 hover:text-stone-300 transition-all duration-300 hover:bg-stone-900/50"
+                href="#">
+                <span class="material-symbols-outlined" data-icon="rate_review">rate_review</span>
+                <span class="font-serif text-sm uppercase tracking-wider">Peer Review Queue</span>
+            </a>
+            <div class="mt-8 pt-8 border-t border-stone-800/20">
+                <button
+                    class="w-full py-3 bg-primary-container text-on-primary font-bold text-xs uppercase tracking-widest rounded-sm scale-95 active:opacity-80 transition-all">
+                    Upload Manuscript
+                </button>
+            </div>
+        </nav>
+        <div class="mt-auto flex flex-col gap-2">
+            <a class="flex items-center gap-4 py-2 pl-4 text-stone-500 hover:text-stone-300 transition-colors" href="#">
+                <span class="material-symbols-outlined" data-icon="auto_awesome">auto_awesome</span>
+                <span class="font-serif text-sm uppercase tracking-wider">Enter Archive</span>
+            </a>
+            <a class="flex items-center gap-4 py-2 pl-4 text-stone-500 hover:text-stone-300 transition-colors" href="#">
+                <span class="material-symbols-outlined" data-icon="settings">settings</span>
+                <span class="font-serif text-sm uppercase tracking-wider">Settings</span>
+            </a>
+        </div>
+    </aside>
+    <!-- Main Content Wrapper -->
+    <main class="ml-[260px] min-h-screen relative">
+        <!-- TopAppBar Anchor -->
+        <header class="flex justify-between items-center w-full pl-12 pr-12 pt-8 h-20 bg-transparent negative-space">
+            <div class="flex items-center gap-8">
+                <nav class="flex gap-8">
+                    <a class="font-serif text-sm tracking-widest text-[#D4AF37] border-b border-[#D4AF37] opacity-90 hover:opacity-100 transition-colors uppercase"
+                        href="#">Portal</a>
+                    <a class="font-serif text-sm tracking-widest text-stone-600 hover:text-[#f2ca50] transition-colors uppercase"
+                        href="#">Impact Dashboard</a>
+                </nav>
+            </div>
+            <div class="flex items-center gap-6">
+                <button class="text-[#D4AF37] opacity-90 hover:opacity-100 transition-all">
+                    <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+                </button>
+                <button class="text-[#D4AF37] opacity-90 hover:opacity-100 transition-all">
+                    <span class="material-symbols-outlined" data-icon="history_edu">history_edu</span>
+                </button>
+                <div class="w-8 h-8 rounded-full bg-surface-container border border-outline-variant/20 overflow-hidden">
+                    <img alt="Curator Profile" class="w-full h-full object-cover"
+                        data-alt="Close up of an antique fountain pen resting on parchment paper with blurred library background"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1FxsYI0Oew6Vt5aEBJjxup2jSsGcMZljxzqaGr4UtYy7PpqAHAchwLSBHMA4Ixu0G3mSSK77RUYhLgLSdMrD2IRx4jtBbxG61_C--SeMyJeIWhGTBuzLvXYg4HYccNRte5gc5qMpD06M4LXKsiimTLfYbvpjTPMC0tdinn_prRvNruZZ8Auk7-GBYNNDTZWQend5cBJSu0NSO5_B-zJkQ9Yb4eWPygjyApwXCuCTOzeASNzzgAN2wByLY4Gq5TpbXWIVM9IFx4IM" />
+                </div>
+            </div>
+        </header>
+        <!-- Dashboard Content -->
+        <div class="px-12 py-12 max-w-7xl">
+            <!-- Header Editorial Section -->
+            <div class="mb-16">
+                <span class="font-sans text-[10px] uppercase tracking-[0.3em] text-primary/60 mb-4 block">Analytical
+                    Overview</span>
+                <h2 class="font-serif text-5xl font-black text-on-surface mb-4 tracking-tight">Curatorial Impact</h2>
+                <p class="font-sans text-on-surface-variant max-w-2xl leading-relaxed">
+                    A comprehensive trace of your contributions to the digital archive. Your work currently informs 12%
+                    of the RAG datasets in the Southeast Asian Maritime History sector.
+                </p>
+            </div>
+            <!-- Top Row: Metrics -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+                <!-- Card 1 -->
+                <div
+                    class="bg-surface-container p-8 border-t-2 border-[#D4AF37] shadow-[0_0_20px_rgba(212,175,55,0.08)] relative overflow-hidden group hover:shadow-[0_0_25px_rgba(212,175,55,0.15)] transition-all duration-500">
+                    <div class="absolute -right-4 -bottom-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                        <span class="material-symbols-outlined text-8xl" data-icon="library_books">library_books</span>
+                    </div>
+                    <p class="font-sans text-[10px] uppercase tracking-widest text-on-surface-variant mb-6">Total
+                        Citations</p>
+                    <h3 class="font-serif text-4xl font-bold text-primary mb-2">1,432</h3>
+                    <p class="text-xs text-green-500/80 font-medium flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm" data-icon="trending_up">trending_up</span>
+                        +14% this quarter
+                    </p>
+                </div>
+                <!-- Card 2 -->
+                <div
+                    class="bg-surface-container p-8 border-t-2 border-[#D4AF37] shadow-[0_0_20px_rgba(212,175,55,0.08)] relative overflow-hidden group hover:shadow-[0_0_25px_rgba(212,175,55,0.15)] transition-all duration-500">
+                    <div class="absolute -right-4 -bottom-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                        <span class="material-symbols-outlined text-8xl" data-icon="history_edu">history_edu</span>
+                    </div>
+                    <p class="font-sans text-[10px] uppercase tracking-widest text-on-surface-variant mb-6">Published
+                        Essays</p>
+                    <h3 class="font-serif text-4xl font-bold text-primary mb-2">8</h3>
+                    <p class="text-xs text-on-surface-variant/60 font-medium">Across 4 verified archives</p>
+                </div>
+                <!-- Card 3 -->
+                <div
+                    class="bg-surface-container p-8 border-t-2 border-[#D4AF37] shadow-[0_0_20px_rgba(212,175,55,0.08)] relative overflow-hidden group hover:shadow-[0_0_25px_rgba(212,175,55,0.15)] transition-all duration-500">
+                    <div class="absolute -right-4 -bottom-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                        <span class="material-symbols-outlined text-8xl" data-icon="verified_user">verified_user</span>
+                    </div>
+                    <p class="font-sans text-[10px] uppercase tracking-widest text-on-surface-variant mb-6">Pending Peer
+                        Reviews</p>
+                    <h3 class="font-serif text-4xl font-bold text-primary mb-2">2</h3>
+                    <p class="text-xs text-secondary/70 font-medium italic">Estimated completion: 4 days</p>
+                </div>
+            </div>
+            <!-- Middle Section: Visualization -->
+            <div class="mb-16">
+                <div class="bg-surface-container p-10 relative">
+                    <div class="flex justify-between items-end mb-12">
+                        <div>
+                            <h4 class="font-serif text-2xl font-bold text-on-surface">Citations Over Time</h4>
+                            <p class="text-xs font-sans text-on-surface-variant uppercase tracking-widest mt-2">
+                                Aggregate growth across all manuscripts</p>
+                        </div>
+                        <div class="flex gap-4">
+                            <span class="text-[10px] uppercase tracking-widest text-primary flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-primary"></span> 2024 Active
+                            </span>
+                            <span class="text-[10px] uppercase tracking-widest text-stone-600 flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-stone-700"></span> 2023 Baseline
+                            </span>
+                        </div>
+                    </div>
+                    <!-- SVG Chart Visualization -->
+                    <div class="relative h-64 w-full">
+                        <svg class="w-full h-full overflow-visible" viewbox="0 0 1000 200">
+                            <!-- Grid lines -->
+                            <line stroke="#353534" stroke-dasharray="4" stroke-width="0.5" x1="0" x2="1000" y1="0"
+                                y2="0"></line>
+                            <line stroke="#353534" stroke-dasharray="4" stroke-width="0.5" x1="0" x2="1000" y1="50"
+                                y2="50"></line>
+                            <line stroke="#353534" stroke-dasharray="4" stroke-width="0.5" x1="0" x2="1000" y1="100"
+                                y2="100"></line>
+                            <line stroke="#353534" stroke-dasharray="4" stroke-width="0.5" x1="0" x2="1000" y1="150"
+                                y2="150"></line>
+                            <!-- Area Gradient -->
+                            <defs>
+                                <lineargradient id="chartGradient" x1="0" x2="0" y1="0" y2="1">
+                                    <stop offset="0%" stop-color="#D4AF37" stop-opacity="0.2"></stop>
+                                    <stop offset="100%" stop-color="#D4AF37" stop-opacity="0"></stop>
+                                </lineargradient>
+                            </defs>
+                            <!-- Data Path 1 (2024) -->
+                            <path d="M0,180 Q100,160 200,140 T400,110 T600,60 T800,40 T1000,20" fill="none"
+                                stroke="#D4AF37" stroke-linecap="round" stroke-width="3"></path>
+                            <path d="M0,180 Q100,160 200,140 T400,110 T600,60 T800,40 T1000,20 V200 H0 Z"
+                                fill="url(#chartGradient)"></path>
+                            <!-- Baseline Path 2 (2023) -->
+                            <path d="M0,190 Q150,185 300,170 T600,150 T900,130 T1000,120" fill="none" stroke="#353534"
+                                stroke-dasharray="8" stroke-width="2"></path>
+                            <!-- Data points -->
+                            <circle cx="200" cy="140" fill="#131313" r="4" stroke="#D4AF37" stroke-width="2"></circle>
+                            <circle cx="600" cy="60" fill="#131313" r="4" stroke="#D4AF37" stroke-width="2"></circle>
+                            <circle cx="1000" cy="20" fill="#D4AF37" r="6"></circle>
+                        </svg>
+                        <!-- Axis Labels -->
+                        <div
+                            class="flex justify-between mt-6 font-sans text-[10px] text-stone-500 uppercase tracking-tighter">
+                            <span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span><span>Nov</span><span>Dec</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Bottom Section: Table -->
+            <div>
+                <div class="flex items-center justify-between mb-8">
+                    <h4 class="font-serif text-2xl font-bold text-on-surface">Top Cited Works</h4>
+                    <button
+                        class="text-[10px] font-sans uppercase tracking-widest text-primary hover:underline underline-offset-4 decoration-2 transition-all">View
+                        Archive Full Catalog</button>
+                </div>
+                <div class="bg-surface-container overflow-hidden">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="border-b border-outline-variant/10">
+                                <th
+                                    class="py-6 px-8 font-sans text-[10px] uppercase tracking-widest text-on-surface-variant font-medium">
+                                    Manuscript Title</th>
+                                <th
+                                    class="py-6 px-8 font-sans text-[10px] uppercase tracking-widest text-on-surface-variant font-medium">
+                                    Year</th>
+                                <th
+                                    class="py-6 px-8 font-sans text-[10px] uppercase tracking-widest text-on-surface-variant font-medium">
+                                    Citations</th>
+                                <th
+                                    class="py-6 px-8 font-sans text-[10px] uppercase tracking-widest text-on-surface-variant font-medium text-right">
+                                    Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-outline-variant/5">
+                            <tr class="group hover:bg-stone-900/40 transition-colors">
+                                <td class="py-8 px-8">
+                                    <div class="flex items-center gap-4">
+                                        <span class="material-symbols-outlined text-primary/40"
+                                            data-icon="menu_book">menu_book</span>
+                                        <div>
+                                            <p
+                                                class="font-serif text-lg text-on-surface group-hover:text-primary transition-colors">
+                                                The Agoncillo Constraint in Modern RAG</p>
+                                            <p class="text-xs font-sans text-stone-500 mt-1 italic">Published in AI
+                                                Ethnohistory Quarterly</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-8 px-8 font-sans text-sm text-on-surface-variant">2024</td>
+                                <td class="py-8 px-8">
+                                    <span class="font-serif text-xl text-primary font-bold">642</span>
+                                </td>
+                                <td class="py-8 px-8 text-right">
+                                    <span
+                                        class="inline-block px-3 py-1 bg-primary-container/10 border border-primary/20 text-primary text-[10px] uppercase tracking-widest font-bold">Authenticated</span>
+                                </td>
+                            </tr>
+                            <tr class="group hover:bg-stone-900/40 transition-colors">
+                                <td class="py-8 px-8">
+                                    <div class="flex items-center gap-4">
+                                        <span class="material-symbols-outlined text-primary/40"
+                                            data-icon="history">history</span>
+                                        <div>
+                                            <p
+                                                class="font-serif text-lg text-on-surface group-hover:text-primary transition-colors">
+                                                Trade Routes of the Sulu Sultanate</p>
+                                            <p class="text-xs font-sans text-stone-500 mt-1 italic">Archival Deep-Scan
+                                                Series Vol. 12</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-8 px-8 font-sans text-sm text-on-surface-variant">2023</td>
+                                <td class="py-8 px-8">
+                                    <span class="font-serif text-xl text-primary font-bold">412</span>
+                                </td>
+                                <td class="py-8 px-8 text-right">
+                                    <span
+                                        class="inline-block px-3 py-1 bg-stone-800/40 border border-stone-700/50 text-stone-400 text-[10px] uppercase tracking-widest font-bold">Archived</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- Decorative background element -->
+            <div class="fixed bottom-0 right-0 p-12 opacity-5 pointer-events-none -z-10">
+                <span class="font-serif text-[15rem] leading-none font-black text-stone-500 select-none">AI</span>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>

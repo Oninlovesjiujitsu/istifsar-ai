@@ -1,6 +1,6 @@
 import { proxy } from '@/proxy';
 import { createClient } from '@/lib/supabase/server';
-import ValidateView from '@/components/contribute/ValidateView';
+import ValidateView from '@/app/components/contribute/ValidateView';
 import { redirect } from 'next/navigation';
 import type { Metadata } from 'next';
 
@@ -87,9 +87,9 @@ export default async function ValidateDocumentPage({ params }: Props) {
   const existingValidation =
     rawValidations.find((v) => v.validator_id === user!.id)
       ? {
-          decision: rawValidations.find((v) => v.validator_id === user!.id)!.decision,
-          notes: rawValidations.find((v) => v.validator_id === user!.id)!.notes,
-        }
+        decision: rawValidations.find((v) => v.validator_id === user!.id)!.decision,
+        notes: rawValidations.find((v) => v.validator_id === user!.id)!.notes,
+      }
       : null;
 
   // All other validators' decisions (excluding current user)

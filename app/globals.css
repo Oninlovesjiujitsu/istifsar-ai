@@ -15,9 +15,9 @@
   --color-gold: #d4af37;
   --color-gold-dim: #b8963f;
   --color-gold-bright: #f2ca50;
-  --color-surface-vault: #18181b;
-  --color-surface-elevated: #27272a;
-  --color-text-muted-vault: #a1a1aa;
+  --color-surface-vault: var(--surface-vault);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-text-muted-vault: var(--text-muted-vault);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -56,42 +56,42 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* ─── Light mode — warm parchment & amber ──────────────────────────────────── */
+/* ─── Light mode — crisp paper & slate ─────────────────────────────────────── */
 :root {
-  /* Warm cream parchment background */
-  --background: oklch(0.98 0.012 80);
-  --foreground: oklch(0.18 0.022 52);
+  /* Clean off-white paper background (#FAF9F6) */
+  --background: oklch(0.98 0.003 90);
+  --foreground: oklch(0.15 0.01 260);
 
-  /* Cards slightly brighter than background */
-  --card: oklch(1 0.005 78);
-  --card-foreground: oklch(0.18 0.022 52);
+  /* Pure white cards */
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.15 0.01 260);
 
-  --popover: oklch(1 0.005 78);
-  --popover-foreground: oklch(0.18 0.022 52);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.15 0.01 260);
 
-  /* Amber/sepia primary — museum signage, aged gold */
+  /* Deep amber primary — interactive elements only */
   --primary: oklch(0.44 0.11 56);
-  --primary-foreground: oklch(0.99 0.004 78);
+  --primary-foreground: oklch(0.99 0 0);
 
-  /* Warm secondary surfaces */
-  --secondary: oklch(0.95 0.016 78);
-  --secondary-foreground: oklch(0.18 0.022 52);
+  /* Cool-neutral secondary surfaces */
+  --secondary: oklch(0.96 0.003 260);
+  --secondary-foreground: oklch(0.15 0.01 260);
 
-  /* Warm muted backgrounds */
-  --muted: oklch(0.95 0.016 78);
-  --muted-foreground: oklch(0.50 0.026 58);
+  /* Neutral muted tones */
+  --muted: oklch(0.96 0.003 260);
+  --muted-foreground: oklch(0.45 0.01 260);
 
-  --accent: oklch(0.95 0.016 78);
-  --accent-foreground: oklch(0.18 0.022 52);
+  --accent: oklch(0.96 0.003 260);
+  --accent-foreground: oklch(0.15 0.01 260);
 
   --destructive: oklch(0.577 0.245 27.325);
 
-  /* Warm border — parchment tone */
-  --border: oklch(0.88 0.018 78);
-  --input: oklch(0.88 0.018 78);
+  /* Clean neutral borders */
+  --border: oklch(0.90 0.003 260);
+  --input: oklch(0.90 0.003 260);
   --ring: oklch(0.55 0.08 58);
 
-  /* Charts */
+  /* Charts — keep warm for visual interest */
   --chart-1: oklch(0.44 0.11 56);
   --chart-2: oklch(0.60 0.09 58);
   --chart-3: oklch(0.72 0.07 70);
@@ -100,13 +100,18 @@
 
   --radius: 0.625rem;
 
-  --sidebar: oklch(0.97 0.014 78);
-  --sidebar-foreground: oklch(0.18 0.022 52);
+  /* Sidebar & vault surfaces — clean light grey */
+  --surface-vault: oklch(0.97 0.002 260);
+  --surface-elevated: oklch(0.94 0.003 260);
+  --text-muted-vault: oklch(0.40 0.01 260);
+
+  --sidebar: oklch(0.97 0.002 260);
+  --sidebar-foreground: oklch(0.15 0.01 260);
   --sidebar-primary: oklch(0.44 0.11 56);
-  --sidebar-primary-foreground: oklch(0.99 0.004 78);
-  --sidebar-accent: oklch(0.93 0.018 78);
-  --sidebar-accent-foreground: oklch(0.18 0.022 52);
-  --sidebar-border: oklch(0.88 0.018 78);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.93 0.003 260);
+  --sidebar-accent-foreground: oklch(0.15 0.01 260);
+  --sidebar-border: oklch(0.90 0.003 260);
   --sidebar-ring: oklch(0.55 0.08 58);
 }
 
@@ -148,6 +153,10 @@
   --chart-4: oklch(0.40 0.05 50);
   --chart-5: oklch(0.30 0.04 48);
 
+  --surface-vault: #18181b;
+  --surface-elevated: #27272a;
+  --text-muted-vault: #a1a1aa;
+
   --sidebar: oklch(0.20 0.016 52);
   --sidebar-foreground: oklch(0.95 0.012 78);
   --sidebar-primary: oklch(0.78 0.08 64);
@@ -185,6 +194,9 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    transition-property: color, background-color, border-color, box-shadow;
+    transition-duration: 300ms;
+    transition-timing-function: ease-out;
   }
 
   body {

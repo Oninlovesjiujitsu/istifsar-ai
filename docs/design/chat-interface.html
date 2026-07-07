@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Istifsar AI | Nocturnal Vault</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;0,900;1,400&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .parchment-texture {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cfilter id='noise' x='0' y='0'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-container-lowest": "#0e0e0e",
+                        "on-surface": "#e5e2e1",
+                        "primary-container": "#d4af37",
+                        "surface-container": "#201f1f",
+                        "surface": "#131313",
+                        "primary": "#f2ca50",
+                        "on-primary": "#3c2f00",
+                        "surface-container-low": "#1c1b1b",
+                        "surface-container-high": "#2a2a2a",
+                        "outline-variant": "#4d4635",
+                        "background": "#131313",
+                        "secondary-container": "#544519",
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    fontFamily: {
+                        "headline": ["Noto Serif"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-surface text-on-surface font-body overflow-hidden">
+<!-- Shared SideNavBar -->
+<nav class="fixed left-0 top-0 h-full w-72 flex flex-col z-40 bg-zinc-900 dark:bg-[#131313] font-serif tracking-tight text-zinc-100 shadow-[0_0_15px_rgba(212,175,55,0.1)]">
+<div class="bg-zinc-950 px-6 py-8 flex flex-col gap-2">
+<div class="font-serif italic text-amber-500 text-xl">The Archivist</div>
+<div class="font-serif text-lg uppercase tracking-widest text-amber-500 dark:text-[#D4AF37]">Historical Intelligence</div>
+</div>
+<div class="mt-8 flex flex-col gap-6">
+<div class="flex items-center gap-4 text-zinc-500 dark:text-zinc-600 pl-4 hover:text-amber-400 hover:shadow-[0_0_10px_rgba(212,175,55,0.2)] transition-all cursor-pointer scale-95 active:scale-90 duration-300">
+<span class="material-symbols-outlined">auto_stories</span>
+<span class="label-md uppercase tracking-wider text-xs">Archives</span>
+</div>
+<div class="flex items-center gap-4 text-amber-500 dark:text-[#f2ca50] font-bold border-l-2 border-amber-500 pl-4 hover:text-amber-400 hover:shadow-[0_0_10px_rgba(212,175,55,0.2)] transition-all cursor-pointer scale-95 active:scale-90 duration-300">
+<span class="material-symbols-outlined">history_edu</span>
+<span class="label-md uppercase tracking-wider text-xs">Library</span>
+</div>
+<div class="flex items-center gap-4 text-zinc-500 dark:text-zinc-600 pl-4 hover:text-amber-400 hover:shadow-[0_0_10px_rgba(212,175,55,0.2)] transition-all cursor-pointer scale-95 active:scale-90 duration-300">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="label-md uppercase tracking-wider text-xs">Codex</span>
+</div>
+<div class="flex items-center gap-4 text-zinc-500 dark:text-zinc-600 pl-4 hover:text-amber-400 hover:shadow-[0_0_10px_rgba(212,175,55,0.2)] transition-all cursor-pointer scale-95 active:scale-90 duration-300">
+<span class="material-symbols-outlined">settings</span>
+<span class="label-md uppercase tracking-wider text-xs">Settings</span>
+</div>
+</div>
+<div class="mt-auto p-6">
+<button class="w-full py-4 bg-primary-container text-on-primary font-bold rounded-sm text-xs uppercase tracking-widest shadow-[0_0_10px_rgba(212,175,55,0.3)]">
+                New Inquiry
+            </button>
+</div>
+</nav>
+<!-- Shared TopAppBar -->
+<header class="ml-72 flex items-center justify-between px-12 h-20 w-[calc(100%-18rem)] bg-transparent backdrop-blur-md tonal-shift bg-zinc-900/50 z-30">
+<h1 class="font-serif font-black text-amber-500 text-lg uppercase tracking-widest">Nocturnal Vault</h1>
+<div class="flex items-center gap-8">
+<div class="relative">
+<input class="bg-surface-container-lowest border-none rounded-sm px-4 py-2 w-64 text-sm focus:ring-1 focus:ring-primary/40 shadow-[0_0_5px_rgba(212,175,55,0.1)]" placeholder="Search the Vault..." type="text"/>
+</div>
+<div class="flex items-center gap-6 text-zinc-400">
+<span class="material-symbols-outlined hover:text-amber-200 transition-colors cursor-pointer">notifications</span>
+<span class="material-symbols-outlined hover:text-amber-200 transition-colors cursor-pointer">account_balance</span>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="ml-72 pt-20 flex h-screen">
+<!-- Chat Area -->
+<section class="flex-1 flex flex-col bg-surface relative overflow-hidden">
+<!-- Background Decoration -->
+<div class="absolute inset-0 pointer-events-none opacity-5">
+<div class="absolute top-1/4 left-1/4 w-96 h-96 bg-primary rounded-full blur-[120px]"></div>
+</div>
+<!-- Messages List -->
+<div class="flex-1 overflow-y-auto px-12 py-12 flex flex-col gap-12">
+<!-- User Inquiry -->
+<div class="flex justify-end ml-24">
+<div class="max-w-2xl bg-surface-container-high p-6 rounded-sm text-on-surface/90 text-sm leading-relaxed border-r-4 border-primary/20">
+                        Can you tell me about the authorship of Al-Ibānah and its significance in Islamic theology?
+                    </div>
+</div>
+<!-- AI Response -->
+<div class="flex mr-24 group">
+<div class="flex flex-col gap-4 max-w-3xl">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-sm">history_edu</span>
+<span class="text-[10px] uppercase tracking-widest text-primary/60 font-bold">Archivist Inquiry Response</span>
+</div>
+<div class="bg-[#27272A] p-8 rounded-sm text-zinc-300 text-base leading-loose font-light relative">
+<p class="mb-4">
+                                The document is titled "The Creed of Abul-Hasan Al-Ash’ari: Al-Ibānah ‘an Usūl Ad-Diyānah" 
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-surface-container text-primary text-xs cursor-pointer hover:shadow-[0_0_10px_rgba(212,175,55,0.4)] transition-all font-mono mx-1 border border-primary/20">[1]</span>. 
+                            </p>
+<p>
+                                It was written by al-Imām Abul-Ḥasan al-Ash’arī (d. 324 AH), a central figure whose transition back to the methodology of the Salaf is documented extensively within this specific text. The work serves as a formal refutation of Mu'tazilite doctrine and an affirmation of traditionalist creed 
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-surface-container text-primary text-xs cursor-pointer hover:shadow-[0_0_10px_rgba(212,175,55,0.4)] transition-all font-mono mx-1 border border-primary/20">[Source 2]</span>.
+                            </p>
+<!-- Asymmetric Decorative Element -->
+<div class="absolute -right-2 -bottom-2 w-12 h-12 border-b-2 border-r-2 border-primary/20"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Chat Input Area -->
+<div class="px-12 pb-12">
+<div class="relative flex items-center">
+<input class="w-full bg-surface-container-lowest border-none py-6 px-8 rounded-sm text-on-surface focus:ring-1 focus:ring-primary/40 shadow-xl parchment-texture" placeholder="Deepen the investigation..." type="text"/>
+<div class="absolute right-6 flex items-center gap-4 text-primary/60">
+<span class="material-symbols-outlined cursor-pointer hover:text-primary">attach_file</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-primary">send</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Right Source Panel -->
+<aside class="w-[40%] bg-surface-container-low border-l border-outline-variant/15 flex flex-col z-20">
+<!-- Source Header -->
+<div class="h-20 flex items-center px-8 bg-surface-container-high">
+<div class="flex items-center justify-between w-full">
+<h2 class="font-headline text-primary text-xl font-black italic tracking-tight">Source Details</h2>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary">close</span>
+</div>
+</div>
+<!-- Source Metadata -->
+<div class="p-10 flex flex-col gap-8">
+<div class="space-y-4">
+<span class="text-[10px] uppercase tracking-[0.2em] text-primary/60 font-bold">Metadata Identification</span>
+<div class="grid grid-cols-1 gap-6">
+<div>
+<div class="text-[10px] text-zinc-500 uppercase mb-1">Document Title</div>
+<div class="font-headline text-lg text-on-surface leading-tight">Al-Ibānah ‘an Usūl Ad-Diyānah (The Elucidation of Islam’s Foundation)</div>
+</div>
+<div class="flex gap-12">
+<div>
+<div class="text-[10px] text-zinc-500 uppercase mb-1">Author</div>
+<div class="font-headline text-on-surface">Abul-Ḥasan al-Ash’arī</div>
+</div>
+<div>
+<div class="text-[10px] text-zinc-500 uppercase mb-1">Dating</div>
+<div class="font-headline text-on-surface">Circa 310-324 AH</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Source Excerpt -->
+<div class="mt-4">
+<span class="text-[10px] uppercase tracking-[0.2em] text-primary/60 font-bold mb-4 block">Archival Fragment</span>
+<div class="parchment-texture bg-[#0e0e0e] p-8 rounded-sm relative overflow-hidden group">
+<!-- Decorative Seal -->
+<div class="absolute -right-8 -top-8 w-32 h-32 opacity-5 pointer-events-none">
+<img class="w-full h-full object-contain" data-alt="ancient arabic calligraphy seal stamp with circular geometric patterns gold embossed effect on dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAFe4MXaQEAwBpHiWJKD3BevsembQJxox-12dJFKXk4zx5XBd5TEL_u8mXNxDLPvj8SnvMXh_NjUVEpVOgx2j15irJDUEGsISau_nZLCE0j7a5wa-7IxfWDkEh76iCQB1SvWw-Bue65IuB0T3W6E_adqa-BFKp0-SbeumxLgFQ8yp2PDLsDoSFCqvWlEajd-OiiX145t46-VgIH4RdSOI6IWY1wMrmLsof7W2pxWVfA14rli7tKmeR-8oIV2KVTyo8NgmMzVZZuXw0"/>
+</div>
+<div class="font-headline italic text-xl text-primary/80 mb-6 border-l-2 border-primary/30 pl-4">
+                            "Our position which we hold and our religion which we follow is..."
+                        </div>
+<div class="text-zinc-400 leading-relaxed font-light first-letter:text-4xl first-letter:font-headline first-letter:text-primary first-letter:mr-2 first-letter:float-left">
+                            Adherence to the Book of our Lord, to the Sunnah of our Prophet, and to that which has been narrated from the Companions, the Successors and the Imams of Hadith. In this we seek refuge... We hold that which Abu Abdillah Ahmad ibn Hanbal—may Allah brighten his face, raise his rank and grant him a great reward—held, following what he said and avoiding what he avoided. He was the noble Imam and the complete leader by whom Allah made the truth clear and removed the deviation...
+                        </div>
+<div class="mt-8 pt-8 border-t border-primary/10 flex justify-between items-center">
+<span class="text-[10px] text-zinc-600 font-mono italic">Folio 14b, Codex Ash'ari-Vault-001</span>
+<button class="text-primary text-xs font-bold uppercase tracking-widest flex items-center gap-2 hover:translate-x-1 transition-transform">
+                                VIEW FULL MANUSCRIPT <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</aside>
+</main>
+<!-- FAB Suppression (Per Instructions) - None Rendered -->
+</body></html>

@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import type { Metadata } from 'next';
-import SettingsClient from '@/components/settings/SettingsClient';
+import SettingsClient from '@/app/components/settings/SettingsClient';
 
 export const metadata: Metadata = { title: 'Settings — Istifsar' };
 

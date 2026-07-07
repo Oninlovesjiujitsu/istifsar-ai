@@ -1,6 +1,6 @@
 import { proxy } from '@/proxy';
 import { createClient } from '@/lib/supabase/server';
-import ValidateList from '@/components/contribute/ValidateList';
+import ValidateList from '@/app/components/contribute/ValidateList';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {

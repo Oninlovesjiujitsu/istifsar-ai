@@ -1,6 +1,6 @@
 import { proxy } from '@/proxy';
 import { createClient } from '@/lib/supabase/server';
-import ChatInterface from '@/components/chat/ChatInterface';
+import ChatInterface from '@/app/components/chat/ChatInterface';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = { title: 'New Inquiry — Istifsar AI' };

@@ -1,5 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/admin';
-import ChangeRoleForm from '@/components/admin/ChangeTierForm';
+import ChangeRoleForm from '@/app/components/admin/ChangeTierForm';
 import { ROLE_BADGE, ROLE_LABELS } from '@/lib/ui/role-labels';
 import type { Metadata } from 'next';
 

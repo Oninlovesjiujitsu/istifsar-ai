@@ -2,8 +2,8 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import ContentionView from '@/components/shared/ContentionView';
-import AskAboutButton from '@/components/document/AskAboutButton';
+import ContentionView from '@/app/components/shared/ContentionView';
+import AskAboutButton from '@/app/components/document/AskAboutButton';
 import type { Metadata } from 'next';
 
 type Props = { params: Promise<{ id: string }> };

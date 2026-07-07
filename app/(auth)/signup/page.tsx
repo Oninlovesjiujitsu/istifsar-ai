@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import SignUpForm from '@/components/auth/SignUpForm';
+import SignUpForm from '@/app/components/auth/SignUpForm';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = { title: 'Create account — Istifsar' };

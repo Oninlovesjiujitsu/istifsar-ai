@@ -1,7 +1,7 @@
 import { proxy } from '@/proxy';
 import { createClient } from '@/lib/supabase/server';
-import ArchiveCard from '@/components/explore/ArchiveCard';
-import DiscoveryTip from '@/components/explore/DiscoveryTip';
+import ArchiveCard from '@/app/components/explore/ArchiveCard';
+import DiscoveryTip from '@/app/components/explore/DiscoveryTip';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = { title: 'Archive — Istifsar AI' };
@@ -21,9 +21,9 @@ export default async function ExplorePage() {
   const tagIds = (tags ?? []).map((t) => t.id);
   const { data: tagCounts } = tagIds.length
     ? await supabase
-        .from('document_tags')
-        .select('tag_id')
-        .in('tag_id', tagIds)
+      .from('document_tags')
+      .select('tag_id')
+      .in('tag_id', tagIds)
     : { data: [] };
 
   // Build count map
@@ -48,13 +48,13 @@ export default async function ExplorePage() {
       {/* Editorial Header */}
       <header className="max-w-6xl mx-auto mb-10 sm:mb-16">
         <div className="flex flex-col gap-3 sm:gap-4">
-          <span className="text-[10px] sm:text-xs uppercase tracking-[0.3em] sm:tracking-[0.4em] text-gold/60">
+          <span className="text-[10px] sm:text-xs uppercase tracking-[0.3em] sm:tracking-[0.4em] text-muted-foreground dark:text-gold/60">
             {(totalDocs ?? 0).toLocaleString()} writings in the archive
           </span>
-          <h2 className="text-2xl sm:text-4xl lg:text-6xl xl:text-7xl font-heading text-gold leading-tight max-w-2xl">
+          <h2 className="text-2xl sm:text-4xl lg:text-6xl xl:text-7xl font-heading text-foreground dark:text-gold leading-tight max-w-2xl">
             Select an Archive to Begin
           </h2>
-          <div className="h-px w-24 bg-gradient-to-r from-gold to-transparent mt-4" />
+          <div className="h-px w-24 bg-gradient-to-r from-border dark:from-gold to-transparent mt-4" />
         </div>
       </header>
 

@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import ResetPasswordForm from '@/components/auth/ResetPasswordForm';
+import ResetPasswordForm from '@/app/components/auth/ResetPasswordForm';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = { title: 'Set new password — Istifsar' };

@@ -1,7 +1,7 @@
 import { proxy } from '@/proxy';
 import { createClient } from '@/lib/supabase/server';
-import SidebarShell from '@/components/layout/SidebarShell';
-import ReaderSidebarContent from '@/components/layout/ReaderSidebarContent';
+import SidebarShell from '@/app/components/layout/SidebarShell';
+import ReaderSidebarContent from '@/app/components/layout/ReaderSidebarContent';
 
 export default async function ArchiveLayout({ children }: { children: React.ReactNode }) {
   await proxy({ requireAuth: true });

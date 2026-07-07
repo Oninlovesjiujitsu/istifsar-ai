@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Istifsar AI | Reader Dashboard</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto_Serif:wght@400;700&amp;family=Inter:wght@300;400;500;600;700&amp;family=Playfair+Display:wght@700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "secondary-fixed": "#f7e1a6",
+                        "error": "#ffb4ab",
+                        "primary-container": "#d4af37",
+                        "surface-bright": "#393939",
+                        "on-error": "#690005",
+                        "on-tertiary-fixed-variant": "#27438a",
+                        "on-primary-container": "#554300",
+                        "on-primary": "#3c2f00",
+                        "on-surface": "#e5e2e1",
+                        "on-primary-fixed-variant": "#574500",
+                        "tertiary-fixed": "#dbe1ff",
+                        "surface-tint": "#e9c349",
+                        "inverse-primary": "#735c00",
+                        "on-tertiary-fixed": "#00174b",
+                        "primary": "#f2ca50",
+                        "on-tertiary-container": "#254188",
+                        "on-surface-variant": "#d0c5af",
+                        "secondary-fixed-dim": "#dac58d",
+                        "on-primary-fixed": "#241a00",
+                        "tertiary": "#bfcdff",
+                        "on-tertiary": "#082b72",
+                        "on-error-container": "#ffdad6",
+                        "surface-dim": "#131313",
+                        "inverse-on-surface": "#313030",
+                        "on-secondary": "#3c2f05",
+                        "surface-container-low": "#1c1b1b",
+                        "on-background": "#e5e2e1",
+                        "tertiary-fixed-dim": "#b4c5ff",
+                        "primary-fixed": "#ffe088",
+                        "surface-container-highest": "#353534",
+                        "surface-container-high": "#2a2a2a",
+                        "inverse-surface": "#e5e2e1",
+                        "secondary": "#dac58d",
+                        "surface-container-lowest": "#0e0e0e",
+                        "surface-container": "#201f1f",
+                        "tertiary-container": "#97b0ff",
+                        "outline-variant": "#4d4635",
+                        "on-secondary-fixed": "#241a00",
+                        "secondary-container": "#544519",
+                        "on-secondary-container": "#c8b37d",
+                        "surface": "#131313",
+                        "background": "#121212",
+                        "error-container": "#93000a",
+                        "surface-variant": "#353534",
+                        "outline": "#99907c",
+                        "primary-fixed-dim": "#e9c349",
+                        "on-secondary-fixed-variant": "#544519"
+                    },
+                    fontFamily: {
+                        "headline": ["Playfair Display", "Noto Serif"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #353534;
+            border-radius: 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #d4af37;
+        }
+    </style>
+</head>
+
+<body class="bg-background text-on-surface font-body selection:bg-primary-container/30">
+    <!-- SIDEBAR (SideNavBar Shared Component Integration) -->
+    <aside
+        class="h-screen w-64 fixed left-0 top-0 bg-[#18181B] border-r border-[#353534]/15 shadow-[0_0_15px_rgba(212,175,55,0.1)] flex flex-col py-8 gap-12 z-50">
+        <!-- Brand & Header -->
+        <div class="px-6 flex flex-col gap-2">
+            <h1 class="text-2xl font-serif text-[#D4AF37] tracking-widest uppercase font-headline">Istifsar AI</h1>
+            <p class="text-xs font-label uppercase tracking-widest text-on-surface-variant/60">The Illuminated Archivist
+            </p>
+        </div>
+        <!-- Primary CTA -->
+        <div class="px-6">
+            <button
+                class="w-full bg-[#D4AF37] text-on-primary-fixed py-3 font-bold rounded-sm shadow-[0_4px_10px_rgba(212,175,55,0.2)] hover:bg-primary transition-all duration-300 flex items-center justify-center gap-2 group">
+                <span class="material-symbols-outlined text-xl" data-icon="add">add</span>
+                <span class="font-label uppercase text-sm tracking-tighter">New Inquiry</span>
+            </button>
+        </div>
+        <!-- Primary Navigation -->
+        <nav class="flex flex-col flex-grow">
+            <div class="flex flex-col gap-1">
+                <a class="text-[#f2ca50] border-l-4 border-[#D4AF37] bg-[#201f1f] font-bold px-4 py-3 flex items-center gap-3 font-['Noto_Serif'] antialiased tracking-tight"
+                    href="#">
+                    <span class="material-symbols-outlined" data-icon="subscriptions">subscriptions</span>
+                    Archive
+                </a>
+                <a class="text-[#A1A1AA] hover:text-[#e5e2e1] px-4 py-3 transition-colors hover:bg-[#201f1f] flex items-center gap-3 font-['Noto_Serif'] antialiased tracking-tight"
+                    href="#">
+                    <span class="material-symbols-outlined" data-icon="military_tech">military_tech</span>
+                    Bounty Board
+                </a>
+            </div>
+            <!-- Conversation Vault Section -->
+            <div class="mt-8 px-6 flex flex-col gap-4">
+                <div class="flex flex-col gap-3">
+                    <span class="text-[10px] font-label uppercase tracking-[0.2em] text-[#A1A1AA]">Conversation
+                        Vault</span>
+                    <div class="relative">
+                        <input
+                            class="w-full bg-[#0e0e0e] border-none text-xs py-2 pl-8 pr-2 rounded-sm focus:ring-1 focus:ring-primary/40 placeholder:text-on-surface-variant/30 font-label"
+                            placeholder="Search inquiries..." type="text" />
+                        <span
+                            class="material-symbols-outlined absolute left-2 top-1.5 text-sm text-on-surface-variant/40"
+                            data-icon="search">search</span>
+                    </div>
+                </div>
+                <div class="flex flex-col gap-2 custom-scrollbar overflow-y-auto max-h-[307px] -mx-2 px-2">
+                    <button
+                        class="text-left text-xs p-2 rounded-sm bg-primary/5 text-[#f2ca50] border-l border-primary/40 hover:bg-primary/10 transition-colors flex items-start gap-2">
+                        <span class="material-symbols-outlined text-sm mt-0.5"
+                            data-icon="chat_bubble">chat_bubble</span>
+                        <span>The Tejeros Convention</span>
+                    </button>
+                    <button
+                        class="text-left text-xs p-2 rounded-sm text-[#A1A1AA] hover:text-[#e5e2e1] hover:bg-[#201f1f] transition-colors flex items-start gap-2">
+                        <span class="material-symbols-outlined text-sm mt-0.5"
+                            data-icon="chat_bubble">chat_bubble</span>
+                        <span>Martial Law Economics</span>
+                    </button>
+                    <button
+                        class="text-left text-xs p-2 rounded-sm text-[#A1A1AA] hover:text-[#e5e2e1] hover:bg-[#201f1f] transition-colors flex items-start gap-2">
+                        <span class="material-symbols-outlined text-sm mt-0.5"
+                            data-icon="chat_bubble">chat_bubble</span>
+                        <span>Suez Canal Impacts</span>
+                    </button>
+                </div>
+            </div>
+        </nav>
+        <!-- Footer Actions -->
+        <div class="px-2 flex flex-col gap-1 border-t border-[#353534]/15 pt-6">
+            <a class="text-[#A1A1AA] hover:text-[#e5e2e1] px-4 py-2 transition-colors hover:bg-[#201f1f] flex items-center gap-3 text-sm font-['Noto_Serif']"
+                href="#">
+                <span class="material-symbols-outlined text-lg" data-icon="settings">settings</span>
+                Settings
+            </a>
+            <a class="text-[#A1A1AA] hover:text-[#e5e2e1] px-4 py-2 transition-colors hover:bg-[#201f1f] flex items-center gap-3 text-sm font-['Noto_Serif']"
+                href="#">
+                <span class="material-symbols-outlined text-lg" data-icon="logout">logout</span>
+                Sign Out
+            </a>
+        </div>
+    </aside>
+    <!-- MAIN CONTENT AREA -->
+    <main class="ml-64 min-h-screen p-12 lg:p-24 bg-[#121212] relative overflow-hidden">
+        <!-- Background Ambience -->
+        <div
+            class="absolute top-0 right-0 w-[800px] h-[800px] bg-[radial-gradient(circle_at_center,rgba(212,175,55,0.03)_0%,transparent_70%)] -z-10 pointer-events-none">
+        </div>
+        <!-- Editorial Header -->
+        <header class="max-w-6xl mx-auto mb-20 mt-12">
+            <div class="flex flex-col gap-4">
+                <span class="text-xs font-label uppercase tracking-[0.4em] text-primary/60">Digital Curation v2.4</span>
+                <h2 class="text-5xl lg:text-7xl font-headline text-[#D4AF37] leading-tight max-w-2xl">
+                    Select an Archive to Begin
+                </h2>
+                <div class="h-px w-24 bg-gradient-to-r from-primary to-transparent mt-4"></div>
+            </div>
+        </header>
+        <!-- Bento Grid for Archives -->
+        <section class="max-w-6xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+                <!-- Card 1: The Philippine Revolution -->
+                <div
+                    class="group relative bg-[#27272A] p-8 rounded-sm border-l border-t border-white/5 transition-all duration-500 hover:shadow-[0_0_20px_rgba(212,175,55,0.15)] hover:-translate-y-1 overflow-hidden">
+                    <!-- Gold Glow Accent -->
+                    <div
+                        class="absolute -inset-[1px] bg-[#D4AF37] opacity-0 group-hover:opacity-20 transition-opacity duration-500 -z-10 blur-[1px]">
+                    </div>
+                    <div class="flex flex-col h-full gap-8">
+                        <div class="aspect-[4/3] w-full overflow-hidden bg-surface-container-lowest relative">
+                            <img alt="historical document"
+                                class="w-full h-full object-cover mix-blend-luminosity group-hover:mix-blend-normal group-hover:scale-105 transition-all duration-700"
+                                data-alt="vintage aged sepia historical document with quill and handwriting in dramatic low light atmospheric setting"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDt28IvOSGwIQtWRihLX5HEKzl-mwTko6E7zOhvPZPZ-mkI9U4xHu7QnGxwTfxBrrWtXooBuOVFU-HISPna32qbJiDEf8HiXXnMjBJapYieYDX7O1ws-pN7vwc2-8UUTTvpg7UyPWm2zV7_QaHt07Z622YsfQPoohQBxOagF8J-3scXV_DNjTK177Dwa95Bp4i8VsXXO1Gk6JSPXdqDB1TJdw7TuqIjvrNjYUXg9bmTmo3Hit18sJBV3qby3OU-UgVl1yuujPL3NkU" />
+                            <div
+                                class="absolute inset-0 bg-gradient-to-t from-[#27272A] via-transparent to-transparent">
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-4">
+                            <h3
+                                class="text-2xl font-headline text-on-surface group-hover:text-primary transition-colors duration-300">
+                                The Philippine Revolution</h3>
+                            <p class="text-sm text-[#A1A1AA] leading-relaxed line-clamp-3">
+                                Explore the intricate socio-political movements of 1896, from the Katipunan's inception
+                                to the declaration of independence.
+                            </p>
+                        </div>
+                        <div class="mt-auto flex items-center justify-between pt-6 border-t border-white/5">
+                            <span class="text-[10px] font-label uppercase tracking-widest text-[#A1A1AA]">4.2k
+                                Documents</span>
+                            <span
+                                class="material-symbols-outlined text-primary opacity-0 group-hover:opacity-100 group-hover:translate-x-2 transition-all duration-300"
+                                data-icon="arrow_right_alt">arrow_right_alt</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Card 2: 18th Century Trade -->
+                <div
+                    class="group relative bg-[#27272A] p-8 rounded-sm border-l border-t border-white/5 transition-all duration-500 hover:shadow-[0_0_20px_rgba(212,175,55,0.15)] hover:-translate-y-1 overflow-hidden">
+                    <div
+                        class="absolute -inset-[1px] bg-[#D4AF37] opacity-0 group-hover:opacity-20 transition-opacity duration-500 -z-10 blur-[1px]">
+                    </div>
+                    <div class="flex flex-col h-full gap-8">
+                        <div class="aspect-[4/3] w-full overflow-hidden bg-surface-container-lowest relative">
+                            <img alt="ancient map"
+                                class="w-full h-full object-cover mix-blend-luminosity group-hover:mix-blend-normal group-hover:scale-105 transition-all duration-700"
+                                data-alt="detailed ancient nautical map with ornate illustrations of sea monsters and compass rose on aged parchment paper"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDpYQNq3qww9-AJMnl7e9qgeOdbswzkjA98fc1YQI-0ysTJBuPH7TWdh8n0eyuT5bBTszKFrpAp32EEUmlJYBMPkK_wI1XOeNOsKMah9-2f5JSRGXPrUJIHnngHIc8dFRf-D28WNk8RUXFynHpARQb8bEuFX66ShnlqrpwpgLCdc7d65Hv0vAwSye3qiU6s6PUvPK3NfKIW7c5SHz0Er4FDCIzMMnV4EjxVzZAs1LLoRcm5A51KMJehErnpzzAqrc_dnkodLcRkoEw" />
+                            <div
+                                class="absolute inset-0 bg-gradient-to-t from-[#27272A] via-transparent to-transparent">
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-4">
+                            <h3
+                                class="text-2xl font-headline text-on-surface group-hover:text-primary transition-colors duration-300">
+                                18th Century Trade</h3>
+                            <p class="text-sm text-[#A1A1AA] leading-relaxed line-clamp-3">
+                                Analyzing the economic ripples of the Galleon Trade and the emergence of global commerce
+                                routes through Southeast Asian ports.
+                            </p>
+                        </div>
+                        <div class="mt-auto flex items-center justify-between pt-6 border-t border-white/5">
+                            <span class="text-[10px] font-label uppercase tracking-widest text-[#A1A1AA]">2.8k Ledger
+                                Entries</span>
+                            <span
+                                class="material-symbols-outlined text-primary opacity-0 group-hover:opacity-100 group-hover:translate-x-2 transition-all duration-300"
+                                data-icon="arrow_right_alt">arrow_right_alt</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Card 3: Pre-Colonial Era -->
+                <div
+                    class="group relative bg-[#27272A] p-8 rounded-sm border-l border-t border-white/5 transition-all duration-500 hover:shadow-[0_0_20px_rgba(212,175,55,0.15)] hover:-translate-y-1 overflow-hidden">
+                    <div
+                        class="absolute -inset-[1px] bg-[#D4AF37] opacity-0 group-hover:opacity-20 transition-opacity duration-500 -z-10 blur-[1px]">
+                    </div>
+                    <div class="flex flex-col h-full gap-8">
+                        <div class="aspect-[4/3] w-full overflow-hidden bg-surface-container-lowest relative">
+                            <img alt="gold artifact"
+                                class="w-full h-full object-cover mix-blend-luminosity group-hover:mix-blend-normal group-hover:scale-105 transition-all duration-700"
+                                data-alt="macro close-up of intricate pre-colonial filigree gold jewelry artifact against dark shadows with warm gleaming highlights"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAYKUlYBQK5734jtM0Lp9qLmSAxdam4F8q9SwPQdwMMpzz68CWlWAVwGeB_oF2TwU-GxwQJBWRUsA5_TuODbt7iUcSr7sJ4BavIA4Z8N5hqC0bJiqsFra7s6ZxRF3u3dSmTVs-YbRt1xkFAnhX0TXOcFEuSpp48NLqfi5RuCCzv05aw0x6e5XfSQ2-gC5njDnNXnXh-a09bXur3wLtLyBoWpDOVQASsRXT99VMlH26rpE6ryTV-Z2_-drVbuxDXEeseIY0ULtiz79Y" />
+                            <div
+                                class="absolute inset-0 bg-gradient-to-t from-[#27272A] via-transparent to-transparent">
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-4">
+                            <h3
+                                class="text-2xl font-headline text-on-surface group-hover:text-primary transition-colors duration-300">
+                                Pre-Colonial Era</h3>
+                            <p class="text-sm text-[#A1A1AA] leading-relaxed line-clamp-3">
+                                Deciphering the social structures of the Barangay systems, oral traditions, and the
+                                complex web of maritime kingdoms before 1521.
+                            </p>
+                        </div>
+                        <div class="mt-auto flex items-center justify-between pt-6 border-t border-white/5">
+                            <span class="text-[10px] font-label uppercase tracking-widest text-[#A1A1AA]">Artifact
+                                Metadata</span>
+                            <span
+                                class="material-symbols-outlined text-primary opacity-0 group-hover:opacity-100 group-hover:translate-x-2 transition-all duration-300"
+                                data-icon="arrow_right_alt">arrow_right_alt</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Secondary Discoverability Section -->
+        <section class="max-w-6xl mx-auto mt-32 mb-12">
+            <div class="bg-surface-container-low/40 p-12 rounded-sm border border-white/5 backdrop-blur-sm">
+                <div class="flex flex-col md:flex-row gap-12 items-center">
+                    <div class="flex-1 space-y-6">
+                        <span class="text-xs font-label uppercase tracking-[0.2em] text-[#D4AF37]">The Librarian's
+                            Tip</span>
+                        <h4 class="text-3xl font-headline italic">"History is a set of lies agreed upon—unless you find
+                            the primary sources."</h4>
+                        <p class="text-[#A1A1AA] text-sm leading-relaxed max-w-lg">
+                            Use the Bounty Board to discover specific historical enigmas requested by the curator
+                            community. Successfully answering an inquiry rewards you with 'Merit Credits' for deeper
+                            archive access.
+                        </p>
+                        <button
+                            class="text-primary hover:text-white transition-colors flex items-center gap-2 group font-label uppercase text-xs tracking-widest font-bold">
+                            View Bounty Board
+                            <div class="w-12 h-[1px] bg-primary group-hover:w-16 transition-all duration-300"></div>
+                        </button>
+                    </div>
+                    <div class="flex-shrink-0 w-48 h-48 border border-[#D4AF37]/30 p-4 relative group">
+                        <div
+                            class="absolute inset-0 border border-[#D4AF37]/10 translate-x-3 translate-y-3 -z-10 group-hover:translate-x-5 group-hover:translate-y-5 transition-transform duration-500">
+                        </div>
+                        <div class="w-full h-full bg-[#1c1b1b] flex items-center justify-center">
+                            <span class="material-symbols-outlined text-5xl text-[#D4AF37]/20"
+                                data-icon="auto_stories">auto_stories</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+
+</html>

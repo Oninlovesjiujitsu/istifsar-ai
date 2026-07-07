@@ -1,8 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import ContentionView from '@/components/shared/ContentionView';
-import DeleteDocumentButton from '@/components/publications/DeleteDocumentButton';
+import ContentionView from '@/app/components/shared/ContentionView';
+import DeleteDocumentButton from '@/app/components/publications/DeleteDocumentButton';
 import type { Metadata } from 'next';
 
 type Props = { params: Promise<{ id: string }> };

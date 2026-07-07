@@ -1,6 +1,6 @@
 import { proxy } from '@/proxy';
 import { createClient } from '@/lib/supabase/server';
-import ChatInterface from '@/components/chat/ChatInterface';
+import ChatInterface from '@/app/components/chat/ChatInterface';
 import { redirect } from 'next/navigation';
 import type { Metadata } from 'next';
 import type { ContentionMeta } from '@/types/contention';

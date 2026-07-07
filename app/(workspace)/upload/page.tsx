@@ -1,6 +1,6 @@
 
 import { proxy } from '@/proxy';
-import UploadForm from '@/components/contribute/UploadForm';
+import UploadForm from '@/app/components/contribute/UploadForm';
 
 export const metadata = {
   title: 'Add a primary source — Istifsar',

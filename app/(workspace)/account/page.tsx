@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
-import SignOutButton from '@/components/layout/SignOutButton';
-import EditDisplayName from '@/components/settings/EditDisplayName';
+import SignOutButton from '@/app/components/layout/SignOutButton';
+import EditDisplayName from '@/app/components/settings/EditDisplayName';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 

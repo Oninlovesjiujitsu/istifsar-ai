@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist_Mono, Figtree, Playfair_Display, Noto_Serif } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import { ThemeProvider } from "@/app/components/providers/ThemeProvider";
 
 const figtree = Figtree({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -36,7 +37,7 @@ export default function RootLayout({
     <html
       lang="en"
       className={cn(
-        "dark h-full antialiased",
+        "h-full antialiased",
         figtree.variable,
         playfairDisplay.variable,
         notoSerif.variable,
@@ -45,7 +46,9 @@ export default function RootLayout({
       )}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>{children}</ThemeProvider>
+      </body>
     </html>
   );
 }

@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Istifsar AI | The Digital Curator</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,300;0,400;0,700;1,300;1,400&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f2ca50",
+                        "primary-fixed-dim": "#e9c349",
+                        "on-secondary-container": "#c8b37d",
+                        "on-primary-container": "#554300",
+                        "on-surface": "#e5e2e1",
+                        "surface-dim": "#131313",
+                        "on-background": "#e5e2e1",
+                        "surface": "#131313",
+                        "secondary": "#dac58d",
+                        "on-primary-fixed": "#241a00",
+                        "secondary-fixed": "#f7e1a6",
+                        "surface-tint": "#e9c349",
+                        "surface-bright": "#393939",
+                        "surface-container-high": "#2a2a2a",
+                        "primary-fixed": "#ffe088",
+                        "on-tertiary": "#082b72",
+                        "inverse-on-surface": "#313030",
+                        "on-secondary-fixed": "#241a00",
+                        "tertiary-fixed": "#dbe1ff",
+                        "inverse-primary": "#735c00",
+                        "on-secondary": "#3c2f05",
+                        "on-primary-fixed-variant": "#574500",
+                        "on-error": "#690005",
+                        "inverse-surface": "#e5e2e1",
+                        "tertiary-container": "#97b0ff",
+                        "on-tertiary-container": "#254188",
+                        "secondary-fixed-dim": "#dac58d",
+                        "outline-variant": "#4d4635",
+                        "on-tertiary-fixed-variant": "#27438a",
+                        "primary-container": "#d4af37",
+                        "on-surface-variant": "#d0c5af",
+                        "error-container": "#93000a",
+                        "surface-variant": "#353534",
+                        "surface-container-low": "#1c1b1b",
+                        "tertiary": "#bfcdff",
+                        "on-tertiary-fixed": "#00174b",
+                        "tertiary-fixed-dim": "#b4c5ff",
+                        "on-secondary-fixed-variant": "#544519",
+                        "secondary-container": "#544519",
+                        "error": "#ffb4ab",
+                        "surface-container": "#201f1f",
+                        "on-primary": "#3c2f00",
+                        "on-error-container": "#ffdad6",
+                        "background": "#131313",
+                        "outline": "#99907c",
+                        "surface-container-lowest": "#0e0e0e",
+                        "surface-container-highest": "#353534"
+                    },
+                    fontFamily: {
+                        "headline": ["Noto Serif"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .glow-hover:hover {
+            shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+        }
+    </style>
+</head>
+
+<body class="bg-surface text-on-surface font-body selection:bg-primary/30">
+    <!-- TopNavBar -->
+    <nav class="fixed top-0 w-full z-50 bg-transparent shadow-[0_0_15px_rgba(212,175,55,0.1)]">
+        <div class="flex justify-between items-center px-12 py-6 max-w-[1440px] mx-auto">
+            <div class="text-2xl font-serif italic text-[#D4AF37] tracking-widest">Istifsar AI</div>
+            <div class="hidden md:flex items-center space-x-12">
+                <a class="font-['Noto_Serif'] font-light tracking-tight text-[#f2ca50] border-b-2 border-[#D4AF37] pb-1 cursor-pointer transition-all duration-300 ease-in-out"
+                    href="#">The Agoncillo Constraint</a>
+                <a class="font-['Noto_Serif'] font-light tracking-tight text-[#A1A1AA] hover:text-[#e5e2e1] transition-colors cursor-pointer transition-all duration-300 ease-in-out"
+                    href="#">For Historians</a>
+                <a class="font-['Noto_Serif'] font-light tracking-tight text-[#A1A1AA] hover:text-[#e5e2e1] transition-colors cursor-pointer transition-all duration-300 ease-in-out"
+                    href="#">FAQs</a>
+            </div>
+            <div class="flex items-center space-x-6">
+                <button
+                    class="text-[#D4AF37] font-label text-sm uppercase tracking-widest hover:text-primary-fixed transition-colors">Sign
+                    In</button>
+                <button
+                    class="bg-primary-container text-on-primary px-6 py-2 rounded-sm font-label text-sm uppercase tracking-widest hover:scale-[1.02] transition-all duration-300">Join
+                    as Historian</button>
+            </div>
+        </div>
+    </nav>
+    <main>
+        <!-- Hero Section -->
+        <section class="relative min-h-screen flex items-center justify-center pt-24 px-8 overflow-hidden">
+            <div class="absolute inset-0 z-0">
+                <div class="absolute inset-0 bg-gradient-to-b from-transparent via-surface to-surface"></div>
+                <div class="w-full h-full opacity-20"
+                    data-alt="dramatic chiaroscuro lighting on an ancient library hall with dust motes dancing in shafts of golden sunlight hitting old leather books"
+                    style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAbanGNIKVF4RxWZqCJ7_XoI9K71iKZmL4NaulI6Fk8CoJCm9RI-Mh6F6xdnIehaHly2IjpNjaVmX59pHOCGS-srb83LSTHjvnM__a9zShK9EKlSvyEvv5GjBLQGYF9A7B11waO_cHEyi_okF6YHPEFI6SszjUJQCtDSgdnzccRznD2lavonW279bh4b80qn4gvxEA1yahDbvbcuooUkvTyKIQmRmgqFpqGgtkmU7gCYrFlh09IzA7TSMEe6frjtzsX8O5pP1fvrCU'); background-size: cover; background-position: center;">
+                </div>
+            </div>
+            <div class="relative z-10 max-w-5xl text-center">
+                <h1 class="font-headline text-6xl md:text-8xl text-primary leading-tight mb-8 tracking-tight">
+                    Seek the Truth <br /><span class="italic font-light">of the Past.</span>
+                </h1>
+                <p class="font-body text-xl text-on-surface-variant max-w-2xl mx-auto leading-relaxed mb-12">
+                    An advanced analytical engine designed for the rigorous demands of historical scholarship.
+                    Transcending search to deliver synthesized truth.
+                </p>
+                <div class="flex justify-center gap-16 items-center opacity-40">
+                    <span class="font-label text-xs uppercase tracking-[0.3em]">Curated Archives</span>
+                    <span class="font-label text-xs uppercase tracking-[0.3em]">Verified Sources</span>
+                    <span class="font-label text-xs uppercase tracking-[0.3em]">Scholarly Nodes</span>
+                </div>
+            </div>
+        </section>
+        <!-- Archive Catalog Grid -->
+        <section class="max-w-[1440px] mx-auto px-12 py-32">
+            <div class="flex flex-col mb-20">
+                <h2 class="font-headline text-4xl text-on-surface mb-4">The Digital Collections</h2>
+                <div class="w-24 h-px bg-primary/40"></div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+                <!-- Card 1 -->
+                <div
+                    class="group relative bg-surface-container p-10 rounded-sm border border-primary/20 hover:border-primary/60 transition-all duration-500 hover:shadow-[0_0_30px_rgba(212,175,55,0.15)] cursor-pointer overflow-hidden">
+                    <div class="absolute -right-8 -top-8 text-primary/5 group-hover:text-primary/10 transition-colors">
+                        <span class="material-symbols-outlined text-9xl">history_edu</span>
+                    </div>
+                    <h3 class="font-headline text-2xl text-primary mb-2">The Philippine Revolution</h3>
+                    <p class="font-label text-xs uppercase tracking-widest text-on-surface-variant mb-8">45
+                        Peer-Reviewed Essays
+                    </p>
+                    <p class="text-on-surface-variant text-sm leading-relaxed mb-8">Katipunan primary sources and
+                        insurgent records.</p>
+                    <div
+                        class="flex items-center text-primary text-xs uppercase tracking-widest font-semibold group-hover:gap-4 transition-all">
+                        Explore Collection <span class="material-symbols-outlined ml-2 text-sm">arrow_forward</span>
+                    </div>
+                </div>
+                <!-- Card 2 -->
+                <div
+                    class="group relative bg-surface-container p-10 rounded-sm border border-primary/20 hover:border-primary/60 transition-all duration-500 hover:shadow-[0_0_30px_rgba(212,175,55,0.15)] cursor-pointer overflow-hidden">
+                    <div class="absolute -right-8 -top-8 text-primary/5 group-hover:text-primary/10 transition-colors">
+                        <span class="material-symbols-outlined text-9xl">menu_book</span>
+                    </div>
+                    <h3 class="font-headline text-2xl text-primary mb-2">The Martial Law Era</h3>
+                    <p class="font-label text-xs uppercase tracking-widest text-on-surface-variant mb-8">12 Scholarly
+                        Perspectives
+                    </p>
+                    <p class="text-on-surface-variant text-sm leading-relaxed mb-8">Scholars insights during the Martial
+                        Law Era.</p>
+                    <div
+                        class="flex items-center text-primary text-xs uppercase tracking-widest font-semibold group-hover:gap-4 transition-all">
+                        Explore Collection <span class="material-symbols-outlined ml-2 text-sm">arrow_forward</span>
+                    </div>
+                </div>
+                <!-- Card 3 -->
+                <div
+                    class="group relative bg-surface-container p-10 rounded-sm border border-primary/20 hover:border-primary/60 transition-all duration-500 hover:shadow-[0_0_30px_rgba(212,175,55,0.15)] cursor-pointer overflow-hidden">
+                    <div class="absolute -right-8 -top-8 text-primary/5 group-hover:text-primary/10 transition-colors">
+                        <span class="material-symbols-outlined text-9xl">sailing</span>
+                    </div>
+                    <h3 class="font-headline text-2xl text-primary mb-2">Pre-Colonial Trade</h3>
+                    <p class="font-label text-xs uppercase tracking-widest text-on-surface-variant mb-8">8 Documents</p>
+                    <p class="text-on-surface-variant text-sm leading-relaxed mb-8">Mapping the maritime silk road
+                        through ceramic remnants and early Austronesian navigation charts.</p>
+                    <div
+                        class="flex items-center text-primary text-xs uppercase tracking-widest font-semibold group-hover:gap-4 transition-all">
+                        Explore Collection <span class="material-symbols-outlined ml-2 text-sm">arrow_forward</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Value Proposition Grid -->
+        <section class="bg-surface-container-low py-32 px-12">
+            <div class="max-w-[1440px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-24">
+                <div class="flex flex-col items-start">
+                    <div class="bg-surface-container p-4 rounded-sm mb-8">
+                        <span class="material-symbols-outlined text-3xl text-primary">shield</span>
+                    </div>
+                    <h4 class="font-headline text-xl text-on-surface mb-4">The Agoncillo Constraint</h4>
+                    <p class="text-on-surface-variant leading-relaxed">Our AI adheres to strict historiographical
+                        protocols, prioritizing primary source validation over speculative inference.</p>
+                </div>
+                <div class="flex flex-col items-start">
+                    <div class="bg-surface-container p-4 rounded-sm mb-8">
+                        <span class="material-symbols-outlined text-3xl text-primary">balance</span>
+                    </div>
+                    <h4 class="font-headline text-xl text-on-surface mb-4">Nodes of Contention</h4>
+                    <p class="text-on-surface-variant leading-relaxed">Identify conflicting historical narratives
+                        instantly. Istifsar highlights discrepancies to facilitate critical debate.</p>
+                </div>
+                <div class="flex flex-col items-start">
+                    <div class="bg-surface-container p-4 rounded-sm mb-8">
+                        <span class="material-symbols-outlined text-3xl text-primary">bar_chart</span>
+                    </div>
+                    <h4 class="font-headline text-xl text-on-surface mb-4">The Citation Economy</h4>
+                    <p class="text-on-surface-variant leading-relaxed">Every claim is backed by a verifiable digital
+                        thread, connecting synthesized insights directly to the original manuscript.</p>
+                </div>
+            </div>
+        </section>
+        <!-- Editorial Call to Action -->
+        <section class="py-40 text-center max-w-4xl mx-auto px-8">
+            <h2 class="font-headline text-5xl text-on-surface mb-12">History is not just preserved; it is understood.
+            </h2>
+            <p class="font-body text-on-surface-variant mb-16 text-lg">Access to the Istifsar engine is currently by
+                institutional invitation. We invite historians to help us curate the future of our shared past.</p>
+            <button
+                class="inline-flex items-center bg-transparent border border-primary text-primary px-12 py-5 rounded-sm font-label uppercase tracking-widest hover:bg-primary/5 transition-all group">
+                Apply for Researcher Access
+                <span
+                    class="material-symbols-outlined ml-4 group-hover:translate-x-2 transition-transform">auto_stories</span>
+            </button>
+        </section>
+    </main>
+    <!-- Footer -->
+    <footer class="w-full border-t border-[#353534]/20 bg-[#0e0e0e]">
+        <div class="flex flex-col md:flex-row justify-between items-center px-16 py-12 w-full max-w-[1440px] mx-auto">
+            <div class="flex flex-col items-center md:items-start gap-4 mb-8 md:mb-0">
+                <span class="font-serif text-[#D4AF37] text-xl">Istifsar AI</span>
+                <p class="font-['Inter'] text-sm tracking-widest uppercase text-[#A1A1AA] text-center md:text-left">©
+                    2024 Istifsar AI. All rights reserved. The Digital Curator.</p>
+            </div>
+            <div class="flex gap-12">
+                <a class="font-['Inter'] text-sm tracking-widest uppercase text-[#A1A1AA] hover:text-[#D4AF37] transition-all opacity-80 hover:opacity-100"
+                    href="#">Archives</a>
+                <a class="font-['Inter'] text-sm tracking-widest uppercase text-[#A1A1AA] hover:text-[#D4AF37] transition-all opacity-80 hover:opacity-100"
+                    href="#">Methodology</a>
+                <a class="font-['Inter'] text-sm tracking-widest uppercase text-[#A1A1AA] hover:text-[#D4AF37] transition-all opacity-80 hover:opacity-100"
+                    href="#">Privacy Policy</a>
+                <a class="font-['Inter'] text-sm tracking-widest uppercase text-[#A1A1AA] hover:text-[#D4AF37] transition-all opacity-80 hover:opacity-100"
+                    href="#">Institutional Access</a>
+            </div>
+        </div>
+    </footer>
+</body>
+
+</html>

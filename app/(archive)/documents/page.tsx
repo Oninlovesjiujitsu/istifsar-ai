@@ -1,6 +1,6 @@
 import { proxy } from '@/proxy';
 import { createClient } from '@/lib/supabase/server';
-import DocumentCard from '@/components/document/DocumentCard';
+import DocumentCard from '@/app/components/document/DocumentCard';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 
@@ -75,11 +75,10 @@ export default async function DocumentsPage({ searchParams }: Props) {
           <div className="flex flex-wrap gap-2">
             <Link
               href="/documents"
-              className={`rounded-full px-3 py-1.5 text-sm transition-colors ${
-                !activeTag
+              className={`rounded-full px-3 py-1.5 text-sm transition-colors ${!activeTag
                   ? 'bg-gold text-[#241a00] font-medium'
                   : 'bg-surface-elevated text-text-muted-vault hover:bg-white/10'
-              }`}
+                }`}
             >
               All
             </Link>
@@ -87,11 +86,10 @@ export default async function DocumentsPage({ searchParams }: Props) {
               <Link
                 key={t.slug}
                 href={`/documents?tag=${t.slug}`}
-                className={`rounded-full px-3 py-1.5 text-sm transition-colors ${
-                  activeTag?.slug === t.slug
+                className={`rounded-full px-3 py-1.5 text-sm transition-colors ${activeTag?.slug === t.slug
                     ? 'bg-gold text-[#241a00] font-medium'
                     : 'bg-surface-elevated text-text-muted-vault hover:bg-white/10'
-                }`}
+                  }`}
               >
                 {t.name}
               </Link>
