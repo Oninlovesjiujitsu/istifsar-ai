@@ -10,9 +10,9 @@ Istifsar comes from the Arabic root word (f-s-r) which relates to interpreting, 
 - `TypeScript`
 - `Tailwind CSS` + `shadcn/ui`
 - `Vercel AI SDK`
-- `Google Gemini` (Flash, Pro, Embedding)
-- `Supabase` (PostgreSQL, pgvector, Auth, Storage, Edge Functions)
-- `LangChain.js`
+- `Google Gemini` (Flash 2.5, gemini-embedding-001)
+- `GraphRAG` (custom-built)
+- `Supabase` (PostgreSQL, pgvector, Recursive CTEs for graph traversal, Auth, Storage, Edge Functions)
 - `Unstructured.io`
 - `Upstash Redis`
 - `React Flow`
@@ -42,11 +42,11 @@ The AI is strictly forbidden from answering based on its general training data. 
 
 Istifsar was built to solve a specific problem: LLMs answer historical questions confidently but without sources, while the scholarly record sits locked in PDFs and archives. Agoncillo's dictum—"No Document, No History"—became the design constraint: every answer must trace back to a verified historian publication, or the system refuses to answer.
 
-**Stack choice:** Google Gemini for all LLM and embedding operations, Supabase as the unified data layer (PostgreSQL + pgvector + Auth + Storage + Edge Functions). One AI vendor, one infrastructure vendor, no glue services.
+**Stack choice:** Google Gemini for all LLM and embedding operations, Supabase as the unified data layer (PostgreSQL + pgvector + Recursive CTEs + Auth + Storage + Edge Functions).
 
-**Ingestion pipeline** (first build target—no documents, no platform). A database webhook triggers an Edge Function: text extraction (historian-provided text preferred, Unstructured.io fallback for scans) → semantic chunking (Greg Kamradt method—embedding similarity between consecutive sentences to find natural topic boundaries) with recursive character splitter as fallback → 3072-dim embedding via `gemini-embedding-001` → full-text search indexing → contention detection against existing publications.
+**Ingestion pipeline** (first build target—no documents, no platform). A database webhook triggers an Edge Function: text extraction (historian-provided text preferred, Unstructured.io fallback for scans) → semantic chunking (Greg Kamradt method) with recursive character splitter fallback → 3072-dim embedding via `gemini-embedding-001` → full-text search indexing → entity & relationship extraction (via Gemini Flash) → graph linking (deduplicated via aliases/embeddings) → contention detection against existing publications.
 
-**RAG pipeline.** Hybrid retrieval (pgvector cosine similarity + Postgres full-text search, merged via Reciprocal Rank Fusion) → cosine-similarity rerank (top 30 → top-K) → hard similarity gate → context construction with Agoncillo Constraint system prompt, numbered source passages, and conversation history → streamed response via Vercel AI SDK.
+**RAG pipeline.** Parallel retrieval: hybrid search (pgvector + FTS) and graph-guided search (via recursive CTE traversal) → merged & ranked via Reciprocal Rank Fusion (RRF) with graph-proximity boost → cosine-similarity rerank (top 30 → top-K) → similarity gate (bypassed for strong graph signals) → context construction (Agoncillo Constraint prompt, source passages, and graph connections) → streamed response via Vercel AI SDK.
 
 **Role-based access.** Three roles (Reader, Verified Historian, Admin) enforced at the database layer—JWT custom claims carry the user's role, RLS policies read the claim directly. Validators cannot approve their own submissions.
 
@@ -68,6 +68,8 @@ Istifsar was built to solve a specific problem: LLMs answer historical questions
 
 ## 💭 How can it be improved?
 
+- Utilize Microsoft's pre-built GraphRAG framework, instead of the custom-built GraphRAG.
+- Migrate SQL-based recursive CTE graph retrieval to a native graph DB like Neo4j (locally or cloud-hosted).
 - Implement Knowledge Graph RAG for dynamic connection and data points analysis within a network for a superior context-aware retrieval.
 - Add export functionality for citation chains (BibTeX, Chicago, Turabian formats).
 - Add accessibility audit (screen reader support for Citation Graph, keyboard navigation for Split-Pane).
