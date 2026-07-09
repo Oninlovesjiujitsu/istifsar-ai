@@ -112,7 +112,7 @@ export default function SourceDetailsPanel({ citation, onClose }: Props) {
                 Relevance: {(citation.score * 100).toFixed(0)}%
               </span>
               <a
-                href={`/documents/${citation.documentId}`}
+                href={`/documents/all/${citation.documentId}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gold text-xs font-bold uppercase tracking-widest flex items-center gap-2 hover:translate-x-1 transition-transform"

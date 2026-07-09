@@ -1,16 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { motion } from 'motion/react';
-import { HugeiconsIcon } from '@hugeicons/react';
-import {
-  ArrowRight01Icon,
-  BookOpen01Icon,
-} from '@hugeicons/core-free-icons';
 import { getArchiveCatalog } from '@/src/actions/catalog';
 import type { CatalogTag } from '@/src/lib/cache/redis';
 import { useAuth } from '@/src/hooks/useAuth';
+import ArchiveCard from './ArchiveCard';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -35,7 +30,7 @@ export default function ArchiveCatalog() {
     } else if (role === 'admin') {
       return '/admin';
     } else {
-      return `/documents?tag=${slug}`;
+      return `/documents/${slug}`;
     }
   };
 
@@ -51,7 +46,7 @@ export default function ArchiveCatalog() {
   }, []);
 
   return (
-    <section id="collections" className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-12 py-16 sm:py-24 md:py-32">
+    <section id="collections" className="dark max-w-6xl mx-auto px-4 sm:px-6 md:px-12 py-16 sm:py-24 md:py-32">
       <motion.div
         initial="hidden"
         whileInView="visible"
@@ -75,7 +70,7 @@ export default function ArchiveCatalog() {
       </motion.div>
 
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
           {[1, 2, 3].map((i) => (
             <div
               key={i}
@@ -93,37 +88,21 @@ export default function ArchiveCatalog() {
           initial="hidden"
           whileInView="visible"
           viewport={viewport}
-          className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12"
+          className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12"
         >
           {collections.map((collection) => (
             <motion.div
               key={collection.id}
               variants={fadeUp}
               transition={{ duration: 0.6, ease: 'easeOut' }}
+              className="flex flex-col h-full"
             >
-              <Link
+              <ArchiveCard
                 href={getDestination(collection.slug)}
-                className="group relative block bg-card p-8 md:p-10 rounded-sm border border-gold/20 hover:border-gold/60 transition-all duration-500 hover:shadow-[0_0_30px_rgba(212,175,55,0.15)] hover:-translate-y-2 hover:scale-[1.01] overflow-hidden"
-              >
-                <div className="absolute -right-6 -top-6 text-gold/5 group-hover:text-gold/10 transition-colors duration-500">
-                  <HugeiconsIcon icon={BookOpen01Icon} size={96} strokeWidth={0.5} />
-                </div>
-
-                <h3 className="font-heading text-xl md:text-2xl text-gold mb-2">
-                  {collection.name}
-                </h3>
-                <p className="text-xs uppercase tracking-widest text-muted-foreground mb-8">
-                  {collection.count} {collection.count === 1 ? 'Writing' : 'Writings'}
-                </p>
-                <p className="text-muted-foreground text-sm leading-relaxed mb-8">
-                  {collection.description ?? `Explore writings tagged with ${collection.name}.`}
-                </p>
-
-                <div className="flex items-center text-gold text-xs uppercase tracking-widest font-semibold group-hover:gap-3 gap-0 transition-all duration-300">
-                  Explore Collection
-                  <HugeiconsIcon icon={ArrowRight01Icon} size={14} className="ml-2" />
-                </div>
-              </Link>
+                title={collection.name}
+                description={collection.description ?? `Explore writings tagged with ${collection.name}.`}
+                stat={`${collection.count} ${collection.count === 1 ? 'writing' : 'writings'}`}
+              />
             </motion.div>
           ))}
         </motion.div>

@@ -17,7 +17,7 @@ import {
 } from '@hugeicons/core-free-icons';
 import type { IconSvgElement } from '@hugeicons/react';
 import ContactModal from '@/src/components/contact/ContactModal';
-import ArchiveCatalog from '@/src/components/discovery/ArchiveCatalog';
+import ArchiveCatalog from '@/src/components/archive/ArchiveCatalog';
 import FireFlyBackground from '@/src/components/layout/FireFlyBackground';
 import ArchiveBookshelfSilhouette from '@/src/components/layout/ArchiveBookshelfSilhouette';
 import FloatingBackToTop from '@/src/components/layout/FloatingBackToTheTop';

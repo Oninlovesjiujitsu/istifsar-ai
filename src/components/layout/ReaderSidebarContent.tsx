@@ -60,10 +60,10 @@ export default function ReaderSidebarContent({
       <nav className="flex flex-col flex-grow overflow-hidden">
         <div className="flex flex-col gap-0.5 px-2">
           <SidebarNavLink href="/explore" icon="archive" onNavigate={close}>
-            The Archive
+            Explore
           </SidebarNavLink>
           <SidebarNavLink href="/documents" icon="writings" onNavigate={close}>
-            Writings
+            Archive
           </SidebarNavLink>
           <SidebarNavLink href="/bounty" icon="target" onNavigate={close}>
             Bounty Board

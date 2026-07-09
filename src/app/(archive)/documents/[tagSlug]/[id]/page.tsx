@@ -6,7 +6,7 @@ import ContentionView from '@/src/components/shared/ContentionView';
 import AskAboutButton from '@/src/components/document/AskAboutButton';
 import type { Metadata } from 'next';
 
-type Props = { params: Promise<{ id: string }> };
+type Props = { params: Promise<{ tagSlug: string; id: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function DocumentDetailPage({ params }: Props) {
-  const { id } = await params;
+  const { tagSlug, id } = await params;
   const supabase = await createClient();
 
   const { data: doc } = await supabase
@@ -50,7 +50,7 @@ export default async function DocumentDetailPage({ params }: Props) {
     signedUrl = signed?.signedUrl ?? null;
   }
 
-  // Transcription path (added in migration 0006 — use type assertion)
+  // Transcription path
   const transcriptionPath = (doc as Record<string, unknown>).transcription_path as string | null ?? null;
   let transcriptionText: string | null = null;
   if (transcriptionPath) {
@@ -73,17 +73,34 @@ export default async function DocumentDetailPage({ params }: Props) {
     return t ? [t] : [];
   });
 
+  const activeTag = tags.find((t) => t.slug === tagSlug) ?? tags[0] ?? { name: 'Archive', slug: 'all' };
+
   const isPDF = doc.mime_type?.includes('pdf');
   const isImage = doc.mime_type?.startsWith('image/');
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
+      {/* Dynamic Breadcrumbs */}
+      <nav className="mb-6 text-sm text-muted-foreground flex items-center gap-2">
+        <Link href="/documents" className="hover:text-gold transition-colors">
+          Archive
+        </Link>
+        <span className="text-zinc-600">/</span>
+        <Link href={`/documents/${activeTag.slug}`} className="hover:text-gold transition-colors">
+          {activeTag.name}
+        </Link>
+        <span className="text-zinc-600">/</span>
+        <span className="text-gold font-medium line-clamp-1 max-w-[240px]" title={doc.title}>
+          {doc.title}
+        </span>
+      </nav>
+
       {/* Back link */}
       <Link
-        href="/documents"
+        href={`/documents/${activeTag.slug}`}
         className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
-        ← Primary sources
+        ← Back to {activeTag.name}
       </Link>
 
       {/* Title */}
@@ -183,13 +200,13 @@ export default async function DocumentDetailPage({ params }: Props) {
             Topics
           </h2>
           <div className="flex flex-wrap gap-2">
-            {tags.map((tag) => (
+            {tags.map((t) => (
               <Link
-                key={tag.slug}
-                href={`/documents?tag=${tag.slug}`}
+                key={t.slug}
+                href={`/documents/${t.slug}`}
                 className="rounded-full bg-muted px-3 py-1 text-sm text-muted-foreground hover:bg-muted/80 transition-colors"
               >
-                {tag.name}
+                {t.name}
               </Link>
             ))}
           </div>
@@ -218,13 +235,9 @@ export default async function DocumentDetailPage({ params }: Props) {
   );
 }
 
-/**
- * Server component that fetches and displays contentions related to a document.
- */
 async function ContentionsSection({ documentId }: { documentId: string }) {
   const supabase = await createClient();
 
-  // Fetch contentions where this document is involved
   const { data: contentions } = await supabase
     .from('contentions')
     .select('id, title, description, status, document_ids, resolution_notes, created_at')
@@ -233,7 +246,6 @@ async function ContentionsSection({ documentId }: { documentId: string }) {
 
   if (!contentions || contentions.length === 0) return null;
 
-  // Collect all document IDs referenced in contentions to resolve titles
   const allDocIds = [...new Set(contentions.flatMap((c) => c.document_ids))];
   const { data: docs } = await supabase
     .from('documents')

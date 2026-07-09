@@ -39,7 +39,7 @@ export default function DocumentCard({
             {tags.map((tag) => (
               <Link
                 key={tag.slug}
-                href={`/documents?tag=${tag.slug}`}
+                href={`/documents/${tag.slug}`}
                 className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground hover:bg-muted/80 transition-colors"
               >
                 {tag.name}
@@ -49,7 +49,7 @@ export default function DocumentCard({
         )}
 
         {/* Title */}
-        <Link href={`/documents/${id}`} className="group">
+        <Link href={`/documents/${tags[0]?.slug ?? 'all'}/${id}`} className="group">
           <h3 className="font-semibold leading-snug group-hover:text-primary transition-colors line-clamp-2">
             {title}
           </h3>

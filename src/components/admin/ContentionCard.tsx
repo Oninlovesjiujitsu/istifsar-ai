@@ -82,7 +82,7 @@ export default function ContentionCard({ contention, documentTitles }: Props) {
               <li key={docId} className="text-sm">
                 {documentTitles[docId] ? (
                   <a
-                    href={`/documents/${docId}`}
+                    href={`/documents/all/${docId}`}
                     className="text-primary hover:underline"
                     target="_blank"
                     rel="noopener noreferrer"

@@ -1,141 +1,95 @@
 import { createClient } from '@/src/lib/supabase/server';
-import DocumentCard from '@/src/components/document/DocumentCard';
+import ArchiveCard from '@/src/components/archive/ArchiveCard';
+import DiscoveryTip from '@/src/components/explore/DiscoveryTip';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 
-type Props = {
-  searchParams: Promise<{ tag?: string }>;
-};
+export const metadata: Metadata = { title: 'Archive — Istifsar AI' };
 
-export const metadata: Metadata = { title: 'Writings — Istifsar AI' };
-
-export default async function DocumentsPage({ searchParams }: Props) {
-
-  const { tag: tagSlug } = await searchParams;
+export default async function DocumentsPage() {
   const supabase = await createClient();
 
-  // Look up active tag if filtered
-  let activeTag: { id: string; name: string; slug: string } | null = null;
-  if (tagSlug) {
-    const { data } = await supabase
-      .from('tags')
-      .select('id, name, slug')
-      .eq('slug', tagSlug)
-      .single();
-    activeTag = data;
-  }
-
-  // Fetch published documents with their tags
-  const { data: docs } = await supabase
-    .from('documents')
-    .select(
-      'id, title, description, document_type, date_of_origin, origin_location, language, published_at, document_tags(tag_id, tags(name, slug))',
-    )
-    .eq('status', 'published')
-    .order('published_at', { ascending: false, nullsFirst: false });
-
-  // Filter by tag if needed
-  let filteredDocs = docs ?? [];
-  if (activeTag) {
-    filteredDocs = filteredDocs.filter((doc) =>
-      (doc.document_tags ?? []).some((dt) => {
-        const t = dt.tags as { name: string; slug: string } | null;
-        return t?.slug === tagSlug;
-      }),
-    );
-  }
-
-  // Fetch all tags for filter pills
-  const { data: allTags } = await supabase
+  // Fetch tags with their document counts
+  const { data: tags } = await supabase
     .from('tags')
-    .select('id, name, slug')
+    .select('id, name, slug, description')
     .order('name');
 
+  // Get document counts per tag
+  const tagIds = (tags ?? []).map((t) => t.id);
+  const { data: tagCounts } = tagIds.length
+    ? await supabase
+        .from('document_tags')
+        .select('tag_id')
+        .in('tag_id', tagIds)
+    : { data: [] };
+
+  // Build count map
+  const countMap = new Map<string, number>();
+  for (const row of tagCounts ?? []) {
+    countMap.set(row.tag_id, (countMap.get(row.tag_id) ?? 0) + 1);
+  }
+
+  // Fetch total published document count
+  const { count: totalDocs } = await supabase
+    .from('documents')
+    .select('id', { count: 'exact', head: true })
+    .eq('status', 'published');
+
+  // Sort tags by document count (most popular first)
+  const sortedTags = (tags ?? []).sort(
+    (a, b) => (countMap.get(b.id) ?? 0) - (countMap.get(a.id) ?? 0),
+  );
+
   return (
-    <div className="min-h-full p-4 sm:p-6 lg:p-16 xl:p-24 relative">
-      {/* Header */}
-      <header className="max-w-6xl mx-auto mb-10 sm:mb-16 mt-4 sm:mt-8 lg:mt-12">
-        <div className="flex flex-col gap-3 sm:gap-4">
-          <span className="text-[10px] sm:text-xs uppercase tracking-[0.3em] sm:tracking-[0.4em] text-gold/60">
-            {filteredDocs.length} {filteredDocs.length === 1 ? 'writing' : 'writings'}
-            {activeTag ? ` in ${activeTag.name}` : ' in the archive'}
+    <div className="min-h-full p-4 sm:p-6 lg:p-8 xl:p-12 relative">
+      {/* Breadcrumb */}
+      <nav className="max-w-6xl mx-auto mb-6 text-sm text-muted-foreground flex items-center gap-2">
+        <span className="text-gold font-medium">Archive</span>
+      </nav>
+
+      {/* Editorial Header */}
+      <header className="max-w-6xl mx-auto mb-8 sm:mb-12">
+        <div className="flex flex-col gap-2 sm:gap-3">
+          <span className="text-[10px] sm:text-xs uppercase tracking-[0.3em] text-muted-foreground dark:text-gold/60">
+            {(totalDocs ?? 0).toLocaleString()} writings in the archive
           </span>
-          <h2 className="text-2xl sm:text-4xl lg:text-6xl font-heading text-gold leading-tight max-w-2xl">
-            {activeTag ? activeTag.name : 'Published Writings'}
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading text-foreground dark:text-gold leading-tight max-w-2xl">
+            Historical Collections
           </h2>
-          <div className="h-px w-24 bg-gradient-to-r from-gold to-transparent mt-4" />
+          <div className="h-px w-20 bg-gradient-to-r from-border dark:from-gold to-transparent mt-3" />
         </div>
       </header>
 
-      {/* Tag filter pills */}
-      {(allTags?.length ?? 0) > 0 && (
-        <section className="max-w-6xl mx-auto mb-8">
-          <div className="flex flex-wrap gap-2">
-            <Link
-              href="/documents"
-              className={`rounded-full px-3 py-1.5 text-sm transition-colors ${!activeTag
-                ? 'bg-gold text-[#241a00] font-medium'
-                : 'bg-surface-elevated text-text-muted-vault hover:bg-white/10'
-                }`}
-            >
-              All
-            </Link>
-            {(allTags ?? []).map((t) => (
-              <Link
-                key={t.slug}
-                href={`/documents?tag=${t.slug}`}
-                className={`rounded-full px-3 py-1.5 text-sm transition-colors ${activeTag?.slug === t.slug
-                  ? 'bg-gold text-[#241a00] font-medium'
-                  : 'bg-surface-elevated text-text-muted-vault hover:bg-white/10'
-                  }`}
-              >
-                {t.name}
-              </Link>
+      {/* Archive Cards — Bento Grid */}
+      <section className="max-w-6xl mx-auto">
+        {sortedTags.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
+            {sortedTags.map((tag) => (
+              <ArchiveCard
+                key={tag.id}
+                href={`/documents/${tag.slug}`}
+                title={tag.name}
+                description={tag.description ?? `Explore writings tagged with ${tag.name}.`}
+                stat={`${(countMap.get(tag.id) ?? 0).toLocaleString()} writings`}
+              />
             ))}
           </div>
-        </section>
-      )}
-
-      {/* Document grid */}
-      <section className="max-w-6xl mx-auto">
-        {filteredDocs.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredDocs.map((doc) => {
-              const tags = (doc.document_tags ?? []).flatMap((dt) => {
-                const t = dt.tags as { name: string; slug: string } | null;
-                return t ? [t] : [];
-              });
-              return (
-                <DocumentCard
-                  key={doc.id}
-                  id={doc.id}
-                  title={doc.title}
-                  description={doc.description}
-                  documentType={doc.document_type}
-                  dateOfOrigin={doc.date_of_origin}
-                  originLocation={doc.origin_location}
-                  language={doc.language}
-                  publishedAt={doc.published_at}
-                  tags={tags}
-                />
-              );
-            })}
-          </div>
         ) : (
-          <div className="text-center py-20">
-            <p className="text-text-muted-vault text-lg">
-              No writings found{activeTag ? ` for "${activeTag.name}"` : ''}.
-            </p>
-            {activeTag && (
-              <Link
-                href="/documents"
-                className="text-gold hover:underline mt-2 inline-block text-sm"
-              >
-                View all writings
-              </Link>
-            )}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
+            <ArchiveCard
+              href="/documents/all"
+              title="Browse All Writings"
+              description="Explore the full collection of historian-authored works in the archive."
+              stat={`${(totalDocs ?? 0).toLocaleString()} writings`}
+            />
           </div>
         )}
+      </section>
+
+      {/* Discovery Tip */}
+      <section className="max-w-6xl mx-auto mt-24 lg:mt-32 mb-8 lg:mb-12">
+        <DiscoveryTip />
       </section>
     </div>
   );

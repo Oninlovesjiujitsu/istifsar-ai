@@ -164,7 +164,7 @@ export default function ProfileContent({
             {publications.map((doc) => (
               <Link
                 key={doc.id}
-                href={`/documents/${doc.id}`}
+                href={`/documents/all/${doc.id}`}
                 className="group rounded-lg border bg-card p-4 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:scale-[1.01] hover:shadow-md hover:border-gold/30 space-y-2"
               >
                 <p className="font-medium leading-snug line-clamp-2 group-hover:text-primary transition-colors text-sm">
