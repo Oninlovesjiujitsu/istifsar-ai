@@ -2,6 +2,9 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
+import SignOutButton from '@/app/components/layout/SignOutButton';
 import { motion, AnimatePresence } from 'motion/react';
 import { HugeiconsIcon } from '@hugeicons/react';
 import {
@@ -87,6 +90,22 @@ export default function LandingPage() {
   const [activeSection, setActiveSection] = useState<SectionId | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
+
+  const { role, loading } = useAuth();
+  const router = useRouter();
+
+  // Silent session validation redirect
+  useEffect(() => {
+    if (!loading && role) {
+      if (role === 'admin') {
+        router.replace('/admin');
+      } else if (role === 'verified_historian') {
+        router.replace('/dashboard');
+      } else {
+        router.replace('/explore');
+      }
+    }
+  }, [role, loading, router]);
 
   const closeMobileMenu = useCallback(() => setMobileMenuOpen(false), []);
 
@@ -203,18 +222,34 @@ export default function LandingPage() {
 
           {/* Desktop auth buttons */}
           <div className="hidden md:flex items-center space-x-6">
-            <Link
-              href="/login"
-              className="text-gold text-sm uppercase tracking-widest hover:text-gold-bright transition-colors"
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/signup"
-              className="bg-gold text-background px-6 py-2 rounded-sm text-sm uppercase tracking-widest hover:scale-[1.02] transition-all duration-300 font-medium"
-            >
-              Join as Historian
-            </Link>
+            {!loading && role ? (
+              <>
+                <Link
+                  href={role === 'admin' ? '/admin' : role === 'verified_historian' ? '/dashboard' : '/explore'}
+                  className="bg-gold text-background px-6 py-2 rounded-sm text-sm uppercase tracking-widest hover:scale-[1.02] transition-all duration-300 font-medium"
+                >
+                  Go to Workspace
+                </Link>
+                <div className="text-gold text-sm uppercase tracking-widest hover:text-gold-bright transition-colors">
+                  <SignOutButton />
+                </div>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="text-gold text-sm uppercase tracking-widest hover:text-gold-bright transition-colors"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/signup"
+                  className="bg-gold text-background px-6 py-2 rounded-sm text-sm uppercase tracking-widest hover:scale-[1.02] transition-all duration-300 font-medium"
+                >
+                  Join as Historian
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile hamburger button */}
@@ -280,22 +315,37 @@ export default function LandingPage() {
 
                 <div className="h-px bg-gold/10" />
 
-                <div className="flex flex-col gap-3">
-                  <Link
-                    href="/login"
-                    onClick={closeMobileMenu}
-                    className="text-gold text-sm uppercase tracking-widest hover:text-gold-bright transition-colors py-2"
-                  >
-                    Sign In
-                  </Link>
-                  <Link
-                    href="/signup"
-                    onClick={closeMobileMenu}
-                    className="bg-gold text-background px-6 py-3 rounded-sm text-sm uppercase tracking-widest font-medium text-center hover:bg-gold-bright transition-colors"
-                  >
-                    Join as Historian
-                  </Link>
-                </div>
+                {!loading && role ? (
+                  <div className="flex flex-col gap-3">
+                    <Link
+                      href={role === 'admin' ? '/admin' : role === 'verified_historian' ? '/dashboard' : '/explore'}
+                      onClick={closeMobileMenu}
+                      className="bg-gold text-background px-6 py-3 rounded-sm text-sm uppercase tracking-widest font-medium text-center hover:bg-gold-bright transition-colors"
+                    >
+                      Go to Workspace
+                    </Link>
+                    <div className="text-gold text-sm uppercase tracking-widest hover:text-gold-bright transition-colors py-2 text-center">
+                      <SignOutButton />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-3">
+                    <Link
+                      href="/login"
+                      onClick={closeMobileMenu}
+                      className="text-gold text-sm uppercase tracking-widest hover:text-gold-bright transition-colors py-2"
+                    >
+                      Sign In
+                    </Link>
+                    <Link
+                      href="/signup"
+                      onClick={closeMobileMenu}
+                      className="bg-gold text-background px-6 py-3 rounded-sm text-sm uppercase tracking-widest font-medium text-center hover:bg-gold-bright transition-colors"
+                    >
+                      Join as Historian
+                    </Link>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}
@@ -453,7 +503,7 @@ export default function LandingPage() {
                 </div>
                 <div className="space-y-4">
                   {[
-                    { title: 'An Engine for Academic Consensus', text: 'Navigates a strictly vetted database of peer-reviewed journals, academic books, and scholarly writings to present the prevailing historical consensus.' },
+                    { title: 'An Engine for Academic Consensus', text: 'Navigates a strictly vetted database of scholarly writings to present the prevailing historical consensus.' },
                     { title: 'A Citation-Driven Assistant', text: 'Every synthesis generated is anchored to retrieved texts with clear, traceable citations so you can verify the original academic context.' },
                     { title: 'A Contextual Navigator', text: 'Surfaces relevant historiographical debates, key figures, and temporal contexts that would normally require hours of manual review.' },
                     { title: 'A Human-Governed Platform', text: 'Ruled by human Historians who review outputs, flag anomalies, and ensure strict adherence to academic standards.' }

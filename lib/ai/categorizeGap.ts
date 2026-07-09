@@ -1,52 +1,108 @@
 import { generateText } from 'ai';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { MODELS } from '@/lib/config/models';
-import { createClient } from '@/lib/supabase/server';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from '@/types/database';
 
 /**
- * Auto-categorize an archive gap using Gemini Flash.
- * Extracts era, geography, and subject from the unanswered query
- * and updates the archive_gaps row. Designed to be called fire-and-forget.
+ * Heuristically pre-filter out obvious greetings, short tests, or empty inputs locally
+ * to save Gemini LLM token costs.
  */
-export async function categorizeArchiveGap(
-  gapId: string,
-  queryText: string,
+export function isQueryObviousSpam(query: string): boolean {
+  const trimmed = query.trim().toLowerCase();
+
+  // Filter out extremely short queries (e.g., "?", "a", "12")
+  if (trimmed.length < 3) return true;
+
+  // Filter out common greetings or testing keywords
+  const greetings = new Set([
+    'hello', 'hi', 'hey', 'test', 'testing', 'yo', 'hola',
+    'kumusta', 'kamusta', 'halo', 'good morning', 'good afternoon', 'good evening'
+  ]);
+  if (greetings.has(trimmed)) return true;
+
+  // Filter out inputs with no alphabetical characters (just punctuation or numbers)
+  if (!/[a-zA-Z]/.test(trimmed)) return true;
+
+  return false;
+}
+
+interface ProcessGapParams {
+  query: string;
+  userId: string;
+  similarityScore: number;
+}
+
+/**
+ * Auto-categorizes an unanswered query and inserts it into archive_gaps in a
+ * single database operation, but ONLY if the query is deemed relevant to historical
+ * or archival inquiry (filtering out greetings, off-topic prompts, etc.).
+ */
+export async function processAndInsertArchiveGap(
+  supabase: SupabaseClient<Database>,
+  params: ProcessGapParams,
 ): Promise<void> {
+  const { query, userId, similarityScore } = params;
+
+  // Step 1: Run local heuristic filter
+  if (isQueryObviousSpam(query)) {
+    console.log(`[ArchiveGap] Filtered locally: "${query}"`);
+    return;
+  }
+
   try {
     const google = createGoogleGenerativeAI({
       apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
     });
 
+    // Step 2: Query Gemini to check historical relevance and extract metadata in one go
     const { text } = await generateText({
       model: google(MODELS.fast),
-      system:
-        'You are a history classification assistant. Analyze a history question and return a JSON object with three keys: era (the historical period), geography (the region or country), and subject (the topic or theme). Use concise labels. Return ONLY valid JSON, no markdown.',
-      messages: [
-        {
-          role: 'user',
-          content: `Classify this unanswered history question:\n\n"${queryText}"`,
-        },
-      ],
+      system: `You are a historical research assistant. Analyze the user's unanswered query.
+Determine if it is a meaningful query/question about history, historical events, figures, documents, culture, politics, or academic research (particularly general or Philippine history).
+It is NOT relevant if it is general chitchat (e.g. "how are you"), coding/tech help (e.g. "JavaScript help"), math, translations, or gibberish.
+
+Return a raw JSON object with the following structure:
+{
+  "is_relevant": boolean,
+  "era": "historical period or null",
+  "geography": "region/country or null",
+  "subject": "topic or null"
+}
+Return ONLY valid raw JSON. No markdown formatting, no backticks.`,
+      messages: [{ role: 'user', content: `Analyze: "${query}"` }],
     });
 
-    // Parse the JSON response
     const cleaned = text.replace(/```json?\s*|\s*```/g, '').trim();
-    const parsed = JSON.parse(cleaned) as {
-      era?: string;
-      geography?: string;
-      subject?: string;
+    const result = JSON.parse(cleaned) as {
+      is_relevant: boolean;
+      era?: string | null;
+      geography?: string | null;
+      subject?: string | null;
     };
 
-    const supabase = await createClient();
-    await supabase
-      .from('archive_gaps')
-      .update({
-        era: parsed.era ?? null,
-        geography: parsed.geography ?? null,
-        subject: parsed.subject ?? null,
-      })
-      .eq('id', gapId);
-  } catch {
-    // Non-fatal — categorization failure should never surface to the user
+    if (!result.is_relevant) {
+      console.log(`[ArchiveGap] Filtered by LLM: "${query}"`);
+      return;
+    }
+
+    // Step 3: Insert into the database in a single transaction
+    const { error } = await supabase.from('archive_gaps').insert({
+      query_text: query,
+      user_id: userId,
+      similarity_score: similarityScore,
+      mode: 'scholarly_consensus',
+      era: result.era || null,
+      geography: result.geography || null,
+      subject: result.subject || null,
+    });
+
+    if (error) {
+      console.error('[ArchiveGap] Error inserting gap:', error);
+    } else {
+      console.log(`[ArchiveGap] Successfully logged gap: "${query}" (Era: ${result.era}, Geo: ${result.geography}, Subj: ${result.subject})`);
+    }
+  } catch (err) {
+    console.error('[ArchiveGap] Unexpected execution error:', err);
   }
 }

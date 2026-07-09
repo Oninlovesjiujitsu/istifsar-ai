@@ -1,4 +1,3 @@
-import { authGuard } from '@/lib/supabase/authGuard';
 import { createClient } from '@/lib/supabase/server';
 import ArchiveCard from '@/app/components/explore/ArchiveCard';
 import DiscoveryTip from '@/app/components/explore/DiscoveryTip';
@@ -7,7 +6,6 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = { title: 'Archive — Istifsar AI' };
 
 export default async function ExplorePage() {
-  await authGuard({ requireAuth: true });
 
   const supabase = await createClient();
 

@@ -17,7 +17,7 @@ export default async function BountyBoardPage({ searchParams }: Props) {
     .from('archive_gaps')
     .select('id, query_text, similarity_score, era, geography, subject, created_at')
     .order('created_at', { ascending: false })
-    .limit(50);
+    .limit(10);
 
   if (filters.era) query = query.eq('era', filters.era);
   if (filters.geography) query = query.eq('geography', filters.geography);

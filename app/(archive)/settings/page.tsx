@@ -1,3 +1,4 @@
+import { authGuard } from '@/lib/supabase/authGuard';
 import { createClient } from '@/lib/supabase/server';
 import type { Metadata } from 'next';
 import SettingsClient from '@/app/components/settings/SettingsClient';
@@ -5,6 +6,7 @@ import SettingsClient from '@/app/components/settings/SettingsClient';
 export const metadata: Metadata = { title: 'Settings — Istifsar' };
 
 export default async function SettingsPage() {
+  await authGuard({ requireAuth: true });
   const supabase = await createClient();
   const {
     data: { user },

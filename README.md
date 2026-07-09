@@ -16,6 +16,7 @@ Istifsar comes from the Arabic root word (f-s-r) which relates to interpreting, 
 - `Unstructured.io`
 - `Upstash Redis`
 - `React Flow`
+- `Recharts`
 - `TipTap`
 - `Resend`
 

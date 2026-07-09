@@ -10,6 +10,7 @@ import {
 } from '@hugeicons/core-free-icons';
 import { getArchiveCatalog } from '@/actions/catalog';
 import type { CatalogTag } from '@/lib/cache/redis';
+import { useAuth } from '@/hooks/useAuth';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -26,6 +27,17 @@ const viewport = { once: true, amount: 0.2 as const };
 export default function ArchiveCatalog() {
   const [collections, setCollections] = useState<CatalogTag[]>([]);
   const [loading, setLoading] = useState(true);
+  const { role } = useAuth();
+
+  const getDestination = (slug: string) => {
+    if (role === 'verified_historian') {
+      return '/dashboard';
+    } else if (role === 'admin') {
+      return '/admin';
+    } else {
+      return `/documents?tag=${slug}`;
+    }
+  };
 
   useEffect(() => {
     getArchiveCatalog()
@@ -90,7 +102,7 @@ export default function ArchiveCatalog() {
               transition={{ duration: 0.6, ease: 'easeOut' }}
             >
               <Link
-                href={`/explore?era=${collection.slug}`}
+                href={getDestination(collection.slug)}
                 className="group relative block bg-card p-8 md:p-10 rounded-sm border border-gold/20 hover:border-gold/60 transition-all duration-500 hover:shadow-[0_0_30px_rgba(212,175,55,0.15)] hover:-translate-y-2 hover:scale-[1.01] overflow-hidden"
               >
                 <div className="absolute -right-6 -top-6 text-gold/5 group-hover:text-gold/10 transition-colors duration-500">

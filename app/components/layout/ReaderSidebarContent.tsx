@@ -18,8 +18,10 @@ type Conversation = {
 
 export default function ReaderSidebarContent({
   conversations,
+  isLoggedIn = true,
 }: {
   conversations: Conversation[];
+  isLoggedIn?: boolean;
 }) {
   const { expanded, close } = useSidebar();
 
@@ -82,19 +84,32 @@ export default function ReaderSidebarContent({
       {/* Footer */}
       <div className="px-2 flex flex-col gap-0.5 border-t border-border pt-4">
         <ThemePicker showLabel />
-        <SidebarNavLink href="/settings" icon="settings" onNavigate={close}>
-          Settings
-        </SidebarNavLink>
+        {isLoggedIn && (
+          <SidebarNavLink href="/settings" icon="settings" onNavigate={close}>
+            Settings
+          </SidebarNavLink>
+        )}
         <div className={[
           'text-text-muted-vault hover:text-foreground px-3 py-2 transition-colors hover:bg-foreground/[0.04] flex items-center text-sm font-serif',
           expanded ? 'gap-3' : 'lg:justify-center gap-3',
         ].join(' ')}>
-          <svg className="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
-          </svg>
-          <SidebarLabel>
-            <SignOutButton />
-          </SidebarLabel>
+          {isLoggedIn ? (
+            <>
+              <svg className="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
+              </svg>
+              <SidebarLabel>
+                <SignOutButton />
+              </SidebarLabel>
+            </>
+          ) : (
+            <Link href="/login" onClick={close} className="flex items-center gap-3 w-full">
+              <svg className="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
+              </svg>
+              <SidebarLabel>Sign In</SidebarLabel>
+            </Link>
+          )}
         </div>
       </div>
     </>

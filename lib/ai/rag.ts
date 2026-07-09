@@ -14,7 +14,7 @@ import {
 } from '@/lib/cache/redis';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/types/database';
-import { categorizeArchiveGap } from './categorizeGap';
+import { processAndInsertArchiveGap, isQueryObviousSpam } from './categorizeGap';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { queryContentions } from './contentionQuery';
 import type { ContentionMeta } from '@/types/contention';
@@ -66,6 +66,43 @@ export async function runRag(params: RagParams): Promise<Response> {
       },
     }
   );
+
+  // ── Pre-filter Stage: Local Spam/Greeting check ────────────────────────────
+  if (isQueryObviousSpam(params.query)) {
+    console.log(`[RAG] Query detected as greeting/spam locally: "${params.query}"`);
+    const fallbackText =
+      'No document, no history. The current archive does not contain sources that address this historical topic.';
+
+    const fallbackStream = createUIMessageStream<RagUIMessage>({
+      execute: async ({ writer }) => {
+        writer.write({
+          type: 'message-metadata',
+          messageMetadata: { citations: [], contentions: [], noDocument: true },
+        });
+        const textId = crypto.randomUUID();
+        writer.write({ type: 'text-start', id: textId });
+        writer.write({ type: 'text-delta', delta: fallbackText, id: textId });
+        writer.write({ type: 'text-end', id: textId });
+
+        try {
+          const { error: msgError } = await supabase.from('messages').insert({
+            conversation_id: params.conversationId,
+            role: 'assistant',
+            content: fallbackText,
+            topic_id: params.topicTagId ?? null,
+          });
+          if (msgError) {
+            console.error('[RAG] Failed to persist fallback assistant message:', msgError);
+          }
+        } catch (e) {
+          console.error('[RAG] Exception during fallback persist:', e);
+        }
+      },
+      onError: (err) => String(err),
+    });
+
+    return createUIMessageStreamResponse({ stream: fallbackStream });
+  }
 
   const google = createGoogleGenerativeAI({
     apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
@@ -166,21 +203,12 @@ export async function runRag(params: RagParams): Promise<Response> {
   );
 
   if (!gatePassed) {
-    // Log to archive_gaps (best-effort) and auto-categorize
-    try {
-      const { data: gap } = await supabase.from('archive_gaps').insert({
-        query_text: params.query,
-        user_id: params.userId,
-        similarity_score: topChunk?.cosineScore ?? 0,
-        mode: 'scholarly_consensus',
-      }).select('id').single();
-
-      if (gap?.id) {
-        void categorizeArchiveGap(gap.id, params.query);
-      }
-    } catch {
-      // Non-fatal
-    }
+    // Process and insert archive gap (best-effort background task)
+    void processAndInsertArchiveGap(supabase, {
+      query: params.query,
+      userId: params.userId,
+      similarityScore: topChunk?.cosineScore ?? 0,
+    });
 
     // Clear chunks so downstream stages know context is empty
     rankedChunks = [];

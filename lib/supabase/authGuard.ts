@@ -16,7 +16,25 @@ export async function authGuard(options: AuthGuardOptions = {}): Promise<void> {
   const { data: { session } } = await supabase.auth.getSession();
 
   if (redirectAuthenticated && session) {
-    redirect(redirectAuthenticated);
+    let role = (session.user.app_metadata?.role as string) ?? 'reader';
+
+    // Fallback: if the JWT hook hasn't synced the role, query profiles directly
+    if (role === 'reader') {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', session.user.id)
+        .single();
+      if (profile?.role) role = profile.role;
+    }
+
+    if (role === 'admin') {
+      redirect('/admin');
+    } else if (role === 'verified_historian') {
+      redirect('/dashboard');
+    } else {
+      redirect('/explore');
+    }
   }
 
   if (requireAuth && !session) {

@@ -37,7 +37,6 @@ export default function ForgotPasswordPage() {
         >
           Back to sign in
         </Link>
-        <span className="text-neutral-600 select-none">·</span>
       </p>
     </div>
   );

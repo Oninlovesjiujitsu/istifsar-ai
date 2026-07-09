@@ -30,6 +30,8 @@ export default function AskAboutButton({
       );
       if (result.success) {
         router.push(`/explore/${result.conversationId}`);
+      } else {
+        router.push('/login');
       }
     });
   }
