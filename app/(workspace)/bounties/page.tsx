@@ -12,7 +12,7 @@ export default async function TargetBountiesPage() {
     .from('archive_gaps')
     .select('id, query_text, similarity_score, created_at')
     .order('created_at', { ascending: false })
-    .limit(50);
+    .limit(15);
 
   return (
     <div className="mx-auto max-w-4xl px-4 sm:px-6 py-6 sm:py-10 space-y-6 sm:space-y-8">

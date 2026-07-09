@@ -1,4 +1,4 @@
-import { proxy } from '@/proxy';
+import { authGuard } from '@/lib/supabase/authGuard';
 import { createClient } from '@/lib/supabase/server';
 import ValidateView from '@/app/components/contribute/ValidateView';
 import { redirect } from 'next/navigation';
@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function ValidateDocumentPage({ params }: Props) {
-  await proxy({ requireAuth: true, minRole: 'verified_historian' });
+  await authGuard({ requireAuth: true, minRole: 'verified_historian' });
 
   const supabase = await createClient();
 

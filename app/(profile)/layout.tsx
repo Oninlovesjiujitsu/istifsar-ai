@@ -1,4 +1,4 @@
-import { proxy } from '@/proxy';
+import { authGuard } from '@/lib/supabase/authGuard';
 import { createClient } from '@/lib/supabase/server';
 import { getUserRole, isVerifiedHistorian } from '@/lib/ui/role-labels';
 import SidebarShell from '@/app/components/layout/SidebarShell';
@@ -6,7 +6,7 @@ import ReaderSidebarContent from '@/app/components/layout/ReaderSidebarContent';
 import HistorianSidebarContent from '@/app/components/layout/HistorianSidebarContent';
 
 export default async function ProfileLayout({ children }: { children: React.ReactNode }) {
-  await proxy({ requireAuth: true });
+  await authGuard({ requireAuth: true });
 
   const supabase = await createClient();
   const {

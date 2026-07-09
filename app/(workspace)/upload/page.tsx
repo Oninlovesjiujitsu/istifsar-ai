@@ -1,5 +1,5 @@
 
-import { proxy } from '@/proxy';
+import { authGuard } from '@/lib/supabase/authGuard';
 import UploadForm from '@/app/components/contribute/UploadForm';
 
 export const metadata = {
@@ -7,7 +7,7 @@ export const metadata = {
 };
 
 export default async function UploadPage() {
-  await proxy({ requireAuth: true, minRole: 'verified_historian' });
+  await authGuard({ requireAuth: true, minRole: 'verified_historian' });
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-12">

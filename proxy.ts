@@ -1,48 +1,53 @@
-import { redirect } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
-import { type Role, isVerifiedHistorian, isAdmin } from '@/lib/ui/role-labels';
+import { createServerClient } from '@supabase/ssr';
+import { NextResponse, type NextRequest } from 'next/server';
 
-type ProxyOptions = {
-  requireAuth?: boolean;
-  /** Minimum role required. 'verified_historian' also allows admin. */
-  minRole?: Role;
-  redirectAuthenticated?: string;
-};
+export async function proxy(request: NextRequest) {
+  let response = NextResponse.next({
+    request,
+  });
 
-export async function proxy(options: ProxyOptions = {}): Promise<void> {
-  const { requireAuth = false, minRole, redirectAuthenticated } = options;
-
-  const supabase = await createClient();
-  const { data: { session } } = await supabase.auth.getSession();
-
-  if (redirectAuthenticated && session) {
-    redirect(redirectAuthenticated);
-  }
-
-  if (requireAuth && !session) {
-    redirect('/login');
-  }
-
-  if (minRole && session) {
-    let role = (session.user.app_metadata?.role as string) ?? 'reader';
-
-    // Fallback: if the JWT hook hasn't synced the role, query profiles directly
-    if (role === 'reader') {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', session.user.id)
-        .single();
-      if (profile?.role) role = profile.role;
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => {
+            request.cookies.set(name, value);
+          });
+          response = NextResponse.next({
+            request,
+          });
+          cookiesToSet.forEach(({ name, value, options }) => {
+            response.cookies.set(name, value, options);
+          });
+        },
+      },
     }
+  );
 
-    const allowed =
-      minRole === 'reader' ||
-      (minRole === 'verified_historian' && isVerifiedHistorian(role)) ||
-      (minRole === 'admin' && isAdmin(role));
-
-    if (!allowed) {
-      redirect('/');
-    }
+  // Refresh token if expired (wrapped in try/catch to prevent app crash on auth service errors)
+  try {
+    await supabase.auth.getUser();
+  } catch (error) {
+    console.error('Auth refresh in middleware failed:', error);
   }
+
+  return response;
 }
+
+export const config = {
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - Any static media files (.svg, .png, etc.)
+     */
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
+};

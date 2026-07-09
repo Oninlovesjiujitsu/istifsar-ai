@@ -1,4 +1,4 @@
-import { proxy } from '@/proxy';
+import { authGuard } from '@/lib/supabase/authGuard';
 import { createClient } from '@/lib/supabase/server';
 import DocumentCard from '@/app/components/document/DocumentCard';
 import Link from 'next/link';
@@ -11,7 +11,7 @@ type Props = {
 export const metadata: Metadata = { title: 'Writings — Istifsar AI' };
 
 export default async function DocumentsPage({ searchParams }: Props) {
-  await proxy({ requireAuth: true });
+  await authGuard({ requireAuth: true });
 
   const { tag: tagSlug } = await searchParams;
   const supabase = await createClient();

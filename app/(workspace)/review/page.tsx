@@ -1,4 +1,4 @@
-import { proxy } from '@/proxy';
+import { authGuard } from '@/lib/supabase/authGuard';
 import { createClient } from '@/lib/supabase/server';
 import ValidateList from '@/app/components/contribute/ValidateList';
 import type { Metadata } from 'next';
@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 };
 
 export default async function ValidateQueuePage() {
-  await proxy({ requireAuth: true, minRole: 'verified_historian' });
+  await authGuard({ requireAuth: true, minRole: 'verified_historian' });
 
   const supabase = await createClient();
 
