@@ -11,12 +11,12 @@ export default function ArchiveCard({ href, title, description, stat }: ArchiveC
   return (
     <Link
       href={href}
-      className="group relative bg-surface-elevated p-8 rounded-sm border border-border dark:border-l dark:border-t dark:border-white/5 transition-all duration-500 hover:shadow-[0_0_20px_rgba(212,175,55,0.15)] dark:hover:shadow-[0_0_20px_rgba(212,175,55,0.15)] hover:shadow-lg hover:-translate-y-2 hover:scale-[1.01] overflow-hidden"
+      className="group relative rounded-lg border bg-card p-5 pb-4 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:scale-[1.01] hover:shadow-md hover:border-gold/30 dark:hover:border-gold/40 flex flex-col overflow-hidden h-full"
     >
       {/* Gold glow on hover (dark only) */}
-      <div className="absolute -inset-px bg-gold opacity-0 dark:group-hover:opacity-[0.15] transition-opacity duration-500 -z-10 blur-sm" />
+      <div className="absolute -inset-px bg-gold opacity-0 dark:group-hover:opacity-[0.15] transition-opacity duration-300 -z-10 blur-sm" />
 
-      <div className="flex flex-col h-full gap-6">
+      <div className="flex flex-col h-full gap-5">
         {/* Icon placeholder */}
         <div className="aspect-[4/3] w-full overflow-hidden bg-muted dark:bg-[#0e0e0e] rounded-sm relative flex items-center justify-center">
           <svg
@@ -46,7 +46,7 @@ export default function ArchiveCard({ href, title, description, stat }: ArchiveC
         </div>
 
         {/* Footer */}
-        <div className="mt-auto flex items-center justify-between pt-5 border-t border-border dark:border-white/5">
+        <div className="mt-auto flex items-center justify-between pt-4 border-t border-border dark:border-white/5">
           <span className="text-[10px] uppercase tracking-widest text-muted-foreground dark:text-text-muted-vault">
             {stat}
           </span>
