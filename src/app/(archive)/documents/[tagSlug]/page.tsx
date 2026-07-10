@@ -1,5 +1,5 @@
 import { createClient } from '@/src/lib/supabase/server';
-import DocumentCard from '@/src/components/document/DocumentCard';
+import DocumentCard from '@/src/features/documents/components/DocumentCard';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';

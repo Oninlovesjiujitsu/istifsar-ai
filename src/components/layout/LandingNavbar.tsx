@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useAuth } from '@/src/hooks/useAuth';
+import { useAuth } from '@/src/features/auth/hooks/use-auth';
 import SignOutButton from '@/src/components/layout/SignOutButton';
 import ThemePicker from '@/src/components/layout/ThemePicker';
 import { HugeiconsIcon } from '@hugeicons/react';

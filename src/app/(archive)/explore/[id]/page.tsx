@@ -1,6 +1,6 @@
 import { authGuard } from '@/src/lib/supabase/authGuard';
 import { createClient } from '@/src/lib/supabase/server';
-import ChatInterface from '@/src/components/chat/ChatInterface';
+import ChatInterface from '@/src/features/chat/components/ChatInterface';
 import { redirect } from 'next/navigation';
 import type { Metadata } from 'next';
 import type { ContentionMeta } from '@/src/types/contention';

@@ -1,5 +1,5 @@
 import { createClient } from '@/src/lib/supabase/server';
-import BountyFilters from '@/src/components/explore/BountyFilters';
+import BountyFilters from '@/src/features/explore/components/BountyFilters';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = { title: 'Bounty Board — Istifsar' };

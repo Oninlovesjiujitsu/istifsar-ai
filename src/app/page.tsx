@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/src/hooks/useAuth';
+import { useAuth } from '@/src/features/auth/hooks/use-auth';
 import SignOutButton from '@/src/components/layout/SignOutButton';
 import { motion, AnimatePresence } from 'motion/react';
 import { HugeiconsIcon } from '@hugeicons/react';
@@ -17,8 +17,8 @@ import {
   ArrowDown01Icon,
 } from '@hugeicons/core-free-icons';
 import type { IconSvgElement } from '@hugeicons/react';
-import ContactModal from '@/src/components/contact/ContactModal';
-import ArchiveCatalog from '@/src/components/archive/ArchiveCatalog';
+import ContactModal from '@/src/features/contact/components/ContactModal';
+import ArchiveCatalog from '@/src/features/archive/components/ArchiveCatalog';
 import FireFlyBackground from '@/src/components/layout/FireFlyBackground';
 import ArchiveBookshelfSilhouette from '@/src/components/layout/ArchiveBookshelfSilhouette';
 import FloatingBackToTop from '@/src/components/layout/FloatingBackToTheTop';

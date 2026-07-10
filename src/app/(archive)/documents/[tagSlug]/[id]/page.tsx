@@ -2,8 +2,7 @@ import { createClient } from '@/src/lib/supabase/server';
 import { createAdminClient } from '@/src/lib/supabase/admin';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import ContentionView from '@/src/components/shared/ContentionView';
-import AskAboutButton from '@/src/components/document/AskAboutButton';
+import AskAboutButton from '@/src/features/documents/components/AskAboutButton';
 import type { Metadata } from 'next';
 
 type Props = { params: Promise<{ tagSlug: string; id: string }> };
@@ -213,8 +212,6 @@ export default async function DocumentDetailPage({ params }: Props) {
         </div>
       )}
 
-      {/* Contentions */}
-      <ContentionsSection documentId={id} />
 
       {/* CTA */}
       <div className="mt-10 rounded-lg border bg-primary/5 p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
@@ -230,56 +227,6 @@ export default async function DocumentDetailPage({ params }: Props) {
           pendingLabel="Starting conversation…"
           className="shrink-0 text-xs bg-gold text-[#241a00] font-semibold px-3 py-1.5 rounded-full hover:bg-gold/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         />
-      </div>
-    </div>
-  );
-}
-
-async function ContentionsSection({ documentId }: { documentId: string }) {
-  const supabase = await createClient();
-
-  const { data: contentions } = await supabase
-    .from('contentions')
-    .select('id, title, description, status, document_ids, resolution_notes, created_at')
-    .contains('document_ids', [documentId])
-    .order('created_at', { ascending: false });
-
-  if (!contentions || contentions.length === 0) return null;
-
-  const allDocIds = [...new Set(contentions.flatMap((c) => c.document_ids))];
-  const { data: docs } = await supabase
-    .from('documents')
-    .select('id, title, document_tags(tags(slug))')
-    .in('id', allDocIds);
-
-  const titleMap: Record<string, string> = {};
-  const slugMap: Record<string, string> = {};
-  for (const d of docs ?? []) {
-    titleMap[d.id] = d.title;
-    const tags = (d.document_tags ?? []).flatMap((dt) => {
-      const t = (dt as any).tags as { slug: string } | null;
-      return t ? [t] : [];
-    });
-    slugMap[d.id] = tags[0]?.slug ?? 'all';
-  }
-
-  return (
-    <div className="mt-8 space-y-3">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-        Scholarly disagreements
-      </h2>
-      <p className="text-xs text-muted-foreground mb-2">
-        Historians have conflicting accounts involving this source.
-      </p>
-      <div className="space-y-3">
-        {contentions.map((c) => (
-          <ContentionView
-            key={c.id}
-            contention={c}
-            documentTitles={titleMap}
-            documentTagSlugs={slugMap}
-          />
-        ))}
       </div>
     </div>
   );

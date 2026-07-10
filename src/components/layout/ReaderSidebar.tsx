@@ -1,5 +1,5 @@
 import { createClient } from '@/src/lib/supabase/server';
-import ReaderSidebarContent from '@/src/components/layout/ReaderSidebarContent';
+import ReaderSidebarContent from '@/src/features/profile/components/ReaderSidebarContent';
 
 export default async function ReaderSidebar() {
   const supabase = await createClient();

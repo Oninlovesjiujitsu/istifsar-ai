@@ -1,6 +1,6 @@
 import { createClient } from '@/src/lib/supabase/server';
-import ArchiveCard from '@/src/components/archive/ArchiveCard';
-import DiscoveryTip from '@/src/components/explore/DiscoveryTip';
+import ArchiveCard from '@/src/features/archive/components/ArchiveCard';
+import DiscoveryTip from '@/src/features/explore/components/DiscoveryTip';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 

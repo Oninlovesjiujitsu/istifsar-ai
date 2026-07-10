@@ -1,6 +1,6 @@
 
 import { authGuard } from '@/src/lib/supabase/authGuard';
-import UploadForm from '@/src/components/contribute/UploadForm';
+import UploadForm from '@/src/features/contribute/components/UploadForm';
 
 export const metadata = {
   title: 'Add a primary source — Istifsar',

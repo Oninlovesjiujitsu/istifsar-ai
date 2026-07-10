@@ -1,6 +1,6 @@
 import { authGuard } from '@/src/lib/supabase/authGuard';
 import { createClient } from '@/src/lib/supabase/server';
-import ValidateView from '@/src/components/contribute/ValidateView';
+import ValidateView from '@/src/features/contribute/components/ValidateView';
 import { redirect } from 'next/navigation';
 import type { Metadata } from 'next';
 

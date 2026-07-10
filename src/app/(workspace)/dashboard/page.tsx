@@ -1,7 +1,7 @@
 import { createClient } from '@/src/lib/supabase/server';
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import CitationsChart from '@/src/components/dashboard/CitationsChart';
+import CitationsChart from '@/src/features/dashboard/components/CitationsChart';
 
 export const metadata: Metadata = { title: 'Impact Dashboard — Istifsar' };
 

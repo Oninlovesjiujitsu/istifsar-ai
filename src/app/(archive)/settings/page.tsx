@@ -1,7 +1,7 @@
 import { authGuard } from '@/src/lib/supabase/authGuard';
 import { createClient } from '@/src/lib/supabase/server';
 import type { Metadata } from 'next';
-import SettingsClient from '@/src/components/settings/SettingsClient';
+import SettingsClient from '@/src/features/settings/components/SettingsClient';
 
 export const metadata: Metadata = { title: 'Settings — Istifsar' };
 

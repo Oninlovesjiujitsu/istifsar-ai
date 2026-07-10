@@ -1,6 +1,6 @@
 import { createClient } from '@/src/lib/supabase/server';
 import SidebarShell from '@/src/components/layout/SidebarShell';
-import ReaderSidebarContent from '@/src/components/layout/ReaderSidebarContent';
+import ReaderSidebarContent from '@/src/features/profile/components/ReaderSidebarContent';
 
 export default async function ArchiveLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();

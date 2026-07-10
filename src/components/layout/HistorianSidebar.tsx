@@ -1,1 +1,1 @@
-export { default } from '@/src/components/layout/HistorianSidebarContent';
+export { default } from '@/src/features/profile/components/HistorianSidebarContent';

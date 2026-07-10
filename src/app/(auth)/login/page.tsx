@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import LoginForm from '@/src/components/auth/LoginForm';
+import LoginForm from '@/src/features/auth/components/LoginForm';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = { title: 'Sign in — Istifsar' };

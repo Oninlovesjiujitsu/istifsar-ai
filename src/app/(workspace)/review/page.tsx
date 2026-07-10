@@ -1,6 +1,6 @@
 import { authGuard } from '@/src/lib/supabase/authGuard';
 import { createClient } from '@/src/lib/supabase/server';
-import ValidateList from '@/src/components/contribute/ValidateList';
+import ValidateList from '@/src/features/contribute/components/ValidateList';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {

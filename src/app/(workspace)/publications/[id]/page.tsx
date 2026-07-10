@@ -1,8 +1,7 @@
 import { createClient } from '@/src/lib/supabase/server';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import ContentionView from '@/src/components/shared/ContentionView';
-import DeleteDocumentButton from '@/src/components/publications/DeleteDocumentButton';
+import DeleteDocumentButton from '@/src/features/publications/components/DeleteDocumentButton';
 import type { Metadata } from 'next';
 
 type Props = { params: Promise<{ id: string }> };
@@ -211,49 +210,6 @@ export default async function WorkspaceDocumentPage({ params }: Props) {
         </div>
       )}
 
-      {/* Contentions */}
-      <ContentionsSection documentId={id} />
-    </div>
-  );
-}
-
-async function ContentionsSection({ documentId }: { documentId: string }) {
-  const supabase = await createClient();
-
-  const { data: contentions } = await supabase
-    .from('contentions')
-    .select(
-      'id, title, description, status, document_ids, resolution_notes, created_at',
-    )
-    .contains('document_ids', [documentId])
-    .order('created_at', { ascending: false });
-
-  if (!contentions || contentions.length === 0) return null;
-
-  const allDocIds = [...new Set(contentions.flatMap((c) => c.document_ids))];
-  const { data: docs } = await supabase
-    .from('documents')
-    .select('id, title')
-    .in('id', allDocIds);
-
-  const titleMap: Record<string, string> = {};
-  for (const d of docs ?? []) {
-    titleMap[d.id] = d.title;
-  }
-
-  return (
-    <div className="mt-8 space-y-3">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-        Scholarly disagreements
-      </h2>
-      <p className="text-xs text-muted-foreground mb-2">
-        Historians have conflicting accounts involving this source.
-      </p>
-      <div className="space-y-3">
-        {contentions.map((c) => (
-          <ContentionView key={c.id} contention={c} documentTitles={titleMap} documentBasePath="/publications" />
-        ))}
-      </div>
     </div>
   );
 }

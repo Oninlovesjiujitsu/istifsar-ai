@@ -1,1 +1,1 @@
-export { default } from '@/src/components/layout/AdminSidebarContent';
+export { default } from '@/src/features/admin/components/AdminSidebarContent';

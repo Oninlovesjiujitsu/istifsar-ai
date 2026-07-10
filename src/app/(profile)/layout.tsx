@@ -2,8 +2,8 @@ import { authGuard } from '@/src/lib/supabase/authGuard';
 import { createClient } from '@/src/lib/supabase/server';
 import { getUserRole, isVerifiedHistorian } from '@/src/lib/ui/role-labels';
 import SidebarShell from '@/src/components/layout/SidebarShell';
-import ReaderSidebarContent from '@/src/components/layout/ReaderSidebarContent';
-import HistorianSidebarContent from '@/src/components/layout/HistorianSidebarContent';
+import ReaderSidebarContent from '@/src/features/profile/components/ReaderSidebarContent';
+import HistorianSidebarContent from '@/src/features/profile/components/HistorianSidebarContent';
 
 export default async function ProfileLayout({ children }: { children: React.ReactNode }) {
   await authGuard({ requireAuth: true });

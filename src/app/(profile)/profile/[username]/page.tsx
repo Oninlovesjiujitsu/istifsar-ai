@@ -1,7 +1,7 @@
 import { createClient } from '@/src/lib/supabase/server';
 import { createAdminClient } from '@/src/lib/supabase/admin';
 import { notFound } from 'next/navigation';
-import ProfileContent from '@/src/components/profile/ProfileContent';
+import ProfileContent from '@/src/features/profile/components/ProfileContent';
 import type { Metadata } from 'next';
 
 type Props = { params: Promise<{ username: string }> };
