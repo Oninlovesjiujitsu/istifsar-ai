@@ -1,11 +1,15 @@
 'use client';
 
-import { useTheme } from 'next-themes';
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { SidebarLabel } from './SidebarShell';
+// import { useTheme } from 'next-themes';
+// import { useState, useEffect } from 'react';
+// import { motion, AnimatePresence } from 'motion/react';
+// import { SidebarLabel } from './SidebarShell';
 
 export default function ThemeToggle({ showLabel = false }: { showLabel?: boolean }) {
+  // Commented out for now to disable theme selection and keep dark theme by default.
+  return null;
+
+  /*
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -62,4 +66,5 @@ export default function ThemeToggle({ showLabel = false }: { showLabel?: boolean
       {showLabel && <SidebarLabel>{isDark ? 'Light Mode' : 'Dark Mode'}</SidebarLabel>}
     </button>
   );
+  */
 }

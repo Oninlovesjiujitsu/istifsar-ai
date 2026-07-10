@@ -6,165 +6,169 @@
 @custom-variant dark (&:is([data-theme$="-night"] *));
 
 @theme inline {
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-headline);
-  --font-serif: var(--font-serif);
-  --color-gold: #d4af37;
-  --color-gold-dim: #b8963f;
-  --color-gold-bright: #f2ca50;
-  
-  --color-card: hsl(var(--card));
-  --color-card-foreground: hsl(var(--card-foreground));
-  --color-popover: hsl(var(--popover));
-  --color-popover-foreground: hsl(var(--popover-foreground));
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
-  --color-secondary: hsl(var(--secondary));
-  --color-secondary-foreground: hsl(var(--secondary-foreground));
-  --color-muted: hsl(var(--muted));
-  --color-muted-foreground: hsl(var(--muted-foreground));
-  --color-accent: hsl(var(--accent));
-  --color-accent-foreground: hsl(var(--accent-foreground));
-  --color-destructive: hsl(var(--destructive));
-  --color-border: hsl(var(--border));
-  --color-input: hsl(var(--input));
-  --color-ring: hsl(var(--ring));
+    --color-background: hsl(var(--background));
+    --color-foreground: hsl(var(--foreground));
+    --font-sans: var(--font-sans);
+    --font-mono: var(--font-geist-mono);
+    --font-heading: var(--font-headline);
+    --font-serif: var(--font-serif);
+    --color-gold: #d4af37;
+    --color-gold-dim: #b8963f;
+    --color-gold-bright: #f2ca50;
 
-  --color-surface-vault: hsl(var(--surface-vault));
-  --color-surface-elevated: hsl(var(--surface-elevated));
-  --color-text-muted-vault: hsl(var(--text-muted-vault));
+    --color-card: hsl(var(--card));
+    --color-card-foreground: hsl(var(--card-foreground));
+    --color-popover: hsl(var(--popover));
+    --color-popover-foreground: hsl(var(--popover-foreground));
+    --color-primary: hsl(var(--primary));
+    --color-primary-foreground: hsl(var(--primary-foreground));
+    --color-secondary: hsl(var(--secondary));
+    --color-secondary-foreground: hsl(var(--secondary-foreground));
+    --color-muted: hsl(var(--muted));
+    --color-muted-foreground: hsl(var(--muted-foreground));
+    --color-accent: hsl(var(--accent));
+    --color-accent-foreground: hsl(var(--accent-foreground));
+    --color-destructive: hsl(var(--destructive));
+    --color-border: hsl(var(--border));
+    --color-input: hsl(var(--input));
+    --color-ring: hsl(var(--ring));
 
-  --color-sidebar: hsl(var(--sidebar));
-  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
-  --color-sidebar-primary: hsl(var(--sidebar-primary));
-  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
-  --color-sidebar-accent: hsl(var(--sidebar-accent));
-  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
-  --color-sidebar-border: hsl(var(--sidebar-border));
-  --color-sidebar-ring: hsl(var(--sidebar-ring));
+    --color-surface-vault: hsl(var(--surface-vault));
+    --color-surface-elevated: hsl(var(--surface-elevated));
+    --color-text-muted-vault: hsl(var(--text-muted-vault));
 
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+    --color-sidebar: hsl(var(--sidebar));
+    --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+    --color-sidebar-primary: hsl(var(--sidebar-primary));
+    --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+    --color-sidebar-accent: hsl(var(--sidebar-accent));
+    --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+    --color-sidebar-border: hsl(var(--sidebar-border));
+    --color-sidebar-ring: hsl(var(--sidebar-ring));
+
+    --radius-sm: calc(var(--radius) * 0.6);
+    --radius-md: calc(var(--radius) * 0.8);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) * 1.4);
+    --radius-2xl: calc(var(--radius) * 1.8);
+    --radius-3xl: calc(var(--radius) * 2.2);
+    --radius-4xl: calc(var(--radius) * 2.6);
 }
 
 :root,
 [data-theme="summer-morning"] {
-  --background:           45 38% 96%;
-  --foreground:           30 25% 13%;
-  --card:                 45 38% 99%;
-  --card-foreground:      30 25% 13%;
-  --popover:              45 38% 99%;
-  --popover-foreground:   30 25% 13%;
-  --primary:              35 75% 45%;
-  --primary-foreground:   45 38% 96%;
-  --secondary:            45 30% 92%;
-  --secondary-foreground: 30 25% 13%;
-  --muted:                45 30% 92%;
-  --muted-foreground:     30 15% 38%;
-  --accent:               45 30% 92%;
-  --accent-foreground:    30 25% 13%;
-  --destructive:          0 84% 60%;
-  --border:               45 25% 86%;
-  --input:                45 25% 86%;
-  --ring:                 35 75% 45%;
-  --radius:               0.625rem;
+    --background: 45 38% 96%;
+    --foreground: 30 25% 13%;
+    --card: 45 38% 99%;
+    --card-foreground: 30 25% 13%;
+    --popover: 45 38% 99%;
+    --popover-foreground: 30 25% 13%;
+    --primary: 35 75% 45%;
+    --primary-foreground: 45 38% 96%;
+    --secondary: 45 30% 92%;
+    --secondary-foreground: 30 25% 13%;
+    --muted: 45 30% 92%;
+    --muted-foreground: 30 15% 38%;
+    --accent: 45 30% 92%;
+    --accent-foreground: 30 25% 13%;
+    --destructive: 0 84% 60%;
+    --border: 45 25% 86%;
+    --input: 45 25% 86%;
+    --ring: 35 75% 45%;
+    --radius: 0.625rem;
 
-  --surface-vault:        45 30% 92%;
-  --surface-elevated:     45 30% 94%;
-  --text-muted-vault:     30 15% 38%;
+    --surface-vault: 45 30% 92%;
+    --surface-elevated: 45 30% 94%;
+    --text-muted-vault: 30 15% 38%;
 
-  --sidebar:              45 38% 96%;
-  --sidebar-foreground:   30 25% 13%;
-  --sidebar-primary:      35 75% 45%;
-  --sidebar-primary-foreground: 45 38% 96%;
-  --sidebar-accent:       45 30% 92%;
-  --sidebar-accent-foreground: 30 25% 13%;
-  --sidebar-border:       45 25% 86%;
-  --sidebar-ring:         35 75% 45%;
+    --sidebar: 45 38% 96%;
+    --sidebar-foreground: 30 25% 13%;
+    --sidebar-primary: 35 75% 45%;
+    --sidebar-primary-foreground: 45 38% 96%;
+    --sidebar-accent: 45 30% 92%;
+    --sidebar-accent-foreground: 30 25% 13%;
+    --sidebar-border: 45 25% 86%;
+    --sidebar-ring: 35 75% 45%;
 }
 
 [data-theme="summer-night"] {
-  --background:           30 15% 8%;
-  --foreground:           45 15% 92%;
-  --card:                 30 14% 12%;
-  --card-foreground:      45 15% 92%;
-  --popover:              30 14% 12%;
-  --popover-foreground:   45 15% 92%;
-  --primary:              40 75% 62%;
-  --primary-foreground:   30 15% 8%;
-  --secondary:            30 12% 15%;
-  --secondary-foreground: 45 15% 92%;
-  --muted:                30 12% 15%;
-  --muted-foreground:     35 10% 68%;
-  --accent:               30 12% 15%;
-  --accent-foreground:    45 15% 92%;
-  --destructive:          0 84% 60%;
-  --border:               30 12% 22%;
-  --input:                30 12% 22%;
-  --ring:                 40 75% 62%;
-  --radius:               0.625rem;
+    --background: 30 15% 8%;
+    --foreground: 45 15% 92%;
+    --card: 30 14% 12%;
+    --card-foreground: 45 15% 92%;
+    --popover: 30 14% 12%;
+    --popover-foreground: 45 15% 92%;
+    --primary: 40 75% 62%;
+    --primary-foreground: 30 15% 8%;
+    --secondary: 30 12% 15%;
+    --secondary-foreground: 45 15% 92%;
+    --muted: 30 12% 15%;
+    --muted-foreground: 35 10% 68%;
+    --accent: 30 12% 15%;
+    --accent-foreground: 45 15% 92%;
+    --destructive: 0 84% 60%;
+    --border: 30 12% 22%;
+    --input: 30 12% 22%;
+    --ring: 40 75% 62%;
+    --radius: 0.625rem;
 
-  --surface-vault:        30 12% 10%;
-  --surface-elevated:     30 12% 15%;
-  --text-muted-vault:     35 10% 68%;
+    --surface-vault: 30 12% 10%;
+    --surface-elevated: 30 12% 15%;
+    --text-muted-vault: 35 10% 68%;
 
-  --sidebar:              30 15% 8%;
-  --sidebar-foreground:   45 15% 92%;
-  --sidebar-primary:      40 75% 62%;
-  --sidebar-primary-foreground: 30 15% 8%;
-  --sidebar-accent:       30 12% 15%;
-  --sidebar-accent-foreground: 45 15% 92%;
-  --sidebar-border:       30 12% 22%;
-  --sidebar-ring:         40 75% 62%;
+    --sidebar: 30 15% 8%;
+    --sidebar-foreground: 45 15% 92%;
+    --sidebar-primary: 40 75% 62%;
+    --sidebar-primary-foreground: 30 15% 8%;
+    --sidebar-accent: 30 12% 15%;
+    --sidebar-accent-foreground: 45 15% 92%;
+    --sidebar-border: 30 12% 22%;
+    --sidebar-ring: 40 75% 62%;
 }
 
 /* Parchment noise texture for archival fragments */
 .parchment-texture {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cfilter id='noise' x='0' y='0'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cfilter id='noise' x='0' y='0'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
 }
 
 /* Vault-themed scrollbar for Source Details panel */
 .vault-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: #d4af3733 transparent;
+    scrollbar-width: thin;
+    scrollbar-color: #d4af3733 transparent;
 }
+
 .vault-scrollbar::-webkit-scrollbar {
-  width: 6px;
+    width: 6px;
 }
+
 .vault-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
+    background: transparent;
 }
+
 .vault-scrollbar::-webkit-scrollbar-thumb {
-  background: #d4af3733;
-  border-radius: 3px;
+    background: #d4af3733;
+    border-radius: 3px;
 }
+
 .vault-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #d4af3766;
+    background: #d4af3766;
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
-    transition-property: color, background-color, border-color, box-shadow;
-    transition-duration: 300ms;
-    transition-timing-function: ease-out;
-  }
+    * {
+        @apply border-border outline-ring/50;
+        transition-property: color, background-color, border-color, box-shadow;
+        transition-duration: 300ms;
+        transition-timing-function: ease-out;
+    }
 
-  body {
-    @apply bg-background text-foreground;
-  }
+    body {
+        @apply bg-background text-foreground;
+    }
 
-  html {
-    @apply font-sans;
-  }
+    html {
+        @apply font-sans;
+    }
 }
 
 /* ============================================================
@@ -174,79 +178,153 @@
 /* Firefly wander — 3 independent 2D paths so the swarm looks alive.
    Each is a closed loop so motion is seamless when looping. */
 @keyframes firefly-wander-1 {
-  0%   { transform: translate(0,    0); }
-  20%  { transform: translate(38px, -42px); }
-  40%  { transform: translate(-22px, -86px); }
-  60%  { transform: translate(44px, -60px); }
-  80%  { transform: translate(-28px, -28px); }
-  100% { transform: translate(0,    0); }
+    0% {
+        transform: translate(0, 0);
+    }
+
+    20% {
+        transform: translate(38px, -42px);
+    }
+
+    40% {
+        transform: translate(-22px, -86px);
+    }
+
+    60% {
+        transform: translate(44px, -60px);
+    }
+
+    80% {
+        transform: translate(-28px, -28px);
+    }
+
+    100% {
+        transform: translate(0, 0);
+    }
 }
+
 @keyframes firefly-wander-2 {
-  0%   { transform: translate(0,    0); }
-  25%  { transform: translate(-46px, 22px); }
-  50%  { transform: translate(20px,  56px); }
-  75%  { transform: translate(54px, -12px); }
-  100% { transform: translate(0,    0); }
+    0% {
+        transform: translate(0, 0);
+    }
+
+    25% {
+        transform: translate(-46px, 22px);
+    }
+
+    50% {
+        transform: translate(20px, 56px);
+    }
+
+    75% {
+        transform: translate(54px, -12px);
+    }
+
+    100% {
+        transform: translate(0, 0);
+    }
 }
+
 @keyframes firefly-wander-3 {
-  0%   { transform: translate(0,    0); }
-  16%  { transform: translate(34px,  28px); }
-  33%  { transform: translate(62px, -22px); }
-  50%  { transform: translate(20px, -54px); }
-  66%  { transform: translate(-32px, -30px); }
-  83%  { transform: translate(-52px,  12px); }
-  100% { transform: translate(0,    0); }
+    0% {
+        transform: translate(0, 0);
+    }
+
+    16% {
+        transform: translate(34px, 28px);
+    }
+
+    33% {
+        transform: translate(62px, -22px);
+    }
+
+    50% {
+        transform: translate(20px, -54px);
+    }
+
+    66% {
+        transform: translate(-32px, -30px);
+    }
+
+    83% {
+        transform: translate(-52px, 12px);
+    }
+
+    100% {
+        transform: translate(0, 0);
+    }
 }
 
 /* Firefly blink — opacity pulse layered on top of the wander */
 @keyframes firefly-blink {
-  0%, 100% { opacity: 0.25; }
-  50%      { opacity: 1;   }
+
+    0%,
+    100% {
+        opacity: 0.25;
+    }
+
+    50% {
+        opacity: 1;
+    }
 }
 
 .seasonal-particle {
-  will-change: transform, opacity;
-  display: inline-block;
+    will-change: transform, opacity;
+    display: inline-block;
 }
 
 /* Firefly wander — three variants for path diversity across the swarm */
-.firefly-wander-1 { animation: firefly-wander-1 14s ease-in-out infinite; }
-.firefly-wander-2 { animation: firefly-wander-2 16s ease-in-out infinite; }
-.firefly-wander-3 { animation: firefly-wander-3 18s ease-in-out infinite; }
-.firefly-blink    { animation: firefly-blink 2.4s ease-in-out infinite; }
+.firefly-wander-1 {
+    animation: firefly-wander-1 14s ease-in-out infinite;
+}
+
+.firefly-wander-2 {
+    animation: firefly-wander-2 16s ease-in-out infinite;
+}
+
+.firefly-wander-3 {
+    animation: firefly-wander-3 18s ease-in-out infinite;
+}
+
+.firefly-blink {
+    animation: firefly-blink 2.4s ease-in-out infinite;
+}
 
 /* ============================================================
  * SELECTION STYLING (reflecting summer-night theme selection colors)
  * ============================================================ */
 ::selection {
-  background-color: hsl(40 75% 62% / 0.9); /* summer-night primary (sunlit gold) */
-  color: hsl(30 15% 8%);                    /* summer-night primary-foreground (dark warm gray) */
+    background-color: hsl(40 75% 62% / 0.9);
+    /* summer-night primary (sunlit gold) */
+    color: hsl(30 15% 8%);
+    /* summer-night primary-foreground (dark warm gray) */
 }
 
 ::-moz-selection {
-  background-color: hsl(40 75% 62% / 0.9); /* summer-night primary (sunlit gold) */
-  color: hsl(30 15% 8%);                    /* summer-night primary-foreground (dark warm gray) */
+    background-color: hsl(40 75% 62% / 0.9);
+    /* summer-night primary (sunlit gold) */
+    color: hsl(30 15% 8%);
+    /* summer-night primary-foreground (dark warm gray) */
 }
 
 /* ============================================================
  * REACT FLOW EDGE OVERRIDES
  * ============================================================ */
 .react-flow__edge {
-  opacity: 1 !important;
-  visibility: visible !important;
+    opacity: 1 !important;
+    visibility: visible !important;
 }
 
 .react-flow__edge-path.center-edge-path {
-  stroke: #fbbf24 !important;
-  stroke-width: 2px !important;
-  stroke-dasharray: 4 4 !important;
-  opacity: 0.9 !important;
+    stroke: #fbbf24 !important;
+    stroke-width: 2px !important;
+    stroke-dasharray: 4 4 !important;
+    opacity: 0.9 !important;
 }
 
 .react-flow__edge-path.contention-edge-path {
-  stroke: #f87171 !important;
-  stroke-width: 2.2px !important;
-  stroke-dasharray: 5 5 !important;
-  opacity: 0.9 !important;
+    stroke: #f87171 !important;
+    stroke-width: 2.2px !important;
+    stroke-dasharray: 5 5 !important;
+    opacity: 0.9 !important;
 }
-

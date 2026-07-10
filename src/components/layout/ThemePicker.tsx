@@ -1,11 +1,15 @@
 'use client';
 
-import { useTheme } from 'next-themes';
-import { useEffect, useState } from 'react';
-import { Sun, Moon } from 'lucide-react';
-import { useSidebar, SidebarLabel } from '@/src/components/layout/SidebarShell';
+// import { useTheme } from 'next-themes';
+// import { useEffect, useState } from 'react';
+// import { Sun, Moon } from 'lucide-react';
+// import { useSidebar, SidebarLabel } from '@/src/components/layout/SidebarShell';
 
 export default function ThemePicker({ showLabel = false }: { showLabel?: boolean }) {
+  // Commented out for now to disable theme selection and keep dark theme (summer-night) by default.
+  return null;
+
+  /*
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const { expanded } = useSidebar();
@@ -66,5 +70,6 @@ export default function ThemePicker({ showLabel = false }: { showLabel?: boolean
       )}
     </button>
   );
+  */
 }
 

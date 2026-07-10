@@ -6,7 +6,7 @@ import { HugeiconsIcon } from '@hugeicons/react';
 import { QuillWrite01Icon } from '@hugeicons/core-free-icons';
 import SignOutButton from '@/src/components/layout/SignOutButton';
 import { SidebarToggle, SidebarLabel, useSidebar } from '@/src/components/layout/SidebarShell';
-import ThemePicker from '@/src/components/layout/ThemePicker';
+// import ThemePicker from '@/src/components/layout/ThemePicker';
 
 export default function AdminSidebarContent() {
   const { expanded, close } = useSidebar();
@@ -85,7 +85,7 @@ export default function AdminSidebarContent() {
 
       {/* Footer */}
       <div className="px-2 flex flex-col gap-0.5 border-t border-border pt-4">
-        <ThemePicker showLabel />
+        {/* <ThemePicker showLabel /> */}
         <div className={[
           'text-text-muted-vault hover:text-foreground px-3 py-2 transition-colors hover:bg-foreground/[0.04] flex items-center text-sm font-serif',
           expanded ? 'gap-3' : 'lg:justify-center gap-3',

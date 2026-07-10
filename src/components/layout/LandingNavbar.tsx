@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/src/features/auth/hooks/use-auth';
 import SignOutButton from '@/src/components/layout/SignOutButton';
-import ThemePicker from '@/src/components/layout/ThemePicker';
+// import ThemePicker from '@/src/components/layout/ThemePicker';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { QuillWrite01Icon } from '@hugeicons/core-free-icons';
 import { AnimatePresence, motion } from 'motion/react';
@@ -150,12 +150,12 @@ export default function LandingNavbar() {
               </Link>
             </>
           )}
-          <ThemePicker />
+          {/* <ThemePicker /> */}
         </div>
 
         {/* Mobile controls */}
         <div className="md:hidden flex items-center gap-3">
-          <ThemePicker />
+          {/* <ThemePicker /> */}
           <button
             type="button"
             onClick={() => setMobileMenuOpen((prev) => !prev)}

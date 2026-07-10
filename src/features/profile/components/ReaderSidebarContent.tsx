@@ -7,7 +7,7 @@ import { QuillWrite01Icon } from '@hugeicons/core-free-icons';
 import SignOutButton from '@/src/components/layout/SignOutButton';
 import ConversationVault from '@/src/features/chat/components/ConversationVault';
 import { SidebarToggle, SidebarLabel, useSidebar } from '@/src/components/layout/SidebarShell';
-import ThemePicker from '@/src/components/layout/ThemePicker';
+// import ThemePicker from '@/src/components/layout/ThemePicker';
 
 type Conversation = {
   id: string;
@@ -83,7 +83,7 @@ export default function ReaderSidebarContent({
 
       {/* Footer */}
       <div className="px-2 flex flex-col gap-0.5 border-t border-border pt-4">
-        <ThemePicker showLabel />
+        {/* <ThemePicker showLabel /> */}
         {isLoggedIn && (
           <SidebarNavLink href="/settings" icon="settings" onNavigate={close}>
             Settings

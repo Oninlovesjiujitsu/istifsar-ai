@@ -2,7 +2,7 @@ import { createClient } from '@/src/lib/supabase/server';
 import Link from 'next/link';
 import SignOutButton from '@/src/components/layout/SignOutButton';
 import { getUserRole, isVerifiedHistorian, isAdmin } from '@/src/lib/ui/role-labels';
-import ThemePicker from '@/src/components/layout/ThemePicker';
+// import ThemePicker from '@/src/components/layout/ThemePicker';
 
 export default async function Navbar() {
   const supabase = await createClient();
@@ -91,7 +91,7 @@ export default async function Navbar() {
 
         {/* User menu */}
         <div className="flex items-center gap-2 text-sm">
-          <ThemePicker />
+          {/* <ThemePicker /> */}
           {user && (
             <Link
               href={username ? `/profile/${username}` : '/profile'}
