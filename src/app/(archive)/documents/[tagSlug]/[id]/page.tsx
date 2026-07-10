@@ -221,7 +221,7 @@ export default async function DocumentDetailPage({ params }: Props) {
         <div className="flex-1">
           <h2 className="font-semibold">Have questions about this source?</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Start a conversation grounded in verified primary sources.
+            Start a conversation grounded in verified historical sources.
           </p>
         </div>
         <AskAboutButton
@@ -249,12 +249,18 @@ async function ContentionsSection({ documentId }: { documentId: string }) {
   const allDocIds = [...new Set(contentions.flatMap((c) => c.document_ids))];
   const { data: docs } = await supabase
     .from('documents')
-    .select('id, title')
+    .select('id, title, document_tags(tags(slug))')
     .in('id', allDocIds);
 
   const titleMap: Record<string, string> = {};
+  const slugMap: Record<string, string> = {};
   for (const d of docs ?? []) {
     titleMap[d.id] = d.title;
+    const tags = (d.document_tags ?? []).flatMap((dt) => {
+      const t = (dt as any).tags as { slug: string } | null;
+      return t ? [t] : [];
+    });
+    slugMap[d.id] = tags[0]?.slug ?? 'all';
   }
 
   return (
@@ -267,7 +273,12 @@ async function ContentionsSection({ documentId }: { documentId: string }) {
       </p>
       <div className="space-y-3">
         {contentions.map((c) => (
-          <ContentionView key={c.id} contention={c} documentTitles={titleMap} />
+          <ContentionView
+            key={c.id}
+            contention={c}
+            documentTitles={titleMap}
+            documentTagSlugs={slugMap}
+          />
         ))}
       </div>
     </div>

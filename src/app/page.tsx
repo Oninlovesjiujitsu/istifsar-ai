@@ -7,6 +7,7 @@ import { useAuth } from '@/src/hooks/useAuth';
 import SignOutButton from '@/src/components/layout/SignOutButton';
 import { motion, AnimatePresence } from 'motion/react';
 import { HugeiconsIcon } from '@hugeicons/react';
+import LandingNavbar from '@/src/components/layout/LandingNavbar';
 import {
   Shield01Icon,
   BalanceScaleIcon,
@@ -23,9 +24,6 @@ import ArchiveBookshelfSilhouette from '@/src/components/layout/ArchiveBookshelf
 import FloatingBackToTop from '@/src/components/layout/FloatingBackToTheTop';
 import { ArrowDown } from 'lucide-react';
 import { TypeAnimation } from 'react-type-animation';
-
-const navSections = ['collections', 'agoncillo', 'boundaries', 'historians'] as const;
-type SectionId = (typeof navSections)[number];
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -87,8 +85,6 @@ const valueProps: { icon: IconSvgElement; title: string; text: string }[] = [
 ];
 
 export default function LandingPage() {
-  const [activeSection, setActiveSection] = useState<SectionId | null>(null);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
 
   const { role, loading } = useAuth();
@@ -107,250 +103,11 @@ export default function LandingPage() {
     }
   }, [role, loading, router]);
 
-  const closeMobileMenu = useCallback(() => setMobileMenuOpen(false), []);
-
-  const handleScrollToSection = useCallback((e: React.MouseEvent<HTMLAnchorElement>, id: string, closeMenu = false) => {
-    e.preventDefault();
-    if (closeMenu) {
-      setMobileMenuOpen(false);
-      document.body.style.overflow = ''; // Unlock body scroll lock immediately
-    }
-
-    // Defer scroll to allow mobile menu to start closing and layout to update
-    setTimeout(() => {
-      const el = document.getElementById(id);
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, closeMenu ? 150 : 0);
-  }, []);
-
-  useEffect(() => {
-    if (mobileMenuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => { document.body.style.overflow = ''; };
-  }, [mobileMenuOpen]);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id as SectionId);
-          }
-        }
-      },
-      { rootMargin: '-40% 0px -40% 0px' },
-    );
-
-    for (const id of navSections) {
-      const el = document.getElementById(id);
-      if (el) observer.observe(el);
-    }
-
-    return () => observer.disconnect();
-  }, []);
-
-  const navLinkClass = (id: SectionId) =>
-    activeSection === id
-      ? 'font-serif font-light tracking-tight text-gold-bright border-b-2 border-gold pb-1 transition-all duration-300'
-      : 'font-serif font-light tracking-tight text-text-muted-vault hover:text-foreground hover:border-b-2 hover:border-gold/40 pb-1 transition-all duration-300';
-
   return (
     <div>
       <FireFlyBackground />
       <ArchiveBookshelfSilhouette />
-      <motion.nav
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1.0, ease: 'easeOut' }}
-        className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-sm shadow-[0_0_15px_rgba(212,175,55,0.1)]"
-      >
-        <div className="flex justify-between items-center px-4 sm:px-6 md:px-12 py-4 md:py-6 max-w-[1440px] mx-auto">
-          <a
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            className="flex items-center gap-2 group"
-          >
-            <HugeiconsIcon
-              icon={QuillWrite01Icon}
-              size={24}
-              className="text-gold group-hover:text-gold-bright transition-colors duration-300"
-            />
-            <span className="text-xl sm:text-2xl font-serif italic text-gold tracking-widest group-hover:text-gold-bright transition-colors duration-300">
-              Istifsar AI
-            </span>
-          </a>
-
-          {/* Desktop nav links */}
-          <div className="hidden md:flex items-center space-x-12">
-            <a
-              href="#collections"
-              className={navLinkClass('collections')}
-              onClick={(e) => handleScrollToSection(e, 'collections')}
-            >
-              Digital Collections
-            </a>
-            <a
-              href="#agoncillo"
-              className={navLinkClass('agoncillo')}
-              onClick={(e) => handleScrollToSection(e, 'agoncillo')}
-            >
-              The Agoncillo Constraint
-            </a>
-            <a
-              href="#boundaries"
-              className={navLinkClass('boundaries')}
-              onClick={(e) => handleScrollToSection(e, 'boundaries')}
-            >
-              Platform Boundaries
-            </a>
-            <a
-              href="#historians"
-              className={navLinkClass('historians')}
-              onClick={(e) => handleScrollToSection(e, 'historians')}
-            >
-              For Historians
-            </a>
-          </div>
-
-          {/* Desktop auth buttons */}
-          <div className="hidden md:flex items-center space-x-6">
-            {!loading && role ? (
-              <>
-                <Link
-                  href={role === 'admin' ? '/admin' : role === 'verified_historian' ? '/dashboard' : '/explore'}
-                  className="bg-gold text-background px-6 py-2 rounded-sm text-sm uppercase tracking-widest hover:scale-[1.02] transition-all duration-300 font-medium"
-                >
-                  Go to Workspace
-                </Link>
-                <div className="text-gold text-sm uppercase tracking-widest hover:text-gold-bright transition-colors">
-                  <SignOutButton />
-                </div>
-              </>
-            ) : (
-              <>
-                <Link
-                  href="/login"
-                  className="text-gold text-sm uppercase tracking-widest hover:text-gold-bright transition-colors"
-                >
-                  Sign In
-                </Link>
-                <Link
-                  href="/signup"
-                  className="bg-gold text-background px-6 py-2 rounded-sm text-sm uppercase tracking-widest hover:scale-[1.02] transition-all duration-300 font-medium"
-                >
-                  Join as Historian
-                </Link>
-              </>
-            )}
-          </div>
-
-          {/* Mobile hamburger button */}
-          <button
-            type="button"
-            onClick={() => setMobileMenuOpen((prev) => !prev)}
-            className="md:hidden relative w-10 h-10 flex items-center justify-center text-gold"
-            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
-            aria-expanded={mobileMenuOpen}
-          >
-            <span className="sr-only">{mobileMenuOpen ? 'Close menu' : 'Open menu'}</span>
-            <span
-              className={`absolute h-[2px] w-5 bg-current transition-all duration-300 ${mobileMenuOpen ? 'rotate-45 translate-y-0' : '-translate-y-1.5'}`}
-            />
-            <span
-              className={`absolute h-[2px] w-5 bg-current transition-all duration-300 ${mobileMenuOpen ? 'opacity-0' : 'opacity-100'}`}
-            />
-            <span
-              className={`absolute h-[2px] w-5 bg-current transition-all duration-300 ${mobileMenuOpen ? '-rotate-45 translate-y-0' : 'translate-y-1.5'}`}
-            />
-          </button>
-        </div>
-
-        {/* Mobile menu overlay */}
-        <AnimatePresence>
-          {mobileMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3, ease: 'easeInOut' }}
-              className="md:hidden overflow-hidden border-t border-gold/10 bg-background/95 backdrop-blur-md"
-            >
-              <div className="flex flex-col px-6 py-6 gap-6">
-                <a
-                  href="#collections"
-                  onClick={(e) => handleScrollToSection(e, 'collections', true)}
-                  className="font-serif font-light tracking-tight text-text-muted-vault hover:text-gold transition-colors text-lg"
-                >
-                  Digital Collections
-                </a>
-                <a
-                  href="#agoncillo"
-                  onClick={(e) => handleScrollToSection(e, 'agoncillo', true)}
-                  className="font-serif font-light tracking-tight text-text-muted-vault hover:text-gold transition-colors text-lg"
-                >
-                  The Agoncillo Constraint
-                </a>
-                <a
-                  href="#boundaries"
-                  onClick={(e) => handleScrollToSection(e, 'boundaries', true)}
-                  className="font-serif font-light tracking-tight text-text-muted-vault hover:text-gold transition-colors text-lg"
-                >
-                  Platform Boundaries
-                </a>
-                <a
-                  href="#historians"
-                  onClick={(e) => handleScrollToSection(e, 'historians', true)}
-                  className="font-serif font-light tracking-tight text-text-muted-vault hover:text-gold transition-colors text-lg"
-                >
-                  For Historians
-                </a>
-
-                <div className="h-px bg-gold/10" />
-
-                {!loading && role ? (
-                  <div className="flex flex-col gap-3">
-                    <Link
-                      href={role === 'admin' ? '/admin' : role === 'verified_historian' ? '/dashboard' : '/explore'}
-                      onClick={closeMobileMenu}
-                      className="bg-gold text-background px-6 py-3 rounded-sm text-sm uppercase tracking-widest font-medium text-center hover:bg-gold-bright transition-colors"
-                    >
-                      Go to Workspace
-                    </Link>
-                    <div className="text-gold text-sm uppercase tracking-widest hover:text-gold-bright transition-colors py-2 text-center">
-                      <SignOutButton />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex flex-col gap-3">
-                    <Link
-                      href="/login"
-                      onClick={closeMobileMenu}
-                      className="text-gold text-sm uppercase tracking-widest hover:text-gold-bright transition-colors py-2"
-                    >
-                      Sign In
-                    </Link>
-                    <Link
-                      href="/signup"
-                      onClick={closeMobileMenu}
-                      className="bg-gold text-background px-6 py-3 rounded-sm text-sm uppercase tracking-widest font-medium text-center hover:bg-gold-bright transition-colors"
-                    >
-                      Join as Historian
-                    </Link>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.nav>
+      <LandingNavbar />
 
       <main>
         <section className="relative min-h-screen flex items-start sm:items-center justify-center pt-36 sm:pt-0 px-4 sm:px-6 md:px-0 overflow-hidden">
@@ -432,7 +189,10 @@ export default function LandingPage() {
           <div className="absolute bottom-6 sm:bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center animate-bounce z-10">
             <a
               href="#collections"
-              onClick={(e) => handleScrollToSection(e, 'collections')}
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById('collections')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }}
               className="flex flex-col items-center justify-center p-4 -m-4 min-w-[48px] min-h-[48px] text-gold/60 hover:text-gold transition-colors duration-300 group"
               aria-label="Scroll down to collections"
             >

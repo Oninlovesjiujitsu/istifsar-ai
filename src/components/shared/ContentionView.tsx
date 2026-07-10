@@ -13,7 +13,8 @@ type ContentionRow = {
 type Props = {
   contention: ContentionRow;
   documentTitles: Record<string, string>;
-  /** Base path for document links. Defaults to '/documents'. Use '/publications' in workspace. */
+  documentTagSlugs?: Record<string, string>;
+  /** Base path for document links. Defaults to '/documents/[tagSlug]'. Use '/publications' in workspace. */
   documentBasePath?: string;
 };
 
@@ -27,7 +28,12 @@ const STATUS_BADGE: Record<string, string> = {
  * Read-only contention display card for public document pages.
  * Shows contention title, description, linked sources, and status.
  */
-export default function ContentionView({ contention, documentTitles, documentBasePath = '/documents' }: Props) {
+export default function ContentionView({
+  contention,
+  documentTitles,
+  documentTagSlugs = {},
+  documentBasePath = '/documents/[tagSlug]',
+}: Props) {
   return (
     <div className="rounded-lg border bg-card p-5 space-y-3">
       <div className="flex items-start justify-between gap-4">
@@ -59,20 +65,26 @@ export default function ContentionView({ contention, documentTitles, documentBas
             Sources in conflict
           </p>
           <ul className="space-y-0.5">
-            {contention.document_ids.map((docId) => (
-              <li key={docId} className="text-sm">
-                {documentTitles[docId] ? (
-                  <Link
-                    href={`${documentBasePath}/${docId}`}
-                    className="text-primary hover:underline"
-                  >
-                    {documentTitles[docId]}
-                  </Link>
-                ) : (
-                  <span className="font-mono text-xs text-muted-foreground">{docId}</span>
-                )}
-              </li>
-            ))}
+            {contention.document_ids.map((docId) => {
+              const tagSlug = documentTagSlugs[docId] || 'all';
+              const basePath = documentBasePath.includes('[tagSlug]')
+                ? documentBasePath.replace('[tagSlug]', tagSlug)
+                : documentBasePath;
+              return (
+                <li key={docId} className="text-sm">
+                  {documentTitles[docId] ? (
+                    <Link
+                      href={`${basePath}/${docId}`}
+                      className="text-primary hover:underline"
+                    >
+                      {documentTitles[docId]}
+                    </Link>
+                  ) : (
+                    <span className="font-mono text-xs text-muted-foreground">{docId}</span>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}

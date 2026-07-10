@@ -47,7 +47,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>{children}</ThemeProvider>
+        <ThemeProvider attribute="data-theme" defaultTheme="summer-night" enableSystem={false}>{children}</ThemeProvider>
       </body>
     </html>
   );
