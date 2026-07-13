@@ -38,15 +38,15 @@ function CustomTooltip({
   if (!active || !payload?.length) return null;
 
   return (
-    <div className="bg-surface-vault border border-zinc-700 rounded-md px-3 py-2 shadow-lg">
-      <p className="text-[10px] uppercase tracking-widest text-text-muted-vault mb-1">
+    <div className="bg-card border border-border rounded-md px-3 py-2 shadow-lg">
+      <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
         {label}
       </p>
       {payload.map((entry) => (
         <p
           key={entry.dataKey}
           className="text-xs"
-          style={{ color: entry.dataKey === 'currentYear' ? '#D4AF37' : '#71717a' }}
+          style={{ color: entry.dataKey === 'currentYear' ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))' }}
         >
           {entry.dataKey === 'currentYear' ? currentYearLabel : previousYearLabel}:{' '}
           <span className="font-semibold">{entry.value}</span>
@@ -82,12 +82,12 @@ export default function CitationsChart({
           </p>
         </div>
         <div className="flex gap-4">
-          <span className="text-[10px] uppercase tracking-widest text-gold flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-gold" />
+          <span className="text-[10px] uppercase tracking-widest text-primary flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-primary" />
             {currentYearLabel}
           </span>
-          <span className="text-[10px] uppercase tracking-widest text-zinc-600 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-zinc-700" />
+          <span className="text-[10px] uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-muted-foreground/50" />
             {previousYearLabel}
           </span>
         </div>
@@ -98,13 +98,13 @@ export default function CitationsChart({
           <AreaChart data={data} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
             <defs>
               <linearGradient id="citationGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#D4AF37" stopOpacity={0.2} />
-                <stop offset="100%" stopColor="#D4AF37" stopOpacity={0} />
+                <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.2} />
+                <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
               </linearGradient>
             </defs>
 
             <CartesianGrid
-              stroke="#353534"
+              stroke="hsl(var(--border))"
               strokeDasharray="4"
               strokeWidth={0.5}
               vertical={false}
@@ -112,7 +112,7 @@ export default function CitationsChart({
 
             <XAxis
               dataKey="month"
-              tick={{ fontSize: 10, fill: '#71717a' }}
+              tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
               tickFormatter={(value: string) => value.toUpperCase()}
               axisLine={false}
               tickLine={false}
@@ -120,7 +120,7 @@ export default function CitationsChart({
             />
 
             <YAxis
-              tick={{ fontSize: 10, fill: '#71717a' }}
+              tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
               axisLine={false}
               tickLine={false}
               allowDecimals={false}
@@ -133,28 +133,28 @@ export default function CitationsChart({
                   previousYearLabel={previousYearLabel}
                 />
               }
-              cursor={{ stroke: '#D4AF37', strokeWidth: 1, strokeDasharray: '4' }}
+              cursor={{ stroke: 'hsl(var(--primary))', strokeWidth: 1, strokeDasharray: '4' }}
             />
 
             <Area
               type="monotone"
               dataKey="currentYear"
-              stroke="#D4AF37"
+              stroke="hsl(var(--primary))"
               strokeWidth={3}
               fill="url(#citationGradient)"
               dot={false}
-              activeDot={{ r: 5, fill: '#D4AF37', stroke: '#131313', strokeWidth: 2 }}
+              activeDot={{ r: 5, fill: 'hsl(var(--primary))', stroke: 'hsl(var(--background))', strokeWidth: 2 }}
             />
 
             <Area
               type="monotone"
               dataKey="previousYear"
-              stroke="#525252"
+              stroke="hsl(var(--muted-foreground))"
               strokeWidth={2}
               strokeDasharray="8"
               fill="none"
               dot={false}
-              activeDot={{ r: 4, fill: '#525252', stroke: '#131313', strokeWidth: 2 }}
+              activeDot={{ r: 4, fill: 'hsl(var(--muted-foreground))', stroke: 'hsl(var(--background))', strokeWidth: 2 }}
             />
           </AreaChart>
         </ResponsiveContainer>

@@ -90,8 +90,8 @@ export default function SidebarShell({
         {/* ── Sidebar panel ────────────────────────────────────────────── */}
         <aside
           className={[
-            'fixed top-0 left-0 z-50 h-dvh bg-surface-vault border-r border-border',
-            'shadow-sm dark:shadow-[0_0_15px_rgba(212,175,55,0.08)] flex flex-col py-6 gap-6',
+            'fixed top-0 left-0 z-50 h-dvh bg-card border-r border-border',
+            'shadow-sm flex flex-col py-6 gap-6',
             'transition-all duration-300 ease-in-out overflow-hidden',
             expanded ? 'lg:w-64' : 'lg:w-16',
             mobileOpen ? 'translate-x-0 w-64' : '-translate-x-full lg:translate-x-0',
@@ -101,11 +101,11 @@ export default function SidebarShell({
         </aside>
 
         {/* ── Mobile top bar ────────────────────────────────────────────── */}
-        <div className="fixed top-0 left-0 right-0 z-30 flex items-center h-14 px-4 bg-surface-vault/95 backdrop-blur-sm border-b border-border lg:hidden">
+        <div className="fixed top-0 left-0 right-0 z-30 flex items-center h-14 px-4 bg-card/95 backdrop-blur-sm border-b border-border lg:hidden">
           <button
             type="button"
             onClick={toggle}
-            className="w-10 h-10 flex items-center justify-center text-foreground dark:text-gold"
+            className="w-10 h-10 flex items-center justify-center text-foreground hover:text-primary transition-colors"
             aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -147,7 +147,7 @@ export function SidebarToggle() {
     <button
       type="button"
       onClick={toggle}
-      className="hidden lg:flex w-8 h-8 items-center justify-center rounded-sm text-text-muted-vault hover:text-foreground dark:hover:text-gold hover:bg-foreground/[0.04] transition-colors shrink-0"
+      className="hidden lg:flex w-8 h-8 items-center justify-center rounded-sm text-muted-foreground hover:text-foreground hover:bg-foreground/[0.04] transition-colors shrink-0"
       aria-label={expanded ? 'Collapse sidebar' : 'Expand sidebar'}
     >
       <svg

@@ -285,15 +285,15 @@ export default function ChatInterface({
 
   return (
     <div className="flex h-full min-h-0">
-      <div className="flex flex-1 min-h-0 min-w-0 flex-col bg-[#131313] relative">
+      <div className="flex flex-1 min-h-0 min-w-0 flex-col bg-background relative">
         <div className="absolute inset-0 pointer-events-none opacity-5">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gold rounded-full blur-[120px]" />
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary rounded-full blur-[120px]" />
         </div>
 
         {documentTitle && (
-          <div className="flex shrink-0 items-center gap-2 border-b border-white/[0.06] bg-surface-vault/50 backdrop-blur-sm px-4 lg:px-6 py-2 relative z-10">
-            <span className="text-xs text-text-muted-vault truncate max-w-[60%]">
-              Asking about: <span className="font-medium text-zinc-300">{documentTitle}</span>
+          <div className="flex shrink-0 items-center gap-2 border-b border-border bg-card/50 backdrop-blur-sm px-4 lg:px-6 py-2 relative z-10">
+            <span className="text-xs text-muted-foreground truncate max-w-[60%]">
+              Asking about: <span className="font-medium text-foreground">{documentTitle}</span>
             </span>
           </div>
         )}
@@ -372,12 +372,12 @@ export default function ChatInterface({
             (messages.length === 0 ||
               messages[messages.length - 1].role === 'user') && (
               <div className="flex justify-start">
-                <div className="rounded-sm bg-surface-elevated px-4 py-3 text-sm text-text-muted-vault shadow-sm">
+                <div className="rounded-sm bg-card border border-border px-4 py-3 text-sm text-muted-foreground shadow-sm">
                   <span className="flex items-center gap-2">
                     <span className="inline-flex gap-1">
-                      <span className="h-1.5 w-1.5 rounded-full bg-gold animate-bounce [animation-delay:0ms]" />
-                      <span className="h-1.5 w-1.5 rounded-full bg-gold animate-bounce [animation-delay:150ms]" />
-                      <span className="h-1.5 w-1.5 rounded-full bg-gold animate-bounce [animation-delay:300ms]" />
+                      <span className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce [animation-delay:0ms]" />
+                      <span className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce [animation-delay:150ms]" />
+                      <span className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce [animation-delay:300ms]" />
                     </span>
                     {documentId ? 'Exploring this source…' : 'Exploring sources…'}
                   </span>
@@ -389,7 +389,7 @@ export default function ChatInterface({
             <div className="flex justify-start">
               <div className="rounded-sm border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm shadow-sm max-w-[85%]">
                 <p className="font-medium text-destructive">Something went wrong</p>
-                <p className="mt-1 text-text-muted-vault text-xs">{error.message}</p>
+                <p className="mt-1 text-muted-foreground text-xs">{error.message}</p>
               </div>
             </div>
           )}
@@ -404,7 +404,7 @@ export default function ChatInterface({
             selectedTopicId={selectedTopicId}
             onTopicChange={setSelectedTopicId}
           />
-          <p className="mt-1.5 text-center text-xs text-text-muted-vault/60">
+          <p className="mt-1.5 text-center text-xs text-muted-foreground/60">
             Answers are grounded in authenticated and scholarly sources only.
           </p>
         </div>
@@ -412,7 +412,7 @@ export default function ChatInterface({
 
       {rightPanel && (
         <>
-          <div className="hidden md:flex w-[40%] shrink-0 border-l border-white/[0.06] flex-col h-full min-h-0">
+          <div className="hidden md:flex w-[40%] shrink-0 border-l border-border flex-col h-full min-h-0">
             {rightPanel.kind === 'citation' ? (
               <SourceDetailsPanel citation={rightPanel.citation} onClose={closeRightPanel} />
             ) : (

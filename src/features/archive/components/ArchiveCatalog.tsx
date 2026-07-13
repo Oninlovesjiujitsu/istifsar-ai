@@ -46,7 +46,7 @@ export default function ArchiveCatalog() {
   }, []);
 
   return (
-    <section id="collections" className="dark max-w-6xl mx-auto px-4 sm:px-6 md:px-12 py-16 sm:py-24 md:py-32">
+    <section id="collections" className="max-w-6xl mx-auto px-4 sm:px-6 md:px-12 py-16 sm:py-24 md:py-32">
       <motion.div
         initial="hidden"
         whileInView="visible"
@@ -65,7 +65,7 @@ export default function ArchiveCatalog() {
           whileInView={{ scaleX: 1 }}
           viewport={viewport}
           transition={{ duration: 1.0, delay: 0.5, ease: 'easeOut' }}
-          className="w-24 h-px bg-gold/40 origin-left"
+          className="w-24 h-px bg-primary/40 origin-left"
         />
       </motion.div>
 
@@ -74,7 +74,7 @@ export default function ArchiveCatalog() {
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="bg-card p-8 md:p-10 rounded-sm border border-gold/20 animate-pulse h-56"
+              className="bg-card p-8 md:p-10 rounded-sm border border-border animate-pulse h-56"
             />
           ))}
         </div>

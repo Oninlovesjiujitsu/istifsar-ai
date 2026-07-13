@@ -83,8 +83,8 @@ function ConversationItem({
     <div
       className={`group relative flex items-center text-xs rounded-sm transition-colors ${isMenuOpen ? 'z-50' : 'z-10 hover:z-20'
         } ${isActive
-          ? 'bg-gold/5 text-gold-bright border-l border-gold/40'
-          : 'text-text-muted-vault hover:text-foreground hover:bg-white/[0.04]'
+          ? 'bg-primary/10 text-primary border-l-2 border-primary'
+          : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'
         }`}
     >
       <Link
@@ -112,7 +112,7 @@ function ConversationItem({
           <input
             ref={inputRef}
             type="text"
-            className="flex-1 bg-black/60 text-foreground border border-gold/40 rounded-sm px-1.5 py-0.5 w-full outline-none group-hover:pr-8"
+            className="flex-1 bg-background text-foreground border border-border rounded-sm px-1.5 py-0.5 w-full outline-none group-hover:pr-8"
             value={titleValue}
             onChange={(e) => setTitleValue(e.target.value)}
             onBlur={handleSaveRename}
@@ -219,10 +219,10 @@ export default function ConversationVault({
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search inquiries..."
-          className="w-full bg-[#0e0e0e] border-none text-xs py-2 pl-8 pr-2 rounded-sm focus:ring-1 focus:ring-gold/40 placeholder:text-text-muted-vault/30"
+          className="w-full bg-background border border-border text-xs py-2 pl-8 pr-2 rounded-sm shadow-[inset_1px_1px_3px_rgba(0,0,0,0.06)] focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary/50 text-foreground placeholder:text-muted-foreground/40 transition-all duration-200"
         />
         <svg
-          className="absolute left-2 top-2 w-4 h-4 text-text-muted-vault/40"
+          className="absolute left-2.5 top-[9px] w-3.5 h-3.5 text-muted-foreground/60"
           fill="none"
           viewBox="0 0 24 24"
           strokeWidth={1.5}
@@ -238,7 +238,7 @@ export default function ConversationVault({
 
       <div className="flex flex-col gap-1.5 overflow-y-auto flex-1 -mx-2 px-2 scrollbar-thin pb-4">
         {filtered.length === 0 && (
-          <p className="text-[11px] text-text-muted-vault/40 py-2">
+          <p className="text-[11px] text-muted-foreground/60 py-2 font-serif italic">
             {search ? 'No matching conversations' : 'No conversations yet'}
           </p>
         )}

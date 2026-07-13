@@ -46,8 +46,15 @@ export default function RootLayout({
       )}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col">
-        <ThemeProvider attribute="data-theme" defaultTheme="summer-night" enableSystem={false}>{children}</ThemeProvider>
+      <body className="min-h-full flex flex-col relative">
+        {/* Global SVG Noise Overlay */}
+        <div 
+          className="pointer-events-none fixed inset-0 z-50 mix-blend-multiply opacity-[0.4]"
+          style={{ 
+            backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E\")" 
+          }}
+        />
+        <ThemeProvider attribute="data-theme" defaultTheme="archive" enableSystem={false}>{children}</ThemeProvider>
       </body>
     </html>
   );

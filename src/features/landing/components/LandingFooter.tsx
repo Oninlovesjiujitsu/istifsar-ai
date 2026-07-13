@@ -16,20 +16,20 @@ export default function LandingFooter({
       className="w-full border-t border-border relative z-20 bg-background"
     >
       <div className="flex flex-col md:flex-row justify-between items-center px-4 sm:px-6 md:px-16 py-6 md:py-8 w-full max-w-[1440px] mx-auto gap-6 md:gap-8">
-        <p className="text-xs sm:text-sm tracking-widest uppercase text-text-muted-vault text-center md:text-left">
+        <p className="text-xs sm:text-sm tracking-widest uppercase text-muted-foreground text-center md:text-left">
           &copy; 2026 Istifsar AI. All rights reserved. The Digital Curator.
         </p>
         <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-6 md:gap-12">
           <a
             href="#"
-            className="text-xs sm:text-sm tracking-wider sm:tracking-widest uppercase text-text-muted-vault hover:text-gold transition-all opacity-80 hover:opacity-100"
+            className="text-xs sm:text-sm tracking-wider sm:tracking-widest uppercase text-muted-foreground hover:text-primary transition-all opacity-80 hover:opacity-100"
           >
             Privacy Policy
           </a>
           <button
             type="button"
             onClick={onContactClick}
-            className="text-xs sm:text-sm tracking-wider sm:tracking-widest uppercase text-text-muted-vault hover:text-gold transition-all opacity-80 hover:opacity-100 cursor-pointer"
+            className="text-xs sm:text-sm tracking-wider sm:tracking-widest uppercase text-muted-foreground hover:text-primary transition-all opacity-80 hover:opacity-100 cursor-pointer"
           >
             Contact
           </button>
@@ -37,7 +37,7 @@ export default function LandingFooter({
             href="https://github.com/Oninlovesjiujitsu/istifsar-ai"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-text-muted-vault hover:text-gold transition-all opacity-80 hover:opacity-100"
+            className="text-muted-foreground hover:text-primary transition-all opacity-80 hover:opacity-100"
             aria-label="GitHub Repository"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">

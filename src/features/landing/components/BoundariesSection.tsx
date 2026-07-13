@@ -17,7 +17,7 @@ const viewport = { once: true, amount: 0.3 as const };
 
 export default function BoundariesSection() {
   return (
-    <section id="boundaries" className="bg-background py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-12 border-y border-gold/10">
+    <section id="boundaries" className="bg-background py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-12 border-y border-border">
       <div className="max-w-[1440px] mx-auto">
         <motion.div
           variants={fadeUp}
@@ -43,9 +43,9 @@ export default function BoundariesSection() {
             viewport={viewport}
             className="space-y-8"
           >
-            <div className="border-b border-gold/20 pb-4 mb-8">
-              <h3 className="font-serif italic text-gold text-2xl tracking-wide">What Istifsar AI Is</h3>
-              <p className="text-xs uppercase tracking-[0.2em] text-text-muted-vault mt-2">Our Capabilities</p>
+            <div className="border-b border-border pb-4 mb-8">
+              <h3 className="font-serif italic text-primary text-2xl tracking-wide">What Istifsar AI Is</h3>
+              <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground mt-2">Our Capabilities</p>
             </div>
             <div className="space-y-4">
               {[
@@ -66,9 +66,9 @@ export default function BoundariesSection() {
             viewport={viewport}
             className="space-y-8"
           >
-            <div className="border-b border-gold/20 pb-4 mb-8">
-              <h3 className="font-serif italic text-gold text-2xl tracking-wide">What Istifsar AI Isn't</h3>
-              <p className="text-xs uppercase tracking-[0.2em] text-text-muted-vault mt-2">Our Limitations</p>
+            <div className="border-b border-border pb-4 mb-8">
+              <h3 className="font-serif italic text-primary text-2xl tracking-wide">What Istifsar AI Isn't</h3>
+              <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground mt-2">Our Limitations</p>
             </div>
             <div className="space-y-4">
               {[

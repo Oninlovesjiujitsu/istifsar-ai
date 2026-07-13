@@ -5,7 +5,7 @@ function avatarColor(name: string): string {
   const colors = [
     'bg-amber-200 text-amber-800',
     'bg-rose-200 text-rose-800',
-    'bg-emerald-200 text-emerald-800',
+    'bg-sage/20 text-sage border border-sage/20',
     'bg-sky-200 text-sky-800',
     'bg-violet-200 text-violet-800',
     'bg-orange-200 text-orange-800',
@@ -159,7 +159,7 @@ export default function ProfileContent({
       {/* ── Publications ────────────────────────────────────────────────── */}
       {publications && publications.length > 0 && (
         <section className="space-y-4">
-          <SectionHeading>Primary sources contributed</SectionHeading>
+          <SectionHeading>Scholarly sources contributed</SectionHeading>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {publications.map((doc) => (
               <Link

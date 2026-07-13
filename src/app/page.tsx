@@ -38,7 +38,6 @@ export default function LandingPage() {
 
   return (
     <div>
-      <FireFlyBackground />
       <ArchiveBookshelfSilhouette />
       <LandingNavbar />
 

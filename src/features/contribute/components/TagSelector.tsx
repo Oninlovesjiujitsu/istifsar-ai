@@ -112,13 +112,13 @@ export default function TagSelector({
     <div ref={containerRef} className="relative">
       {/* Selected tags + input */}
       <div
-        className="flex flex-wrap gap-1.5 rounded-lg border border-zinc-200 bg-white px-2 py-1.5 text-sm dark:border-zinc-700 dark:bg-zinc-900 focus-within:ring-2 focus-within:ring-[#D4AF37]"
+        className="flex flex-wrap gap-1.5 rounded-lg border border-border bg-background shadow-[inset_1px_1px_3px_rgba(0,0,0,0.06)] px-2 py-1.5 text-sm focus-within:ring-1 focus-within:ring-primary"
         onClick={() => inputRef.current?.focus()}
       >
         {selected.map((tag) => (
           <span
             key={tag.id}
-            className="inline-flex items-center gap-1 rounded-md bg-zinc-200 px-2 py-0.5 text-xs font-medium text-zinc-700 dark:bg-zinc-700 dark:text-zinc-200"
+            className="inline-flex items-center gap-1 rounded-md bg-muted/50 border border-border px-2 py-0.5 text-xs font-medium text-foreground shadow-sm"
           >
             {tag.name}
             <button
@@ -127,7 +127,7 @@ export default function TagSelector({
                 e.stopPropagation();
                 removeTag(tag.id);
               }}
-              className="ml-0.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-100"
+              className="ml-0.5 text-muted-foreground hover:text-foreground"
               aria-label={`Remove ${tag.name}`}
             >
               ×
@@ -146,13 +146,13 @@ export default function TagSelector({
           onFocus={() => setOpen(true)}
           onKeyDown={handleKeyDown}
           placeholder={selected.length === 0 ? 'Search or create tags…' : ''}
-          className="min-w-[120px] flex-1 bg-transparent py-0.5 text-sm text-zinc-900 placeholder-zinc-400 outline-none dark:text-zinc-50 dark:placeholder-zinc-500"
+          className="min-w-[120px] flex-1 bg-transparent py-0.5 text-sm text-foreground placeholder:text-muted-foreground/60 outline-none"
         />
       </div>
 
       {/* Dropdown */}
       {open && items.length > 0 && (
-        <ul className="absolute z-50 mt-1 max-h-48 w-full overflow-auto rounded-lg border border-zinc-200 bg-white shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
+        <ul className="absolute z-50 mt-1 max-h-48 w-full overflow-auto rounded-lg border border-border bg-card shadow-lg">
           {items.map((item, i) => (
             <li
               key={item.id}
@@ -163,15 +163,15 @@ export default function TagSelector({
                 e.preventDefault(); // prevent blur
                 addTag(item);
               }}
-              className={`cursor-pointer px-3 py-2 text-sm ${i === activeIndex
-                  ? 'bg-zinc-100 dark:bg-zinc-800'
+              className={`cursor-pointer px-3 py-2 text-sm text-foreground ${i === activeIndex
+                  ? 'bg-muted/30'
                   : ''
-                } text-zinc-900 dark:text-zinc-100`}
+                }`}
             >
               {item.isNew ? (
                 <span>
                   Create{' '}
-                  <span className="font-semibold text-[#D4AF37]">
+                  <span className="font-semibold text-primary">
                     &quot;{item.name}&quot;
                   </span>
                 </span>

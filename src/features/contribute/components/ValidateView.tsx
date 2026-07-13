@@ -27,9 +27,9 @@ const DECISION_LABELS: Record<string, string> = {
 };
 
 const DECISION_BADGE_STYLES: Record<string, string> = {
-  approved: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
-  rejected: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
-  flagged: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
+  approved: 'bg-sage/10 border border-sage/20 text-sage',
+  rejected: 'bg-red-800/10 border border-red-800/20 text-red-800',
+  flagged: 'bg-amber-800/10 border border-amber-800/20 text-amber-800',
 };
 
 export default function ValidateView({
@@ -197,7 +197,7 @@ export default function ValidateView({
                 value="approved"
                 disabled={isPending}
                 onClick={() => setPendingDecision('approved')}
-                className="inline-flex items-center justify-center rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-600/50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center justify-center rounded-md bg-sage px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-sage/90 focus:outline-none focus:ring-2 focus:ring-sage/50 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isPending && pendingDecision === 'approved' ? 'Saving…' : 'Approve'}
               </button>
@@ -208,7 +208,7 @@ export default function ValidateView({
                 value="rejected"
                 disabled={isPending}
                 onClick={() => setPendingDecision('rejected')}
-                className="inline-flex items-center justify-center rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-600/50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center justify-center rounded-md bg-red-800 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-red-900 focus:outline-none focus:ring-2 focus:ring-red-800/50 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isPending && pendingDecision === 'rejected' ? 'Saving…' : 'Reject'}
               </button>
@@ -219,7 +219,7 @@ export default function ValidateView({
                 value="flagged"
                 disabled={isPending}
                 onClick={() => setPendingDecision('flagged')}
-                className="inline-flex items-center justify-center rounded-md bg-amber-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-500/50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center justify-center rounded-md bg-amber-700 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-amber-800 focus:outline-none focus:ring-2 focus:ring-amber-700/50 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isPending && pendingDecision === 'flagged' ? 'Saving…' : 'Flag for review'}
               </button>

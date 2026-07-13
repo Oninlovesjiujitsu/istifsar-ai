@@ -28,7 +28,7 @@ const ROLE_CARDS: Array<{
   ];
 
 const inputClasses =
-  'block w-full rounded-lg border border-white/[0.08] bg-[#111014] px-4 py-2.5 text-sm text-neutral-200 placeholder:text-neutral-500 transition-colors focus:border-amber-500/40 focus:outline-none focus:ring-2 focus:ring-amber-500/10';
+  'block w-full rounded-sm border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/40 transition-colors shadow-[inset_1px_1px_3px_rgba(0,0,0,0.06)] focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary/50';
 
 export default function SignUpForm() {
   const [step, setStep] = useState<Step>('role');
@@ -87,8 +87,8 @@ export default function SignUpForm() {
         <div className="space-y-1">
           {role === 'historian' ? (
             <>
-              <p className="text-lg font-semibold text-neutral-100">Account created</p>
-              <p className="text-sm leading-relaxed text-neutral-400">
+              <p className="text-lg font-heading font-semibold text-foreground">Account created</p>
+              <p className="text-sm leading-relaxed text-muted-foreground">
                 You can sign in now with your email and password.
                 Your Google Scholar profile has been submitted for verification —
                 an admin will review it and grant you Contributor access.
@@ -96,9 +96,9 @@ export default function SignUpForm() {
             </>
           ) : (
             <>
-              <p className="text-lg font-semibold text-neutral-100">Almost there</p>
-              <p className="text-sm leading-relaxed text-neutral-400">
-                We sent a verification link to <span className="font-medium text-neutral-200">{email}</span>.
+              <p className="text-lg font-heading font-semibold text-foreground">Almost there</p>
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                We sent a verification link to <span className="font-medium text-foreground">{email}</span>.
                 <br />
                 Verify your email, then sign in to start exploring.
               </p>
@@ -118,13 +118,13 @@ export default function SignUpForm() {
               key={card.value}
               type="button"
               onClick={() => selectRole(card.value)}
-              className="group w-full rounded-xl border border-white/[0.06] bg-[#111014] p-5 text-left transition-all hover:border-amber-500/30 hover:bg-amber-500/5 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+              className="group w-full rounded-sm border border-border bg-card p-4 sm:p-5 text-left transition-all hover:border-primary/35 hover:bg-primary/5 focus:outline-none focus:ring-1 focus:ring-primary/20 shadow-sm"
             >
               <div className="space-y-1">
-                <p className="font-semibold text-neutral-100 transition-colors group-hover:text-amber-200">
+                <p className="font-semibold text-foreground transition-colors group-hover:text-primary">
                   {card.title}
                 </p>
-                <p className="text-sm leading-relaxed text-neutral-400">
+                <p className="text-sm leading-relaxed text-muted-foreground">
                   {card.description}
                 </p>
               </div>
@@ -138,13 +138,13 @@ export default function SignUpForm() {
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-300">
+        <span className="inline-flex items-center gap-1.5 rounded-sm bg-primary/10 px-3 py-1 text-xs font-medium text-primary border border-primary/20">
           {role === 'enthusiast' ? 'History enthusiast' : 'Academic Historian'}
         </span>
         <button
           type="button"
           onClick={() => { setStep('role'); setError(null); }}
-          className="text-xs text-neutral-500 underline-offset-2 transition-colors hover:text-neutral-300 hover:underline"
+          className="text-xs text-muted-foreground underline-offset-2 transition-colors hover:text-primary hover:underline"
         >
           Change
         </button>
@@ -152,7 +152,7 @@ export default function SignUpForm() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-1.5">
-          <label htmlFor="display-name" className="block text-sm font-medium text-neutral-300">
+          <label htmlFor="display-name" className="block text-sm font-medium text-muted-foreground">
             Your name
           </label>
           <input
@@ -168,7 +168,7 @@ export default function SignUpForm() {
         </div>
 
         <div className="space-y-1.5">
-          <label htmlFor="signup-email" className="block text-sm font-medium text-neutral-300">
+          <label htmlFor="signup-email" className="block text-sm font-medium text-muted-foreground">
             Email address
           </label>
           <input
@@ -184,7 +184,7 @@ export default function SignUpForm() {
         </div>
 
         <div className="space-y-1.5">
-          <label htmlFor="signup-password" className="block text-sm font-medium text-neutral-300">
+          <label htmlFor="signup-password" className="block text-sm font-medium text-muted-foreground">
             Password
           </label>
           <div className="relative">
@@ -197,18 +197,18 @@ export default function SignUpForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="At least 8 characters"
-              className="block w-full rounded-lg border border-white/[0.08] bg-[#111014] pl-4 pr-11 py-2.5 text-sm text-neutral-200 placeholder:text-neutral-500 transition-colors focus:border-amber-500/40 focus:outline-none focus:ring-2 focus:ring-amber-500/10"
+              className="block w-full rounded-sm border border-border bg-background pl-4 pr-11 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/40 transition-colors shadow-[inset_1px_1px_3px_rgba(0,0,0,0.06)] focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary/50"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-200 focus:outline-none transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none transition-colors"
               aria-label={showPassword ? 'Hide password' : 'Show password'}
             >
               {showPassword ? (
-                <EyeOff className="size-4 text-neutral-400" />
+                <EyeOff className="size-4 text-muted-foreground" />
               ) : (
-                <Eye className="size-4 text-neutral-400" />
+                <Eye className="size-4 text-muted-foreground" />
               )}
             </button>
           </div>
@@ -216,7 +216,7 @@ export default function SignUpForm() {
 
         {role === 'historian' && (
           <div className="space-y-1.5">
-            <label htmlFor="scholar-url" className="block text-sm font-medium text-neutral-300">
+            <label htmlFor="scholar-url" className="block text-sm font-medium text-muted-foreground">
               Google Scholar profile
             </label>
             <input
@@ -228,7 +228,7 @@ export default function SignUpForm() {
               placeholder="https://scholar.google.com/citations?user=..."
               className={inputClasses}
             />
-            <p className="text-xs text-neutral-500">
+            <p className="text-xs text-muted-foreground">
               An admin will review your profile to verify your credentials
               and grant Contributor access.
             </p>
@@ -236,7 +236,7 @@ export default function SignUpForm() {
         )}
 
         {error && (
-          <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-400">
+          <p className="rounded-sm border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
             {error}
           </p>
         )}
@@ -244,9 +244,9 @@ export default function SignUpForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-full border border-[#a08430]/40 bg-[#b8963f] px-4 py-2.5 text-sm font-semibold text-[#1a1210] shadow-lg shadow-black/30 transition-all hover:bg-[#c9a64a] focus:outline-none focus:ring-2 focus:ring-[#b8963f]/30 focus:ring-offset-2 focus:ring-offset-[#1a1720] active:translate-y-px disabled:pointer-events-none disabled:opacity-50"
+          className="w-full rounded-sm bg-primary text-primary-foreground font-semibold px-4 py-2.5 text-sm uppercase tracking-widest border-t border-l border-t-white/20 border-l-white/20 border-b-2 border-r-2 border-b-black/30 border-r-black/30 shadow-[1px_1px_3px_rgba(0,0,0,0.15)] hover:bg-foreground hover:text-background active:border-t-2 active:border-l-2 active:border-b active:border-r active:border-t-black/30 active:border-l-black/30 active:border-b-white/20 active:border-r-white/20 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all duration-100 disabled:pointer-events-none disabled:opacity-50"
         >
-          {loading ? 'Creating account\u2026' : 'Create account'}
+          {loading ? 'Creating account...' : 'Create account'}
         </button>
       </form>
     </div>

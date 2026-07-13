@@ -14,7 +14,7 @@ function avatarColor(name: string): string {
   const colors = [
     'bg-amber-900/60 text-amber-300',
     'bg-rose-900/60 text-rose-300',
-    'bg-emerald-900/60 text-emerald-300',
+    'bg-sage/20 text-sage border border-sage/20',
     'bg-sky-900/60 text-sky-300',
     'bg-violet-900/60 text-violet-300',
     'bg-orange-900/60 text-orange-300',
@@ -60,15 +60,15 @@ export default function HistorianProfileModal({ username, onClose }: Props) {
       aria-modal="true"
       aria-label={`Profile of ${username}`}
     >
-      <div className="w-full max-w-md bg-surface-vault border border-white/[0.08] rounded-sm shadow-2xl overflow-hidden">
-        <div className="flex items-center justify-between px-6 py-4 bg-surface-elevated border-b border-white/[0.06]">
-          <span className="text-[10px] uppercase tracking-[0.2em] text-gold/60 font-bold">
+      <div className="w-full max-w-md bg-card border border-border rounded-sm shadow-2xl overflow-hidden">
+        <div className="flex items-center justify-between px-6 py-4 bg-background border-b border-border">
+          <span className="text-[10px] uppercase tracking-[0.2em] text-primary font-bold">
             Historian Profile
           </span>
           <button
             type="button"
             onClick={onClose}
-            className="text-text-muted-vault hover:text-gold transition-colors"
+            className="text-muted-foreground hover:text-primary transition-colors"
             aria-label="Close profile"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -81,15 +81,15 @@ export default function HistorianProfileModal({ username, onClose }: Props) {
           {loading && (
             <div className="flex items-center justify-center py-10">
               <span className="inline-flex gap-1">
-                <span className="h-2 w-2 rounded-full bg-gold animate-bounce [animation-delay:0ms]" />
-                <span className="h-2 w-2 rounded-full bg-gold animate-bounce [animation-delay:150ms]" />
-                <span className="h-2 w-2 rounded-full bg-gold animate-bounce [animation-delay:300ms]" />
+                <span className="h-2 w-2 rounded-full bg-primary animate-bounce [animation-delay:0ms]" />
+                <span className="h-2 w-2 rounded-full bg-primary animate-bounce [animation-delay:150ms]" />
+                <span className="h-2 w-2 rounded-full bg-primary animate-bounce [animation-delay:300ms]" />
               </span>
             </div>
           )}
 
           {!loading && !profile && (
-            <p className="text-center text-text-muted-vault text-sm py-10">
+            <p className="text-center text-muted-foreground text-sm py-10">
               Profile not found.
             </p>
           )}
@@ -102,20 +102,20 @@ export default function HistorianProfileModal({ username, onClose }: Props) {
                 >
                   {profile.avatarUrl ? (
                     <img
-                      src={profile.avatarUrl}
-                      alt={profile.displayName}
-                      className="h-full w-full rounded-full object-cover"
+                       src={profile.avatarUrl}
+                       alt={profile.displayName}
+                       className="h-full w-full rounded-full object-cover"
                     />
                   ) : (
                     profile.displayName.charAt(0).toUpperCase()
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h3 className="font-heading text-white text-lg font-bold leading-tight">
+                  <h3 className="font-heading text-foreground text-lg font-bold leading-tight">
                     {profile.displayName}
                   </h3>
-                  <p className="text-xs text-text-muted-vault mt-0.5">@{profile.username}</p>
-                  <span className="inline-flex items-center mt-1.5 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-gold/10 text-gold border border-gold/20">
+                  <p className="text-xs text-muted-foreground mt-0.5">@{profile.username}</p>
+                  <span className="inline-flex items-center mt-1.5 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
                     {ROLE_LABELS[profile.role] ?? profile.role}
                   </span>
                 </div>
@@ -123,45 +123,45 @@ export default function HistorianProfileModal({ username, onClose }: Props) {
 
               {profile.institution && (
                 <div>
-                  <div className="text-[10px] text-text-muted-vault uppercase mb-1">Institution</div>
-                  <div className="text-sm text-zinc-300">{profile.institution}</div>
+                  <div className="text-[10px] text-muted-foreground uppercase mb-1">Institution</div>
+                  <div className="text-sm text-foreground">{profile.institution}</div>
                 </div>
               )}
 
               {profile.bio && (
                 <div>
-                  <div className="text-[10px] text-text-muted-vault uppercase mb-1">Biography</div>
-                  <p className="text-sm text-zinc-400 leading-relaxed">{profile.bio}</p>
+                  <div className="text-[10px] text-muted-foreground uppercase mb-1">Biography</div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{profile.bio}</p>
                 </div>
               )}
 
               <div className="grid grid-cols-4 gap-3 pt-2">
                 <div className="text-center">
-                  <div className="font-heading text-gold text-lg font-bold">{profile.publicationCount}</div>
-                  <div className="text-[10px] text-text-muted-vault uppercase">Sources</div>
+                  <div className="font-heading text-primary text-lg font-bold">{profile.publicationCount}</div>
+                  <div className="text-[10px] text-muted-foreground uppercase">Sources</div>
                 </div>
                 <div className="text-center">
-                  <div className="font-heading text-gold text-lg font-bold">{profile.essayCount}</div>
-                  <div className="text-[10px] text-text-muted-vault uppercase">Essays</div>
+                  <div className="font-heading text-primary text-lg font-bold">{profile.essayCount}</div>
+                  <div className="text-[10px] text-muted-foreground uppercase">Essays</div>
                 </div>
                 <div className="text-center">
-                  <div className="font-heading text-gold text-lg font-bold">{profile.citationCount}</div>
-                  <div className="text-[10px] text-text-muted-vault uppercase">Citations</div>
+                  <div className="font-heading text-primary text-lg font-bold">{profile.citationCount}</div>
+                  <div className="text-[10px] text-muted-foreground uppercase">Citations</div>
                 </div>
                 <div className="text-center">
-                  <div className="font-heading text-gold text-lg font-bold">
+                  <div className="font-heading text-primary text-lg font-bold">
                     {new Date(profile.joinedAt).getFullYear()}
                   </div>
-                  <div className="text-[10px] text-text-muted-vault uppercase">Joined</div>
+                  <div className="text-[10px] text-muted-foreground uppercase">Joined</div>
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-white/[0.06]">
+              <div className="pt-3 border-t border-border">
                 <Link
                   href={`/profile/${profile.username}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gold text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2 hover:translate-x-1 transition-transform"
+                  className="text-primary hover:text-primary/80 text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2 hover:translate-x-1 transition-transform"
                 >
                   View Full Profile
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">

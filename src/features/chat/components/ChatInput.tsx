@@ -64,7 +64,7 @@ export default function ChatInput({
           value={selectedTopicId ?? ''}
           onChange={(e) => onTopicChange?.(e.target.value)}
           disabled={disabled}
-          className="w-full rounded-sm border border-gold/20 bg-surface-vault px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:ring-1 focus:ring-gold/40 disabled:opacity-50"
+          className="w-full rounded-sm border border-border bg-card px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/40 disabled:opacity-50"
           aria-label="Select a topic"
         >
           <option value="" disabled>
@@ -78,7 +78,7 @@ export default function ChatInput({
         </select>
       )}
 
-      <div className="relative flex items-center parchment-texture bg-[#0e0e0e] rounded-sm shadow-xl focus-within:ring-1 focus-within:ring-gold/40">
+      <div className="relative flex items-center parchment-texture bg-card border border-border rounded-sm shadow-md focus-within:ring-1 focus-within:ring-primary/40 focus-within:border-primary/50">
         <textarea
           ref={ref}
           rows={1}
@@ -89,7 +89,7 @@ export default function ChatInput({
               : placeholder ?? 'Deepen the investigation...'
           }
           onKeyDown={handleKeyDown}
-          className="max-h-36 min-h-[2rem] flex-1 resize-none bg-transparent py-4 lg:py-6 px-4 lg:px-8 text-sm leading-relaxed text-zinc-200 placeholder:text-text-muted-vault/60 focus:outline-none disabled:opacity-50"
+          className="max-h-36 min-h-[2rem] flex-1 resize-none bg-transparent py-4 lg:py-6 px-4 lg:px-8 text-sm leading-relaxed text-foreground placeholder:text-muted-foreground/60 focus:outline-none disabled:opacity-50"
           aria-label="Message input"
         />
         <div className="absolute right-4 lg:right-6 flex items-center gap-4">
@@ -97,7 +97,7 @@ export default function ChatInput({
             type="button"
             disabled={isDisabled}
             onClick={submit}
-            className="text-gold/60 hover:text-gold transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            className="text-primary/60 hover:text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
             aria-label="Send message"
           >
             <svg

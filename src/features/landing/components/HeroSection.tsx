@@ -18,13 +18,8 @@ export default function HeroSection() {
   return (
     <section className="relative min-h-screen flex items-start sm:items-center justify-center pt-36 sm:pt-0 px-4 sm:px-6 md:px-0 overflow-hidden">
       <div className="absolute inset-0 z-0">
-        <img
-          src="/Background_Landing.jpg"
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover object-center"
-        />
-        <div className="absolute inset-0 bg-background/45 sm:bg-background/35" />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/10 via-background/45 to-background" />
+        {/* Soft, warm spotlight gradient simulating a reading lamp on a desk */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_hsl(43_60%_98%)_0%,_hsl(var(--background))_100%)] opacity-80" />
       </div>
 
       <div className="relative z-10 max-w-5xl text-center">
@@ -32,7 +27,7 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 1, ease: 'easeOut' }}
-          className="font-heading text-4xl sm:text-5xl md:text-6xl lg:text-8xl text-gold leading-tight mb-6 sm:mb-8 tracking-tight"
+          className="font-heading text-4xl sm:text-5xl md:text-6xl lg:text-8xl text-primary leading-tight mb-6 sm:mb-8 tracking-tight"
         >
           Seek the Truth <br />
           <motion.span
@@ -99,7 +94,7 @@ export default function HeroSection() {
             e.preventDefault();
             document.getElementById('collections')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
           }}
-          className="flex flex-col items-center justify-center p-4 -m-4 min-w-[48px] min-h-[48px] text-gold/60 hover:text-gold transition-colors duration-300 group"
+          className="flex flex-col items-center justify-center p-4 -m-4 min-w-[48px] min-h-[48px] text-muted-foreground hover:text-primary transition-colors duration-300 group"
           aria-label="Scroll down to collections"
         >
           <span className="hidden sm:inline text-[10px] uppercase tracking-[0.2em] mb-2 font-serif font-light">Scroll</span>

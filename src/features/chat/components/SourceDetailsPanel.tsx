@@ -13,15 +13,15 @@ export default function SourceDetailsPanel({ citation, onClose }: Props) {
   const [profileUsername, setProfileUsername] = useState<string | null>(null);
 
   return (
-    <div className="flex flex-col h-full bg-surface-vault">
-      <div className="flex items-center justify-between px-6 lg:px-8 py-5 bg-surface-elevated shrink-0">
-        <h2 className="font-heading text-gold text-lg lg:text-xl font-black italic tracking-tight">
+    <div className="flex flex-col h-full bg-card border-l border-border">
+      <div className="flex items-center justify-between px-6 lg:px-8 py-5 bg-background border-b border-border shrink-0">
+        <h2 className="font-heading text-primary text-lg lg:text-xl font-black italic tracking-tight">
           Source Details
         </h2>
         <button
           type="button"
           onClick={onClose}
-          className="text-text-muted-vault hover:text-gold transition-colors"
+          className="text-muted-foreground hover:text-primary transition-colors"
           aria-label="Close source panel"
         >
           <svg
@@ -42,31 +42,31 @@ export default function SourceDetailsPanel({ citation, onClose }: Props) {
 
       <div className="flex-1 min-h-0 flex flex-col p-6 lg:p-8 gap-6">
         <div className="shrink-0 space-y-4">
-          <span className="text-[10px] uppercase tracking-[0.2em] text-gold/60 font-bold">
+          <span className="text-[10px] uppercase tracking-[0.2em] text-primary font-bold">
             Metadata Identification
           </span>
           <div className="grid grid-cols-1 gap-4">
             <div>
-              <div className="text-[10px] text-text-muted-vault uppercase mb-1">
+              <div className="text-[10px] text-muted-foreground uppercase mb-1">
                 Document Title
               </div>
-              <div className="font-heading text-lg text-white leading-tight">
+              <div className="font-heading text-lg text-foreground leading-tight">
                 {citation.documentTitle}
               </div>
             </div>
             {citation.documentDate && (
               <div>
-                <div className="text-[10px] text-text-muted-vault uppercase mb-1">
+                <div className="text-[10px] text-muted-foreground uppercase mb-1">
                   Date
                 </div>
-                <div className="font-heading text-white">
+                <div className="font-heading text-foreground">
                   {citation.documentDate}
                 </div>
               </div>
             )}
             {citation.authorDisplayName && (
               <div>
-                <div className="text-[10px] text-text-muted-vault uppercase mb-1">
+                <div className="text-[10px] text-muted-foreground uppercase mb-1">
                   Author
                 </div>
                 <button
@@ -74,11 +74,11 @@ export default function SourceDetailsPanel({ citation, onClose }: Props) {
                   onClick={() => setProfileUsername(citation.authorUsername)}
                   className="group flex items-center gap-2 text-left"
                 >
-                  <span className="font-heading text-white group-hover:text-gold transition-colors">
+                  <span className="font-heading text-foreground group-hover:text-primary transition-colors">
                     {citation.authorDisplayName}
                   </span>
                   <svg
-                    className="w-3.5 h-3.5 text-gold/40 group-hover:text-gold transition-colors shrink-0"
+                    className="w-3.5 h-3.5 text-primary/60 group-hover:text-primary transition-colors shrink-0"
                     fill="none"
                     viewBox="0 0 24 24"
                     strokeWidth={1.5}
@@ -97,25 +97,25 @@ export default function SourceDetailsPanel({ citation, onClose }: Props) {
         </div>
 
         <div className="flex-1 min-h-0 flex flex-col">
-          <span className="text-[10px] uppercase tracking-[0.2em] text-gold/60 font-bold mb-4 block shrink-0">
+          <span className="text-[10px] uppercase tracking-[0.2em] text-primary font-bold mb-4 block shrink-0">
             Archival Fragment
           </span>
-          <div className="flex-1 min-h-0 parchment-texture bg-[#0e0e0e] rounded-sm relative flex flex-col">
+          <div className="flex-1 min-h-0 parchment-texture bg-card border border-border rounded-sm relative flex flex-col">
             <div className="flex-1 min-h-0 overflow-y-auto vault-scrollbar p-6 pb-0">
-              <div className="text-zinc-400 leading-relaxed font-light text-sm first-letter:text-3xl first-letter:font-heading first-letter:text-gold first-letter:mr-1 first-letter:float-left">
+              <div className="text-foreground leading-relaxed font-light text-sm first-letter:text-3xl first-letter:font-heading first-letter:text-primary first-letter:mr-1 first-letter:float-left">
                 {citation.excerpt}
               </div>
             </div>
 
-            <div className="shrink-0 mx-6 mt-4 mb-6 pt-4 border-t border-gold/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-              <span className="text-[10px] text-zinc-600 font-mono italic">
+            <div className="shrink-0 mx-6 mt-4 mb-6 pt-4 border-t border-border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+              <span className="text-[10px] text-muted-foreground font-mono italic">
                 Relevance: {(citation.score * 100).toFixed(0)}%
               </span>
               <a
                 href={`/documents/all/${citation.documentId}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gold text-xs font-bold uppercase tracking-widest flex items-center gap-2 hover:translate-x-1 transition-transform"
+                className="text-primary hover:text-foreground text-xs font-bold uppercase tracking-widest flex items-center gap-2 hover:translate-x-1 transition-transform"
               >
                 View Original Document
                 <svg

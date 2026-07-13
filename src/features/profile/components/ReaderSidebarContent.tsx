@@ -29,9 +29,9 @@ export default function ReaderSidebarContent({
     <>
       <div className="px-4 flex items-center justify-between">
         <Link href="/explore" onClick={close} className="flex items-center gap-2 min-w-0">
-          <HugeiconsIcon icon={QuillWrite01Icon} size={20} className="text-primary dark:text-gold shrink-0" />
+          <HugeiconsIcon icon={QuillWrite01Icon} size={20} className="text-primary shrink-0" />
           <SidebarLabel>
-            <span className="text-xl font-heading text-foreground dark:text-gold tracking-widest uppercase">
+            <span className="text-xl font-heading text-foreground tracking-widest uppercase">
               Istifsar AI
             </span>
           </SidebarLabel>
@@ -44,8 +44,8 @@ export default function ReaderSidebarContent({
           href="/explore/new"
           onClick={close}
           className={[
-            'flex items-center justify-center gap-2 bg-gold text-[#241a00] font-bold rounded-sm',
-            'shadow-[0_4px_10px_rgba(212,175,55,0.2)] hover:bg-gold-bright transition-all text-sm uppercase tracking-tight',
+            'flex items-center justify-center gap-2 bg-primary text-primary-foreground font-bold rounded-sm',
+            'border-t border-l border-t-white/20 border-l-white/20 border-b-2 border-r-2 border-b-black/30 border-r-black/30 shadow-[1px_1px_3px_rgba(0,0,0,0.15)] hover:bg-foreground hover:text-background active:border-t-2 active:border-l-2 active:border-b active:border-r active:border-t-black/30 active:border-l-black/30 active:border-b-white/20 active:border-r-white/20 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all duration-100 text-sm uppercase tracking-tight',
             expanded ? 'w-full py-3' : 'lg:w-10 lg:h-10 lg:p-0 py-3 w-full',
           ].join(' ')}
           title="New Inquiry"
@@ -73,7 +73,7 @@ export default function ReaderSidebarContent({
         {/* Conversation Vault — hidden when collapsed on desktop */}
         {expanded && (
           <div className="mt-6 px-4 flex flex-col gap-3 flex-1 min-h-0">
-            <span className="text-[10px] uppercase tracking-[0.2em] text-text-muted-vault">
+            <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
               Conversation Vault
             </span>
             <ConversationVault conversations={conversations} />
@@ -90,7 +90,7 @@ export default function ReaderSidebarContent({
           </SidebarNavLink>
         )}
         <div className={[
-          'text-text-muted-vault hover:text-foreground px-3 py-2 transition-colors hover:bg-foreground/[0.04] flex items-center text-sm font-serif',
+          'text-muted-foreground hover:text-foreground px-3 py-2 transition-colors hover:bg-foreground/[0.04] flex items-center text-sm font-serif',
           expanded ? 'gap-3' : 'lg:justify-center gap-3',
         ].join(' ')}>
           {isLoggedIn ? (

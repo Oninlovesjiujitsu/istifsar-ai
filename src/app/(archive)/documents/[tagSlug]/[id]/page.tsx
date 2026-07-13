@@ -121,7 +121,7 @@ export default async function DocumentDetailPage({ params }: Props) {
         {doc.language && (
           <span className="text-muted-foreground capitalize">{doc.language}</span>
         )}
-        <span className="rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-400">
+        <span className="rounded-full border border-sage/20 bg-sage/10 px-2.5 py-0.5 text-xs font-medium text-sage">
           Verified
         </span>
       </div>

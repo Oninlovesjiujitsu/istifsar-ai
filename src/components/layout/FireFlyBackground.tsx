@@ -28,13 +28,13 @@ function makeParticles(): Particle[] {
   }));
 }
 
-// Firefly — solid bright core + soft halo (the halo also blinks via opacity)
-function Firefly() {
+// Archival Dust Mote — slow-drifting, soft blurred particle
+function DustMote() {
   return (
-    <svg viewBox="0 0 24 24" width="100%" height="100%">
-      <circle cx="12" cy="12" r="9" fill="currentColor" opacity="0.18" />
-      <circle cx="12" cy="12" r="5" fill="currentColor" opacity="0.45" />
-      <circle cx="12" cy="12" r="2.3" fill="currentColor" />
+    <svg viewBox="0 0 24 24" width="100%" height="100%" className="blur-[1px]">
+      <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.25" />
+      <circle cx="12" cy="12" r="6" fill="currentColor" opacity="0.5" />
+      <circle cx="12" cy="12" r="3" fill="currentColor" opacity="0.8" />
     </svg>
   );
 }
@@ -77,21 +77,10 @@ export default function FireFlyBackground({ className = 'z-20' }: { className?: 
             className={`absolute seasonal-particle firefly-wander-${p.wanderVariant}`}
             style={{
               ...sizeStyle,
-              color: '#f2ca50', // Warm gold bright tint from theme
+              color: 'hsl(var(--primary) / 0.25)', // Faint sepia dust motes in the library light
             }}
           >
-            <span
-              className="firefly-blink"
-              style={{
-                display: 'block',
-                width: '100%',
-                height: '100%',
-                animationDelay: `-${p.delay * 0.6}s`,
-                animationDuration: `${1.8 + (p.id % 5) * 0.4}s`,
-              }}
-            >
-              <Firefly />
-            </span>
+            <DustMote />
           </span>
         );
       })}

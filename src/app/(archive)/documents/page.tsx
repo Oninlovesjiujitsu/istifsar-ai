@@ -45,19 +45,19 @@ export default async function DocumentsPage() {
     <div className="min-h-full p-4 sm:p-6 lg:p-8 xl:p-12 relative">
       {/* Breadcrumb */}
       <nav className="max-w-6xl mx-auto mb-6 text-sm text-muted-foreground flex items-center gap-2">
-        <span className="text-gold font-medium">Archive</span>
+        <span className="text-primary font-medium">Archive</span>
       </nav>
 
       {/* Editorial Header */}
       <header className="max-w-6xl mx-auto mb-8 sm:mb-12">
         <div className="flex flex-col gap-2 sm:gap-3">
-          <span className="text-[10px] sm:text-xs uppercase tracking-[0.3em] text-muted-foreground dark:text-gold/60">
+          <span className="text-[10px] sm:text-xs uppercase tracking-[0.3em] text-muted-foreground">
             {(totalDocs ?? 0).toLocaleString()} writings in the archive
           </span>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading text-foreground dark:text-gold leading-tight max-w-2xl">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading text-foreground leading-tight max-w-2xl">
             Historical Collections
           </h2>
-          <div className="h-px w-20 bg-gradient-to-r from-border dark:from-gold to-transparent mt-3" />
+          <div className="h-px w-20 bg-gradient-to-r from-border to-transparent mt-3" />
         </div>
       </header>
 

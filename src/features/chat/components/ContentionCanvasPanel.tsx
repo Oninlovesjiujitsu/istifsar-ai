@@ -10,15 +10,15 @@ type Props = {
 
 export default function ContentionCanvasPanel({ contentions, onClose }: Props) {
   return (
-    <div className="flex flex-col h-full bg-surface-vault">
-      <div className="flex items-center justify-between px-6 lg:px-8 py-5 bg-surface-elevated shrink-0">
-        <h2 className="font-heading text-gold text-lg lg:text-xl font-black italic tracking-tight">
+    <div className="flex flex-col h-full bg-card border-l border-border">
+      <div className="flex items-center justify-between px-6 lg:px-8 py-5 bg-background border-b border-border shrink-0">
+        <h2 className="font-heading text-primary text-lg lg:text-xl font-black italic tracking-tight">
           Nodes of Contention
         </h2>
         <button
           type="button"
           onClick={onClose}
-          className="text-text-muted-vault hover:text-gold transition-colors"
+          className="text-muted-foreground hover:text-primary transition-colors"
           aria-label="Close contention canvas"
         >
           <svg

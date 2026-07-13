@@ -22,16 +22,16 @@ export default function AccordionItem({
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
-    <motion.div variants={fadeUp} className="border border-gold/10 rounded-sm overflow-hidden bg-background">
+    <motion.div variants={fadeUp} className="border border-border shadow-sm rounded-sm overflow-hidden bg-background">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex justify-between items-center p-4 sm:p-5 text-left hover:bg-gold/[0.02] transition-colors"
+        className="w-full flex justify-between items-center p-4 sm:p-5 text-left hover:bg-secondary/30 transition-colors"
       >
         <h4 className="text-foreground font-medium text-base sm:text-lg px-2">{title}</h4>
         <HugeiconsIcon
           icon={ArrowDown01Icon}
           size={20}
-          className={`text-gold transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+          className={`text-primary transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
         />
       </button>
       <AnimatePresence>

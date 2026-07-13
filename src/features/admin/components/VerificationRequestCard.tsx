@@ -28,9 +28,9 @@ type Props = {
 };
 
 const STATUS_BADGE: Record<string, string> = {
-  pending: 'bg-amber-100 text-amber-700',
-  approved: 'bg-green-100 text-green-700',
-  denied: 'bg-red-100 text-red-700',
+  pending: 'bg-amber-800/10 border border-amber-800/20 text-amber-800',
+  approved: 'bg-sage/10 border border-sage/20 text-sage',
+  denied: 'bg-red-800/10 border border-red-800/20 text-red-800',
 };
 
 const LINK_TYPE_LABELS: Record<string, string> = {
@@ -134,7 +134,7 @@ export default function VerificationRequestCard({ request }: Props) {
               variant="outline"
               onClick={() => handleAction('approved')}
               disabled={isPending}
-              className="border-green-300 text-green-700 hover:bg-green-50"
+              className="border-sage/30 text-sage hover:bg-sage/5"
             >
               {isPending ? 'Saving…' : 'Approve — grant Verified Historian'}
             </Button>

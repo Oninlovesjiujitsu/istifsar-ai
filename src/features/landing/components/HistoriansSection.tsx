@@ -50,7 +50,7 @@ export default function HistoriansSection() {
       >
         <Link
           href="/signup"
-          className="inline-flex items-center bg-transparent border border-gold text-gold px-6 sm:px-8 md:px-12 py-3 sm:py-4 md:py-5 rounded-sm uppercase tracking-widest text-xs sm:text-sm hover:bg-gold/5 transition-all group"
+          className="inline-flex items-center bg-transparent border border-primary text-primary px-6 sm:px-8 md:px-12 py-3 sm:py-4 md:py-5 rounded-sm uppercase tracking-widest text-xs sm:text-sm outline outline-1 outline-offset-2 outline-primary/30 hover:outline-primary/60 hover:bg-primary/5 transition-all group"
         >
           Sign Up for Historian Access
           <HugeiconsIcon

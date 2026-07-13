@@ -22,9 +22,9 @@ type Props = {
 };
 
 const STATUS_BADGE: Record<string, string> = {
-  open: 'bg-amber-100 text-amber-700',
-  resolved: 'bg-green-100 text-green-700',
-  disputed: 'bg-red-100 text-red-700',
+  open: 'bg-amber-800/10 border border-amber-800/20 text-amber-800',
+  resolved: 'bg-sage/10 border border-sage/20 text-sage',
+  disputed: 'bg-red-800/10 border border-red-800/20 text-red-800',
 };
 
 export default function ContentionCard({ contention, documentTitles }: Props) {
@@ -128,7 +128,7 @@ export default function ContentionCard({ contention, documentTitles }: Props) {
               variant="outline"
               onClick={() => handleAction('resolved')}
               disabled={isPending}
-              className="border-green-300 text-green-700 hover:bg-green-50"
+              className="border-sage/30 text-sage hover:bg-sage/5"
             >
               {isPending ? 'Saving…' : 'Mark resolved'}
             </Button>
@@ -137,7 +137,7 @@ export default function ContentionCard({ contention, documentTitles }: Props) {
               variant="outline"
               onClick={() => handleAction('disputed')}
               disabled={isPending}
-              className="border-red-300 text-red-700 hover:bg-red-50"
+              className="border-red-800/30 text-red-800 hover:bg-red-800/5"
             >
               {isPending ? 'Saving…' : 'Mark disputed'}
             </Button>

@@ -25,8 +25,8 @@ function formatDate(iso: string): string {
 
 function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
-    pending: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
-    under_review: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
+    pending: 'bg-amber-800/10 border border-amber-800/20 text-amber-800',
+    under_review: 'bg-cyan-800/10 border border-cyan-800/20 text-cyan-800',
   };
   const labels: Record<string, string> = {
     pending: 'Pending',
@@ -98,7 +98,7 @@ export default function ValidateList({ documents, userId }: Props) {
             {/* Right side action / reviewed badge */}
             <div className="shrink-0 pt-1">
               {alreadyReviewed ? (
-                <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                <span className="inline-flex items-center rounded-full border border-sage/20 bg-sage/10 px-2.5 py-0.5 text-xs font-medium text-sage">
                   Reviewed
                 </span>
               ) : (

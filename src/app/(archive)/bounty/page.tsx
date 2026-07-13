@@ -37,29 +37,34 @@ export default async function BountyBoardPage({ searchParams }: Props) {
   const hasFilters = !!(filters.era || filters.geography || filters.subject);
 
   return (
-    <div className="min-h-full p-4 sm:p-6 lg:p-16 xl:p-24 relative">
-      <header className="max-w-4xl mx-auto mb-8 sm:mb-12 mt-4 sm:mt-8 lg:mt-12">
-        <span className="text-[10px] sm:text-xs uppercase tracking-[0.3em] sm:tracking-[0.4em] text-gold/60">
+    <div className="min-h-full p-4 sm:p-6 lg:p-8 xl:p-12 relative">
+      {/* Breadcrumb */}
+      <nav className="max-w-6xl mx-auto mb-6 text-sm text-muted-foreground flex items-center gap-2">
+        <span className="text-primary font-medium">Bounty Board</span>
+      </nav>
+
+      <header className="max-w-6xl mx-auto mb-8 sm:mb-12">
+        <span className="text-[10px] sm:text-xs uppercase tracking-[0.3em] sm:tracking-[0.4em] text-primary">
           Unanswered questions
         </span>
-        <h2 className="text-2xl sm:text-3xl lg:text-5xl font-heading text-gold leading-tight max-w-2xl mt-3 sm:mt-4">
+        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading text-foreground leading-tight max-w-2xl mt-3 sm:mt-4">
           Bounty Board
         </h2>
-        <p className="mt-4 text-muted-foreground max-w-xl">
+        <p className="mt-4 text-muted-foreground max-w-xl text-sm leading-relaxed">
           Questions the archive couldn&apos;t answer yet. Help historians know what
           to write about.
         </p>
-        <div className="h-px w-24 bg-gradient-to-r from-gold to-transparent mt-6" />
+        <div className="h-px w-24 bg-gradient-to-r from-border to-transparent mt-6" />
       </header>
 
       {/* Filter bar */}
-      <section className="max-w-4xl mx-auto mb-6">
+      <section className="max-w-6xl mx-auto mb-6">
         <BountyFilters eras={eras} geographies={geographies} subjects={subjects} />
       </section>
 
-      <section className="max-w-4xl mx-auto">
+      <section className="max-w-6xl mx-auto">
         {gaps && gaps.length > 0 ? (
-          <div className="divide-y divide-border rounded-lg border bg-card">
+          <div className="divide-y divide-border rounded-lg border bg-card shadow-sm">
             {gaps.map((gap) => (
               <div key={gap.id} className="px-6 py-4 flex items-start justify-between gap-4">
                 <div className="min-w-0 flex-1">
@@ -67,7 +72,7 @@ export default async function BountyBoardPage({ searchParams }: Props) {
                   {(gap.era || gap.geography || gap.subject) && (
                     <div className="mt-1.5 flex flex-wrap gap-1.5">
                       {gap.era && (
-                        <span className="inline-block rounded bg-gold/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-gold">
+                        <span className="inline-block rounded bg-primary/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-primary">
                           {gap.era}
                         </span>
                       )}

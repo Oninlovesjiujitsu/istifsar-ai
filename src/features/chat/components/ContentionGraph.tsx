@@ -38,9 +38,9 @@ function CustomCenterNode({ data }: { data: { label: string } }) {
       <Handle type="source" position={Position.Top} className="opacity-0" id="center-source" style={{ left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }} />
       <Handle type="target" position={Position.Top} className="opacity-0" id="center-target" style={{ left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }} />
 
-      <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-gold flex items-center justify-center border-4 border-[#27272a] shadow-[0_0_15px_rgba(212,175,55,0.3)]">
+      <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-primary flex items-center justify-center border-4 border-card shadow-md">
         <svg
-          className="w-7 h-7 sm:w-9 sm:h-9 text-[#18181b]"
+          className="w-7 h-7 sm:w-9 sm:h-9 text-primary-foreground"
           fill="currentColor"
           viewBox="0 0 24 24"
           aria-hidden="true"
@@ -49,11 +49,11 @@ function CustomCenterNode({ data }: { data: { label: string } }) {
         </svg>
       </div>
 
-      <div className="mt-2 bg-[#18181b] px-4 py-1.5 border border-gold/40 rounded-sm text-center max-w-[200px] shadow-lg">
-        <h3 className="font-serif text-[11px] sm:text-xs font-bold text-gold leading-tight">
+      <div className="mt-2 bg-card px-4 py-1.5 border border-border rounded-sm text-center max-w-[200px] shadow-lg">
+        <h3 className="font-serif text-[11px] sm:text-xs font-bold text-primary leading-tight">
           {data.label}
         </h3>
-        <span className="text-[8px] uppercase tracking-tighter text-zinc-400 block mt-0.5">
+        <span className="text-[8px] uppercase tracking-tighter text-muted-foreground block mt-0.5">
           Contested Topic
         </span>
       </div>
@@ -101,23 +101,23 @@ function CustomScholarNode({
           </svg>
         </div>
 
-        <span className="mt-2 font-serif text-[10px] sm:text-[11px] text-zinc-300 text-center max-w-[110px] truncate">
+        <span className="mt-2 font-serif text-[10px] sm:text-[11px] text-foreground text-center max-w-[110px] truncate">
           {claim.scholarName}
         </span>
 
         {/* Custom Tooltip overlay */}
         <div
           className={cn(
-            'absolute w-[240px] sm:w-[280px] p-4 z-50 bg-[#18181b] border border-gold/30 rounded-md shadow-2xl transition-all duration-200',
+            'absolute w-[240px] sm:w-[280px] p-4 z-50 bg-card border border-border rounded-md shadow-2xl transition-all duration-200',
             'bottom-[calc(100%+0.75rem)] left-1/2 -translate-x-1/2 origin-bottom',
             isActive ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2 pointer-events-none'
           )}
           onClick={(e) => e.stopPropagation()}
         >
-          <p className="font-serif italic text-[11px] sm:text-xs text-zinc-100 leading-relaxed">
+          <p className="font-serif italic text-[11px] sm:text-xs text-foreground leading-relaxed">
             &ldquo;{claim.claim}&rdquo;
           </p>
-          <span className="absolute w-2.5 h-2.5 bg-[#18181b] border-r border-b border-gold/30 rotate-45 left-1/2 -translate-x-1/2 top-full -mt-1" />
+          <span className="absolute w-2.5 h-2.5 bg-card border-r border-b border-border rotate-45 left-1/2 -translate-x-1/2 top-full -mt-1" />
         </div>
       </div>
     </div>
@@ -161,7 +161,7 @@ export default function ContentionGraph({ contentions }: Props) {
   if (!contentions || contentions.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center p-12 text-center h-full min-h-[300px]">
-        <p className="text-zinc-500 text-sm">
+        <p className="text-muted-foreground text-sm">
           No contentions detected. All claims are in consensus.
         </p>
       </div>
@@ -288,11 +288,11 @@ export default function ContentionGraph({ contentions }: Props) {
 
   return (
     <article
-      className="relative flex flex-col bg-[#1a1a1c] p-4 sm:p-6 lg:p-0 lg:flex-1 lg:min-h-0"
+      className="relative flex flex-col bg-background p-4 sm:p-6 lg:p-0 lg:flex-1 lg:min-h-0"
       onClick={onPaneClick}
     >
       <div
-        className="w-full rounded-lg border border-gold/10 overflow-hidden bg-[#18181b] h-[var(--canvas-height)] lg:flex-1 lg:min-h-0 lg:rounded-none lg:border-0"
+        className="w-full rounded-lg border border-border overflow-hidden bg-card h-[var(--canvas-height)] lg:flex-1 lg:min-h-0 lg:rounded-none lg:border-0"
         style={{ '--canvas-height': `${canvasHeight}px` } as React.CSSProperties}
       >
         <ReactFlow
@@ -314,7 +314,7 @@ export default function ContentionGraph({ contentions }: Props) {
           elementsSelectable={false}
           onPaneClick={onPaneClick}
         >
-          <Background color="rgba(212, 175, 55, 0.04)" gap={16} size={1} />
+          <Background color="hsl(var(--primary) / 0.04)" gap={16} size={1} />
         </ReactFlow>
       </div>
     </article>

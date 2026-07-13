@@ -16,13 +16,13 @@ export default function HistorianSidebarContent() {
       {/* Brand + Toggle */}
       <div className="px-4 flex items-center justify-between">
         <Link href="/dashboard" onClick={close} className="flex items-center gap-2 min-w-0">
-          <HugeiconsIcon icon={QuillWrite01Icon} size={20} className="text-primary dark:text-gold shrink-0" />
+          <HugeiconsIcon icon={QuillWrite01Icon} size={20} className="text-primary shrink-0" />
           <SidebarLabel>
             <span className="flex flex-col gap-0.5">
-              <span className="text-xl font-heading text-foreground dark:text-gold tracking-widest uppercase leading-none">
+              <span className="text-xl font-heading text-foreground tracking-widest uppercase leading-none">
                 Istifsar AI
               </span>
-              <span className="text-[10px] uppercase tracking-[0.2em] text-text-muted-vault/60">
+              <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground/60">
                 Historian Workspace
               </span>
             </span>
@@ -37,8 +37,8 @@ export default function HistorianSidebarContent() {
           href="/upload"
           onClick={close}
           className={[
-            'flex items-center justify-center gap-2 bg-gold text-[#241a00] font-bold rounded-sm',
-            'shadow-[0_4px_10px_rgba(212,175,55,0.2)] hover:bg-gold-bright transition-all text-sm uppercase tracking-tight',
+            'flex items-center justify-center gap-2 bg-primary text-primary-foreground font-bold rounded-sm',
+            'border-t border-l border-t-white/20 border-l-white/20 border-b-2 border-r-2 border-b-black/30 border-r-black/30 shadow-[1px_1px_3px_rgba(0,0,0,0.15)] hover:bg-foreground hover:text-background active:border-t-2 active:border-l-2 active:border-b active:border-r active:border-t-black/30 active:border-l-black/30 active:border-b-white/20 active:border-r-white/20 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all duration-100 text-sm uppercase tracking-tight',
             expanded ? 'w-full py-3' : 'lg:w-10 lg:h-10 lg:p-0 py-3 w-full',
           ].join(' ')}
           title="Upload Manuscript"
@@ -145,8 +145,8 @@ function SidebarNavLink({
       className={[
         'px-3 py-3 transition-colors flex items-center font-serif text-sm tracking-tight rounded-sm',
         isActive
-          ? 'text-primary dark:text-gold bg-accent dark:bg-gold/[0.08]'
-          : 'text-text-muted-vault hover:text-foreground hover:bg-foreground/[0.04]',
+          ? 'text-primary bg-accent'
+          : 'text-muted-foreground hover:text-foreground hover:bg-foreground/[0.04]',
         expanded ? 'gap-3' : 'lg:justify-center gap-3',
       ].join(' ')}
     >

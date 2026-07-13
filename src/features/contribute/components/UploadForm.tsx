@@ -31,15 +31,15 @@ export default function UploadForm() {
   // Success state
   if (state?.success) {
     return (
-      <div className="rounded-xl border border-green-200 bg-green-50 p-6 text-center dark:border-green-900 dark:bg-green-950">
-        <p className="font-semibold text-green-800 dark:text-green-200">
+      <div className="rounded-xl border border-sage/20 bg-card p-6 text-center shadow-sm">
+        <p className="font-semibold text-sage">
           Source submitted
         </p>
-        <p className="mt-1 text-sm text-green-700 dark:text-green-300">
+        <p className="mt-1 text-sm text-sage/90">
           Your document is being processed. It will appear in the validation
           queue once text extraction and indexing are complete.
         </p>
-        <p className="mt-3 font-mono text-xs text-green-600 dark:text-green-400">
+        <p className="mt-3 font-mono text-xs text-sage/80">
           ID: {state.documentId}
         </p>
         <button
@@ -48,7 +48,7 @@ export default function UploadForm() {
             formRef.current?.reset();
             setSelectedTags([]);
           }}
-          className="mt-4 text-sm text-green-700 underline underline-offset-2 dark:text-green-300"
+          className="mt-4 text-sm text-sage/90 underline underline-offset-2 hover:text-sage"
         >
           Submit another document
         </button>
@@ -60,7 +60,7 @@ export default function UploadForm() {
     <form ref={formRef} action={formAction} className="space-y-6">
       {/* Server error banner */}
       {state && !state.success && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300">
+        <div className="rounded-lg border border-primary/30 bg-card px-4 py-3 text-sm text-primary shadow-sm">
           {state.error}
         </div>
       )}
@@ -138,7 +138,7 @@ export default function UploadForm() {
       </Field>
 
       {/* File uploads */}
-      <div className="space-y-5 rounded-xl border border-zinc-200 bg-zinc-50 p-5 dark:border-zinc-800 dark:bg-zinc-900/50">
+      <div className="space-y-5 rounded-xl border border-border bg-card p-5 shadow-sm">
         <Field
           label="Document scan"
           htmlFor="scan"
@@ -168,7 +168,7 @@ export default function UploadForm() {
           htmlFor="transcription"
           hint="Plain text (.txt) or Markdown (.md) · optional · max 10 MB"
         >
-          <p className="mb-1.5 text-xs text-zinc-500">
+          <p className="mb-1.5 text-xs text-muted-foreground">
             If you&apos;ve typed out the text from this document, upload it here.
             We&apos;ll use your version instead of automated text recognition,
             which improves accuracy for older or handwritten sources.
@@ -217,12 +217,12 @@ function Field({
     <div className="space-y-1.5">
       <label
         htmlFor={htmlFor}
-        className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
+        className="text-sm font-medium text-foreground"
       >
         {label}
-        {required && <span className="ml-0.5 text-red-500">*</span>}
+        {required && <span className="ml-0.5 text-primary">*</span>}
         {hint && (
-          <span className="ml-1.5 font-normal text-zinc-400">{hint}</span>
+          <span className="ml-1.5 font-normal text-muted-foreground/70">{hint}</span>
         )}
       </label>
       {children}
@@ -231,7 +231,7 @@ function Field({
 }
 
 const inputClass =
-  'w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50 dark:placeholder-zinc-500 dark:focus:ring-zinc-50';
+  'w-full rounded-lg border border-border bg-background shadow-[inset_1px_1px_3px_rgba(0,0,0,0.06)] px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary';
 
 const fileInputClass =
-  'w-full text-sm text-zinc-700 file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-zinc-200 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-zinc-700 hover:file:bg-zinc-300 dark:text-zinc-300 dark:file:bg-zinc-700 dark:file:text-zinc-300 dark:hover:file:bg-zinc-600';
+  'w-full text-sm text-muted-foreground file:mr-3 file:cursor-pointer file:rounded-md file:border file:border-border file:bg-card file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-foreground hover:file:bg-muted/50';

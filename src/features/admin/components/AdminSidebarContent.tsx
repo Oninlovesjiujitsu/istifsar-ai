@@ -16,10 +16,10 @@ export default function AdminSidebarContent() {
       {/* Brand + Toggle */}
       <div className="px-4 flex items-center justify-between">
         <Link href="/admin" onClick={close} className="flex items-center gap-2 min-w-0">
-          <HugeiconsIcon icon={QuillWrite01Icon} size={20} className="text-primary dark:text-gold shrink-0" />
+          <HugeiconsIcon icon={QuillWrite01Icon} size={20} className="text-primary shrink-0" />
           <SidebarLabel>
             <span className="flex flex-col gap-0.5">
-              <span className="text-xl font-heading text-foreground dark:text-gold tracking-widest uppercase leading-none">
+              <span className="text-xl font-heading text-foreground tracking-widest uppercase leading-none">
                 Istifsar AI
               </span>
               <span className="text-[10px] uppercase tracking-[0.2em] text-red-400/80">
@@ -48,7 +48,7 @@ export default function AdminSidebarContent() {
         {/* Switch views */}
         <div className="mt-auto px-2 pt-4">
           {expanded && (
-            <span className="px-3 text-[10px] uppercase tracking-[0.2em] text-text-muted-vault/60">
+            <span className="px-3 text-[10px] uppercase tracking-[0.2em] text-muted-foreground/60">
               Switch View
             </span>
           )}
@@ -57,7 +57,7 @@ export default function AdminSidebarContent() {
             onClick={close}
             title="Enter Archive"
             className={[
-              'mt-1 text-text-muted-vault hover:text-foreground dark:hover:text-gold px-3 py-3 transition-colors hover:bg-foreground/[0.04] flex items-center font-serif text-sm tracking-tight',
+              'mt-1 text-muted-foreground hover:text-foreground px-3 py-3 transition-colors hover:bg-foreground/[0.04] flex items-center font-serif text-sm tracking-tight',
               expanded ? 'gap-3' : 'lg:justify-center gap-3',
             ].join(' ')}
           >
@@ -149,8 +149,8 @@ function SidebarNavLink({
       className={[
         'px-3 py-3 transition-colors flex items-center font-serif text-sm tracking-tight rounded-sm',
         isActive
-          ? 'text-primary dark:text-gold bg-accent dark:bg-gold/[0.08]'
-          : 'text-text-muted-vault hover:text-foreground hover:bg-foreground/[0.04]',
+          ? 'text-primary bg-accent'
+          : 'text-muted-foreground hover:text-foreground hover:bg-foreground/[0.04]',
         expanded ? 'gap-3' : 'lg:justify-center gap-3',
       ].join(' ')}
     >

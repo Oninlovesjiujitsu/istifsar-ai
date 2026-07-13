@@ -12,9 +12,10 @@
     --font-mono: var(--font-geist-mono);
     --font-heading: var(--font-headline);
     --font-serif: var(--font-serif);
-    --color-gold: #d4af37;
-    --color-gold-dim: #b8963f;
-    --color-gold-bright: #f2ca50;
+    --color-ink: hsl(24 13% 15%);
+    --color-ink-light: hsl(27 9% 44%);
+    --color-parchment: hsl(43 45% 94%);
+    --color-sage: hsl(99 11% 36%);
 
     --color-card: hsl(var(--card));
     --color-card-foreground: hsl(var(--card-foreground));
@@ -56,74 +57,39 @@
 }
 
 :root,
-[data-theme="summer-morning"] {
-    --background: 45 38% 96%;
-    --foreground: 30 25% 13%;
-    --card: 45 38% 99%;
-    --card-foreground: 30 25% 13%;
-    --popover: 45 38% 99%;
-    --popover-foreground: 30 25% 13%;
-    --primary: 35 75% 45%;
-    --primary-foreground: 45 38% 96%;
-    --secondary: 45 30% 92%;
-    --secondary-foreground: 30 25% 13%;
-    --muted: 45 30% 92%;
-    --muted-foreground: 30 15% 38%;
-    --accent: 45 30% 92%;
-    --accent-foreground: 30 25% 13%;
+[data-theme="archive"] {
+    --background: 43 45% 94%;
+    --foreground: 24 13% 15%;
+    --card: 43 35% 91%;
+    --card-foreground: 24 13% 15%;
+    --popover: 43 35% 91%;
+    --popover-foreground: 24 13% 15%;
+    --primary: 13 29% 27%;
+    --primary-foreground: 43 45% 94%;
+    --secondary: 32 23% 82%;
+    --secondary-foreground: 24 13% 15%;
+    --muted: 38 25% 86%;
+    --muted-foreground: 27 9% 44%;
+    --accent: 38 25% 86%;
+    --accent-foreground: 13 29% 27%;
     --destructive: 0 84% 60%;
-    --border: 45 25% 86%;
-    --input: 45 25% 86%;
-    --ring: 35 75% 45%;
-    --radius: 0.625rem;
+    --border: 32 23% 75%;
+    --input: 32 23% 82%;
+    --ring: 13 29% 27%;
+    --radius: 0.25rem;
 
-    --surface-vault: 45 30% 92%;
-    --surface-elevated: 45 30% 94%;
-    --text-muted-vault: 30 15% 38%;
+    --surface-vault: 43 45% 94%;
+    --surface-elevated: 43 35% 91%;
+    --text-muted-vault: 27 9% 44%;
 
-    --sidebar: 45 38% 96%;
-    --sidebar-foreground: 30 25% 13%;
-    --sidebar-primary: 35 75% 45%;
-    --sidebar-primary-foreground: 45 38% 96%;
-    --sidebar-accent: 45 30% 92%;
-    --sidebar-accent-foreground: 30 25% 13%;
-    --sidebar-border: 45 25% 86%;
-    --sidebar-ring: 35 75% 45%;
-}
-
-[data-theme="summer-night"] {
-    --background: 30 15% 8%;
-    --foreground: 45 15% 92%;
-    --card: 30 14% 12%;
-    --card-foreground: 45 15% 92%;
-    --popover: 30 14% 12%;
-    --popover-foreground: 45 15% 92%;
-    --primary: 40 75% 62%;
-    --primary-foreground: 30 15% 8%;
-    --secondary: 30 12% 15%;
-    --secondary-foreground: 45 15% 92%;
-    --muted: 30 12% 15%;
-    --muted-foreground: 35 10% 68%;
-    --accent: 30 12% 15%;
-    --accent-foreground: 45 15% 92%;
-    --destructive: 0 84% 60%;
-    --border: 30 12% 22%;
-    --input: 30 12% 22%;
-    --ring: 40 75% 62%;
-    --radius: 0.625rem;
-
-    --surface-vault: 30 12% 10%;
-    --surface-elevated: 30 12% 15%;
-    --text-muted-vault: 35 10% 68%;
-
-    --sidebar: 30 15% 8%;
-    --sidebar-foreground: 45 15% 92%;
-    --sidebar-primary: 40 75% 62%;
-    --sidebar-primary-foreground: 30 15% 8%;
-    --sidebar-accent: 30 12% 15%;
-    --sidebar-accent-foreground: 45 15% 92%;
-    --sidebar-border: 30 12% 22%;
-    --sidebar-ring: 40 75% 62%;
+    --sidebar: 43 45% 94%;
+    --sidebar-foreground: 24 13% 15%;
+    --sidebar-primary: 13 29% 27%;
+    --sidebar-primary-foreground: 43 45% 94%;
+    --sidebar-accent: 38 25% 86%;
+    --sidebar-accent-foreground: 24 13% 15%;
+    --sidebar-border: 32 23% 75%;
+    --sidebar-ring: 13 29% 27%;
 }
 
 /* Parchment noise texture for archival fragments */
@@ -163,11 +129,11 @@
     }
 
     body {
-        @apply bg-background text-foreground;
+        @apply bg-background text-foreground font-serif;
     }
 
     html {
-        @apply font-sans;
+        @apply font-serif;
     }
 }
 
@@ -294,17 +260,13 @@
  * SELECTION STYLING (reflecting summer-night theme selection colors)
  * ============================================================ */
 ::selection {
-    background-color: hsl(40 75% 62% / 0.9);
-    /* summer-night primary (sunlit gold) */
-    color: hsl(30 15% 8%);
-    /* summer-night primary-foreground (dark warm gray) */
+    background-color: hsl(13 29% 27% / 0.2); /* Faded primary selection */
+    color: hsl(13 29% 27%);
 }
 
 ::-moz-selection {
-    background-color: hsl(40 75% 62% / 0.9);
-    /* summer-night primary (sunlit gold) */
-    color: hsl(30 15% 8%);
-    /* summer-night primary-foreground (dark warm gray) */
+    background-color: hsl(13 29% 27% / 0.2);
+    color: hsl(13 29% 27%);
 }
 
 /* ============================================================

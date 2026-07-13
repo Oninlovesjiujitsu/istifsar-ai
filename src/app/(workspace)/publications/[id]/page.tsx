@@ -76,13 +76,13 @@ export default async function WorkspaceDocumentPage({ params }: Props) {
 
   const STATUS_BADGE: Record<string, string> = {
     published:
-      'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
+      'bg-sage/10 border border-sage/20 text-sage',
     pending_review:
-      'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+      'bg-amber-800/10 border border-amber-800/20 text-amber-800',
     under_review:
-      'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+      'bg-cyan-800/10 border border-cyan-800/20 text-cyan-800',
     rejected:
-      'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+      'bg-red-800/10 border border-red-800/20 text-red-800',
   };
 
   return (

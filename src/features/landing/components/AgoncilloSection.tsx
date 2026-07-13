@@ -55,8 +55,8 @@ export default function AgoncilloSection() {
             transition={{ duration: 1.0, ease: 'easeOut' }}
             className="flex flex-col items-start"
           >
-            <div className="bg-card p-3 sm:p-4 rounded-sm mb-5 sm:mb-8">
-              <HugeiconsIcon icon={prop.icon} size={28} className="text-gold" />
+            <div className="bg-card p-3 sm:p-4 rounded-sm mb-5 sm:mb-8 border border-border shadow-sm">
+              <HugeiconsIcon icon={prop.icon} size={28} className="text-primary" />
             </div>
             <h4 className="font-heading text-lg sm:text-xl text-foreground mb-3 sm:mb-4">
               {prop.title}

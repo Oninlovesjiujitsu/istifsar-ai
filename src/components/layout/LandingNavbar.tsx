@@ -76,15 +76,15 @@ export default function LandingNavbar() {
 
   const navLinkClass = (id: SectionId) =>
     activeSection === id
-      ? 'font-serif font-semibold text-xs md:text-sm tracking-tight text-gold-bright border-b-2 border-gold pb-1 transition-all duration-300'
-      : 'font-serif font-semibold text-xs md:text-sm tracking-tight text-text-muted-vault hover:text-foreground hover:border-b-2 hover:border-gold/40 pb-1 transition-all duration-300';
+      ? 'font-serif font-semibold text-xs md:text-sm tracking-tight text-primary border-b-2 border-primary pb-1 transition-all duration-300'
+      : 'font-serif font-semibold text-xs md:text-sm tracking-tight text-muted-foreground hover:text-foreground hover:border-b-2 hover:border-primary/40 pb-1 transition-all duration-300';
 
   return (
     <motion.nav
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 1.0, ease: 'easeOut' }}
-      className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-sm shadow-[0_0_15px_rgba(212,175,55,0.1)]"
+      className="fixed top-0 w-full z-50 bg-background/90 backdrop-blur-sm border-b border-border/50 shadow-sm"
     >
       <div className="flex justify-between items-center px-4 sm:px-6 md:px-12 py-4 md:py-6 max-w-[1440px] mx-auto">
         {/* Brand */}
@@ -99,9 +99,9 @@ export default function LandingNavbar() {
           <HugeiconsIcon
             icon={QuillWrite01Icon}
             size={24}
-            className="text-gold group-hover:text-gold-bright transition-colors duration-300"
+            className="text-primary group-hover:text-foreground transition-colors duration-300"
           />
-          <span className="text-xl sm:text-2xl font-serif italic text-gold tracking-widest group-hover:text-gold-bright transition-colors duration-300">
+          <span className="text-xl sm:text-2xl font-serif italic text-primary tracking-widest group-hover:text-foreground transition-colors duration-300">
             Istifsar AI
           </span>
         </a>
@@ -126,11 +126,11 @@ export default function LandingNavbar() {
             <>
               <Link
                 href={role === 'admin' ? '/admin' : role === 'verified_historian' ? '/dashboard' : '/explore'}
-                className="bg-gold text-background px-6 py-2 rounded-sm text-sm uppercase tracking-widest hover:scale-[1.02] transition-all duration-300 font-medium"
+                className="inline-block text-center bg-primary text-primary-foreground px-6 py-2 rounded-sm text-sm uppercase tracking-widest hover:bg-foreground hover:text-background font-medium border-t border-l border-t-white/20 border-l-white/20 border-b-2 border-r-2 border-b-black/30 border-r-black/30 shadow-[1px_1px_3px_rgba(0,0,0,0.15)] active:border-t-2 active:border-l-2 active:border-b active:border-r active:border-t-black/30 active:border-l-black/30 active:border-b-white/20 active:border-r-white/20 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all duration-100"
               >
                 Go to Workspace
               </Link>
-              <div className="text-gold text-sm uppercase tracking-widest hover:text-gold-bright transition-colors">
+              <div className="text-primary text-sm uppercase tracking-widest hover:text-foreground transition-colors">
                 <SignOutButton />
               </div>
             </>
@@ -138,13 +138,13 @@ export default function LandingNavbar() {
             <>
               <Link
                 href="/login"
-                className="text-gold text-sm uppercase tracking-widest hover:text-gold-bright transition-colors"
+                className="text-primary text-sm uppercase tracking-widest hover:text-foreground transition-colors"
               >
                 Sign In
               </Link>
               <Link
                 href="/signup"
-                className="bg-gold text-background px-6 py-2 rounded-sm text-sm uppercase tracking-widest hover:scale-[1.02] transition-all duration-300 font-medium"
+                className="inline-block text-center bg-primary text-primary-foreground px-6 py-2 rounded-sm text-sm uppercase tracking-widest hover:bg-foreground hover:text-background font-medium border-t border-l border-t-white/20 border-l-white/20 border-b-2 border-r-2 border-b-black/30 border-r-black/30 shadow-[1px_1px_3px_rgba(0,0,0,0.15)] active:border-t-2 active:border-l-2 active:border-b active:border-r active:border-t-black/30 active:border-l-black/30 active:border-b-white/20 active:border-r-white/20 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all duration-100"
               >
                 Join as Historian
               </Link>
@@ -159,7 +159,7 @@ export default function LandingNavbar() {
           <button
             type="button"
             onClick={() => setMobileMenuOpen((prev) => !prev)}
-            className="relative w-10 h-10 flex items-center justify-center text-gold cursor-pointer"
+            className="relative w-10 h-10 flex items-center justify-center text-primary cursor-pointer hover:text-foreground transition-colors"
             aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={mobileMenuOpen}
           >
@@ -185,7 +185,7 @@ export default function LandingNavbar() {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3, ease: 'easeInOut' }}
-            className="md:hidden overflow-hidden border-t border-gold/10 bg-background/95 backdrop-blur-md"
+            className="md:hidden overflow-hidden border-t border-border bg-background/95 backdrop-blur-md"
           >
             <div className="flex flex-col px-6 py-6 gap-6">
               {navItems.map((item) => (
@@ -193,24 +193,24 @@ export default function LandingNavbar() {
                   key={item.id}
                   href={`#${item.id}`}
                   onClick={(e) => handleScrollToSection(e, item.id, true)}
-                  className="font-serif font-light tracking-tight text-text-muted-vault hover:text-gold transition-colors text-lg"
+                  className="font-serif font-light tracking-tight text-muted-foreground hover:text-primary transition-colors text-lg"
                 >
                   {item.name}
                 </a>
               ))}
 
-              <div className="h-px bg-gold/10" />
+              <div className="h-px bg-border" />
 
               {!loading && role ? (
                 <div className="flex flex-col gap-3">
                   <Link
                     href={role === 'admin' ? '/admin' : role === 'verified_historian' ? '/dashboard' : '/explore'}
                     onClick={() => setMobileMenuOpen(false)}
-                    className="bg-gold text-background px-6 py-3 rounded-sm text-sm uppercase tracking-widest font-medium text-center hover:bg-gold-bright transition-colors"
+                    className="inline-block text-center bg-primary text-primary-foreground px-6 py-3 rounded-sm text-sm uppercase tracking-widest font-medium border-t border-l border-t-white/20 border-l-white/20 border-b-2 border-r-2 border-b-black/30 border-r-black/30 shadow-[1px_1px_3px_rgba(0,0,0,0.15)] active:border-t-2 active:border-l-2 active:border-b active:border-r active:border-t-black/30 active:border-l-black/30 active:border-b-white/20 active:border-r-white/20 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all duration-100"
                   >
                     Go to Workspace
                   </Link>
-                  <div className="text-gold text-sm uppercase tracking-widest hover:text-gold-bright transition-colors py-2 text-center">
+                  <div className="text-primary text-sm uppercase tracking-widest hover:text-foreground transition-colors py-2 text-center">
                     <SignOutButton />
                   </div>
                 </div>
@@ -219,14 +219,14 @@ export default function LandingNavbar() {
                   <Link
                     href="/login"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="text-gold text-sm uppercase tracking-widest hover:text-gold-bright transition-colors py-2"
+                    className="text-primary text-sm uppercase tracking-widest hover:text-foreground transition-colors py-2"
                   >
                     Sign In
                   </Link>
                   <Link
                     href="/signup"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="bg-gold text-background px-6 py-3 rounded-sm text-sm uppercase tracking-widest font-medium text-center hover:bg-gold-bright transition-colors"
+                    className="inline-block text-center bg-primary text-primary-foreground px-6 py-3 rounded-sm text-sm uppercase tracking-widest font-medium border-t border-l border-t-white/20 border-l-white/20 border-b-2 border-r-2 border-b-black/30 border-r-black/30 shadow-[1px_1px_3px_rgba(0,0,0,0.15)] active:border-t-2 active:border-l-2 active:border-b active:border-r active:border-t-black/30 active:border-l-black/30 active:border-b-white/20 active:border-r-white/20 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all duration-100"
                   >
                     Join as Historian
                   </Link>
