@@ -37,7 +37,7 @@ export default function LandingNavbar() {
           }
         }
       },
-      { rootMargin: '-40% 0px -40% 0px' },
+      { rootMargin: '-12% 0px -70% 0px' },
     );
 
     for (const id of navSections) {
@@ -60,18 +60,17 @@ export default function LandingNavbar() {
   }, [mobileMenuOpen]);
 
   const handleScrollToSection = useCallback((e: React.MouseEvent<HTMLAnchorElement>, id: string, closeMenu = false) => {
-    e.preventDefault();
-    if (closeMenu) {
-      setMobileMenuOpen(false);
-      document.body.style.overflow = '';
-    }
-
-    setTimeout(() => {
-      const el = document.getElementById(id);
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const el = document.getElementById(id);
+    if (el) {
+      e.preventDefault();
+      if (closeMenu) {
+        setMobileMenuOpen(false);
+        document.body.style.overflow = '';
       }
-    }, closeMenu ? 150 : 0);
+      setTimeout(() => {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, closeMenu ? 150 : 0);
+    }
   }, []);
 
   const navLinkClass = (id: SectionId) =>
@@ -89,10 +88,12 @@ export default function LandingNavbar() {
       <div className="flex justify-between items-center px-4 sm:px-6 md:px-12 py-4 md:py-6 max-w-[1440px] mx-auto">
         {/* Brand */}
         <a
-          href="#"
+          href="/"
           onClick={(e) => {
-            e.preventDefault();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            if (pathname === '/') {
+              e.preventDefault();
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
           }}
           className="flex items-center gap-2 group"
         >
@@ -111,7 +112,7 @@ export default function LandingNavbar() {
           {navItems.map((item) => (
             <a
               key={item.id}
-              href={`#${item.id}`}
+              href={pathname === '/' ? `#${item.id}` : `/#${item.id}`}
               className={navLinkClass(item.id as SectionId)}
               onClick={(e) => handleScrollToSection(e, item.id)}
             >
@@ -191,7 +192,7 @@ export default function LandingNavbar() {
               {navItems.map((item) => (
                 <a
                   key={item.id}
-                  href={`#${item.id}`}
+                  href={pathname === '/' ? `#${item.id}` : `/#${item.id}`}
                   onClick={(e) => handleScrollToSection(e, item.id, true)}
                   className="font-serif font-light tracking-tight text-muted-foreground hover:text-primary transition-colors text-lg"
                 >

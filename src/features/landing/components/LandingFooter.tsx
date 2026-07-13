@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'motion/react';
+import Link from 'next/link';
 
 export default function LandingFooter({
   onContactClick,
@@ -20,12 +21,12 @@ export default function LandingFooter({
           &copy; 2026 Istifsar AI. All rights reserved. The Digital Curator.
         </p>
         <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-6 md:gap-12">
-          <a
-            href="#"
+          <Link
+            href="/privacy"
             className="text-xs sm:text-sm tracking-wider sm:tracking-widest uppercase text-muted-foreground hover:text-primary transition-all opacity-80 hover:opacity-100"
           >
             Privacy Policy
-          </a>
+          </Link>
           <button
             type="button"
             onClick={onContactClick}
