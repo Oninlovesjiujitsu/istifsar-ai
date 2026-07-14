@@ -3,6 +3,8 @@ export type ContentionClaim = {
   documentTitle: string;
   scholarName: string;
   scholarUsername: string;
+  historianName: string | null;
+  argumentHeadline: string;
   claim: string;
   excerpt: string | null;
 };

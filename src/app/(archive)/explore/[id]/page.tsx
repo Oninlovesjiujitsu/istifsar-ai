@@ -96,7 +96,7 @@ export default async function ConversationPage({ params, searchParams }: Props) 
       const contentionDocIds = [...new Set(rawContentions.flatMap((c) => c.document_ids))];
       const { data: contentionDocs } = await supabase
         .from('documents')
-        .select('id, title, profiles!documents_submitter_id_fkey(username, display_name)')
+        .select('id, title, author_name, profiles!documents_submitter_id_fkey(username, display_name)')
         .in('id', contentionDocIds);
 
       const docTitleMap = new Map<string, string>();
@@ -105,7 +105,12 @@ export default async function ConversationPage({ params, searchParams }: Props) 
         for (const doc of contentionDocs) {
           docTitleMap.set(doc.id, doc.title);
           const profile = doc.profiles as unknown as { username: string; display_name: string } | null;
-          if (profile) docAuthorMap.set(doc.id, profile);
+          if (doc.author_name || profile) {
+            docAuthorMap.set(doc.id, {
+              username: profile?.username ?? '',
+              display_name: doc.author_name ?? profile?.display_name ?? 'Unknown Scholar',
+            });
+          }
         }
       }
 
@@ -122,14 +127,20 @@ export default async function ConversationPage({ params, searchParams }: Props) 
           .filter(
             (cl) => typeof cl?.document_id === 'string' && typeof cl?.claim === 'string',
           )
-          .map((cl) => ({
-            documentId: cl.document_id as string,
-            documentTitle: docTitleMap.get(cl.document_id) ?? 'Unknown Document',
-            scholarName: docAuthorMap.get(cl.document_id)?.display_name ?? 'Unknown Scholar',
-            scholarUsername: docAuthorMap.get(cl.document_id)?.username ?? '',
-            claim: cl.claim as string,
-            excerpt: typeof cl.excerpt === 'string' ? cl.excerpt : null,
-          }));
+          .map((cl) => {
+            const author = docAuthorMap.get(cl.document_id);
+            const finalHistorianName = cl.historian_name ?? author?.display_name ?? 'Unknown Scholar';
+            return {
+              documentId: cl.document_id as string,
+              documentTitle: docTitleMap.get(cl.document_id) ?? 'Unknown Document',
+              scholarName: finalHistorianName,
+              scholarUsername: author?.username ?? '',
+              historianName: cl.historian_name ?? null,
+              argumentHeadline: cl.argument_headline ?? cl.claim,
+              claim: cl.claim as string,
+              excerpt: typeof cl.excerpt === 'string' ? cl.excerpt : null,
+            };
+          });
 
         resolvedContentions.push({
           contentionId: c.id,

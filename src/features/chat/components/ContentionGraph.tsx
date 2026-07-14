@@ -114,9 +114,14 @@ function CustomScholarNode({
           )}
           onClick={(e) => e.stopPropagation()}
         >
-          <p className="font-serif italic text-[11px] sm:text-xs text-foreground leading-relaxed">
-            &ldquo;{claim.claim}&rdquo;
-          </p>
+          <div className="flex flex-col gap-2">
+            <h4 className="font-sans font-semibold text-[13px] sm:text-sm text-primary leading-snug">
+              {claim.argumentHeadline}
+            </h4>
+            <p className="font-serif italic text-[11px] sm:text-xs text-muted-foreground leading-relaxed pl-2 border-l border-primary/30">
+              &ldquo;{claim.claim}&rdquo;
+            </p>
+          </div>
           <span className="absolute w-2.5 h-2.5 bg-card border-r border-b border-border rotate-45 left-1/2 -translate-x-1/2 top-full -mt-1" />
         </div>
       </div>

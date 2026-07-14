@@ -423,6 +423,7 @@ export type Database = {
       }
       documents: {
         Row: {
+          author_name: string | null
           created_at: string
           date_of_origin: string | null
           description: string | null
@@ -443,6 +444,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          author_name?: string | null
           created_at?: string
           date_of_origin?: string | null
           description?: string | null
@@ -463,6 +465,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          author_name?: string | null
           created_at?: string
           date_of_origin?: string | null
           description?: string | null

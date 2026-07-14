@@ -5,6 +5,7 @@ import { createClient } from '@/src/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import type { DocumentInsert, UploadDocumentResult } from '@/src/features/documents/types';
 import { isVerifiedHistorian, getUserRole } from '@/src/lib/ui/role-labels';
+import { detectContentions } from '@/src/lib/ai/contention';
 
 const ALLOWED_SCAN_TYPES = new Set([
   'application/pdf',
@@ -87,14 +88,15 @@ export async function uploadDocument(
   const payload: DocumentInsert = {
     id: docId,
     title,
+    author_name: (formData.get('author_name') as string)?.trim() || null,
     description: (formData.get('description') as string)?.trim() || null,
     document_type: (formData.get('document_type') as string) || null,
     date_of_origin: (formData.get('date_of_origin') as string)?.trim() || null,
     origin_location: (formData.get('origin_location') as string)?.trim() || null,
     language: (formData.get('language') as string)?.trim() || null,
     submitter_id: user.id,
-    status: 'published',
-    published_at: new Date().toISOString(),
+    status: 'under_review',
+    published_at: null,
     storage_path: scanPath,
     transcription_path: transcriptionPath,
     original_filename: scanFile.name,
@@ -157,6 +159,13 @@ export async function uploadDocument(
         .insert(allTagIds.map((tagId) => ({ document_id: docId, tag_id: tagId })) as any);
     }
   }
+
+  // Fire-and-forget: asynchronous contention detection after chunk ingestion finishes (MVP delay)
+  setTimeout(() => {
+    void detectContentions(docId).catch((err) =>
+      console.error('[uploadDocument] Contention detection failed:', err)
+    );
+  }, 1000);
 
   return { success: true, documentId: docId };
 }

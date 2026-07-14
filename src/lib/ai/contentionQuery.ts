@@ -51,7 +51,7 @@ export async function queryContentions(
   if (missingDocIds.length > 0) {
     const { data: extraDocs } = await supabase
       .from('documents')
-      .select('id, title, profiles!documents_submitter_id_fkey(username, display_name)')
+      .select('id, title, author_name, profiles!documents_submitter_id_fkey(username, display_name)')
       .in('id', missingDocIds);
 
     if (extraDocs) {
@@ -61,7 +61,12 @@ export async function queryContentions(
           username: string;
           display_name: string;
         } | null;
-        if (profile) supplementaryAuthors.set(doc.id, profile);
+        if (doc.author_name || profile) {
+          supplementaryAuthors.set(doc.id, {
+            username: profile?.username ?? '',
+            display_name: doc.author_name ?? profile?.display_name ?? 'Unknown Scholar',
+          });
+        }
       }
     }
   }
@@ -81,16 +86,19 @@ export async function queryContentions(
       : [];
 
     const claims: ContentionClaim[] = rawClaims
-      .filter((cl): cl is RawClaim & { document_id: string; claim: string } =>
+      .filter((cl): cl is RawClaim & { document_id: string; claim: string; historian_name?: string; argument_headline?: string } =>
         typeof cl.document_id === 'string' && typeof cl.claim === 'string',
       )
       .map((cl) => {
         const author = authorFor(cl.document_id);
+        const finalHistorianName = cl.historian_name ?? author?.display_name ?? 'Unknown Scholar';
         return {
           documentId: cl.document_id,
           documentTitle: titleFor(cl.document_id),
-          scholarName: author?.display_name ?? 'Unknown Scholar',
+          scholarName: finalHistorianName,
           scholarUsername: author?.username ?? '',
+          historianName: cl.historian_name ?? null,
+          argumentHeadline: cl.argument_headline ?? cl.claim,
           claim: cl.claim,
           excerpt: cl.excerpt ?? null,
         };

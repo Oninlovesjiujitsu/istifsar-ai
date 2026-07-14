@@ -85,7 +85,7 @@ Deno.serve(async (req: Request) => {
     // The pg_net trigger (0010) only sends { id } — fetch the full record.
     const { data: doc, error: fetchErr } = await db
       .from('documents')
-      .select('id, storage_path, transcription_path, original_filename, mime_type')
+      .select('id, storage_path, transcription_path, original_filename, mime_type, submitter_id, status')
       .eq('id', docId)
       .single();
 
@@ -130,7 +130,7 @@ Deno.serve(async (req: Request) => {
         if (error) throw new Error(`Chunk insert failed: ${error.message}`);
       }
 
-      await setStatus(db, doc.id, 'done');
+      await setStatus(db, doc.id, 'done', undefined, doc.submitter_id, doc.status);
 
       // KG extraction — runs after chunking is done (non-blocking).
       // Extracts entities + relationships from the full text and persists
@@ -147,7 +147,7 @@ Deno.serve(async (req: Request) => {
     } catch (inner) {
       const msg = inner instanceof Error ? inner.message : String(inner);
       console.error('[ingest-document] Pipeline error:', msg);
-      await setStatus(db, doc.id, 'failed', msg);
+      await setStatus(db, doc.id, 'failed', msg, doc.submitter_id, doc.status);
       return ok({ error: msg });
     }
   } catch (outer) {
@@ -163,15 +163,56 @@ async function setStatus(
   docId: string,
   status: 'processing' | 'done' | 'failed',
   errorMsg?: string,
+  submitterId?: string,
+  currentStatus?: string,
 ) {
-  await db
+  console.log(`[ingest-document] setStatus called: docId=${docId}, status=${status}, submitterId=${submitterId}, currentStatus=${currentStatus}`);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const updatePayload: Record<string, any> = {
+    ingestion_status: status,
+    ingestion_error: errorMsg ?? null,
+  };
+
+  if (status === 'done' && submitterId && currentStatus === 'under_review') {
+    try {
+      const { data: profile, error: profErr } = await db
+        .from('profiles')
+        .select('role')
+        .eq('id', submitterId)
+        .single();
+
+      if (profErr) {
+        console.error('[ingest-document] profiles fetch error:', profErr);
+      } else {
+        console.log(`[ingest-document] fetched profile role for ${submitterId}:`, profile?.role);
+        const isVerified = profile?.role === 'verified_historian' || profile?.role === 'admin';
+        if (isVerified) {
+          updatePayload.status = 'published';
+          updatePayload.published_at = new Date().toISOString();
+          console.log(`[ingest-document] Auto-publishing document ${docId}`);
+        } else {
+          console.log(`[ingest-document] Submitter is not verified (role: ${profile?.role}), keeping under_review`);
+        }
+      }
+    } catch (err) {
+      console.error('[ingest-document] Failed to check submitter role for auto-publish:', err);
+    }
+  }
+
+  console.log(`[ingest-document] Updating document ${docId} with payload:`, updatePayload);
+  const { error: updateErr } = await db
     .from('documents')
-    .update({
-      ingestion_status: status,
-      ingestion_error: errorMsg ?? null,
-    })
+    .update(updatePayload)
     .eq('id', docId);
+
+  if (updateErr) {
+    console.error(`[ingest-document] Failed to update documents table:`, updateErr.message);
+  } else {
+    console.log(`[ingest-document] Successfully updated document status`);
+  }
 }
+
 
 function ok(body: unknown): Response {
   return new Response(JSON.stringify(body), {
@@ -275,7 +316,8 @@ async function extractWithGemini(
     candidates?: Array<{ content: { parts: Array<{ text: string }> } }>;
   };
 
-  return result.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+  const parts = result.candidates?.[0]?.content?.parts ?? [];
+  return parts.map((p) => p.text).join('');
 }
 
 /**
@@ -680,8 +722,18 @@ async function autoTag(
             ],
           },
         ],
+        safetySettings: [
+          { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+          { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+          { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+          { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' }
+        ],
         generationConfig: {
           responseMimeType: 'application/json',
+          responseSchema: {
+            type: "ARRAY",
+            items: { type: "STRING" },
+          },
         },
       }),
     },
@@ -696,7 +748,8 @@ async function autoTag(
     candidates?: Array<{ content: { parts: Array<{ text: string }> } }>;
   };
 
-  const rawText = geminiResponse.candidates?.[0]?.content?.parts?.[0]?.text ?? '[]';
+  const parts = geminiResponse.candidates?.[0]?.content?.parts ?? [];
+  const rawText = parts.map((p) => p.text).join('').trim() || '[]';
 
   // Strip markdown code fences if present.
   const cleaned = rawText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim();
@@ -784,16 +837,8 @@ Given a scholarly document text, extract structured entities and relationships.
 5. Confidence: 1.0 for explicitly stated, 0.8 for strongly implied, 0.6 for inferred
 6. Excerpt: include a brief verbatim quote (max 40 words) where the entity appears
 7. Weight: 1.0 for explicitly stated relationships, 0.7 for implied, 0.5 for inferred
-
-Respond with ONLY a JSON object (no markdown, no prose):
-{
-  "entities": [
-    { "name": "string", "type": "ENTITY_TYPE", "aliases": ["string"], "excerpt": "verbatim quote", "confidence": 0.0-1.0 }
-  ],
-  "relationships": [
-    { "sourceEntity": "entity name", "targetEntity": "entity name", "type": "RELATIONSHIP_TYPE", "evidence": "brief excerpt", "weight": 0.0-1.0 }
-  ]
-}`;
+8. CRITICAL: Ensure all strings in the JSON response are properly escaped. Any double quotes inside string fields (like name, aliases, excerpt, or evidence) MUST be escaped as \" and any newlines MUST be escaped as \n. Do not include unescaped control characters.
+Respond strictly according to the requested JSON schema.`;
 
 const VALID_ENTITY_TYPES = new Set([
   'HISTORIAN', 'EVENT', 'DATE', 'LOCATION', 'CLAIM', 'SOURCE_REFERENCE', 'CONCEPT',
@@ -839,9 +884,49 @@ async function extractAndLinkKG(
         contents: [
           { parts: [{ text: KG_EXTRACTION_PROMPT + '\n\n' + userPrompt }] },
         ],
+        safetySettings: [
+          { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+          { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+          { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+          { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' }
+        ],
         generationConfig: {
           responseMimeType: 'application/json',
           maxOutputTokens: 8192,
+          responseSchema: {
+            type: "OBJECT",
+            properties: {
+              entities: {
+                type: "ARRAY",
+                items: {
+                  type: "OBJECT",
+                  properties: {
+                    name: { type: "STRING" },
+                    type: { type: "STRING" },
+                    aliases: { type: "ARRAY", items: { type: "STRING" } },
+                    excerpt: { type: "STRING" },
+                    confidence: { type: "NUMBER" },
+                  },
+                  required: ["name", "type", "aliases", "excerpt", "confidence"],
+                },
+              },
+              relationships: {
+                type: "ARRAY",
+                items: {
+                  type: "OBJECT",
+                  properties: {
+                    sourceEntity: { type: "STRING" },
+                    targetEntity: { type: "STRING" },
+                    type: { type: "STRING" },
+                    evidence: { type: "STRING" },
+                    weight: { type: "NUMBER" },
+                  },
+                  required: ["sourceEntity", "targetEntity", "type", "evidence", "weight"],
+                },
+              },
+            },
+            required: ["entities", "relationships"],
+          },
         },
       }),
     },
@@ -853,20 +938,40 @@ async function extractAndLinkKG(
   }
 
   const geminiResult = (await res.json()) as {
-    candidates?: Array<{ content: { parts: Array<{ text: string }> } }>;
+    candidates?: Array<{ finishReason?: string, content: { parts: Array<{ text: string }> } }>;
   };
 
-  const rawText = geminiResult.candidates?.[0]?.content?.parts?.[0]?.text ?? '{}';
+  const finishReason = geminiResult.candidates?.[0]?.finishReason;
+  if (finishReason && finishReason !== 'STOP') {
+    console.warn('[ingest-document] KG extraction: Gemini returned early with finishReason:', finishReason);
+  }
+
+  const parts = geminiResult.candidates?.[0]?.content?.parts ?? [];
+  const rawText = parts.map((p) => p.text).join('').trim() || '{}';
   const cleaned = rawText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim();
-  const parsed = JSON.parse(cleaned) as {
-    entities?: KGEntity[];
-    relationships?: KGRelationship[];
-  };
 
-  // Validate entities
-  const entities = (parsed.entities ?? []).filter(
-    (e) => typeof e.name === 'string' && e.name.trim() && VALID_ENTITY_TYPES.has(e.type),
-  );
+  let parsed: { entities?: KGEntity[]; relationships?: KGRelationship[] } = {};
+  if (cleaned) {
+    try {
+      parsed = JSON.parse(cleaned);
+    } catch (parseErr: any) {
+      const errMatch = parseErr.message.match(/position (\d+)/);
+      const pos = errMatch ? parseInt(errMatch[1], 10) : 0;
+      const snippet = pos > 0 ? cleaned.slice(Math.max(0, pos - 50), pos + 50) : cleaned.slice(0, 200);
+      console.warn(`[ingest-document] KG extraction: JSON parse failed. Length: ${cleaned.length}, finishReason: ${finishReason}`);
+      console.warn(`[ingest-document] Parse error snippet around position ${pos}: ...${snippet}...`);
+      console.warn('[ingest-document] KG extraction: Full raw text was:', rawText);
+    }
+  } else {
+    console.warn('[ingest-document] KG extraction: Gemini returned empty response text');
+  }
+
+  // Validate entities (handle case insensitivity from AI)
+  const entities = (parsed.entities ?? [])
+    .map(e => ({ ...e, type: (e.type || '').toUpperCase() }))
+    .filter(
+      (e) => typeof e.name === 'string' && e.name.trim() && VALID_ENTITY_TYPES.has(e.type),
+    );
 
   if (entities.length === 0) {
     console.log('[ingest-document] KG: no entities extracted');
@@ -904,14 +1009,16 @@ async function extractAndLinkKG(
 
   // Validate and insert relationships
   const entityNames = new Set(entities.map((e) => e.name));
-  const relationships = (parsed.relationships ?? []).filter(
-    (r) =>
-      typeof r.sourceEntity === 'string' &&
-      typeof r.targetEntity === 'string' &&
-      VALID_REL_TYPES.has(r.type) &&
-      entityNames.has(r.sourceEntity) &&
-      entityNames.has(r.targetEntity),
-  );
+  const relationships = (parsed.relationships ?? [])
+    .map(r => ({ ...r, type: (r.type || '').toUpperCase() }))
+    .filter(
+      (r) =>
+        typeof r.sourceEntity === 'string' &&
+        typeof r.targetEntity === 'string' &&
+        VALID_REL_TYPES.has(r.type) &&
+        entityNames.has(r.sourceEntity) &&
+        entityNames.has(r.targetEntity),
+    );
 
   let relCount = 0;
   for (const rel of relationships) {
