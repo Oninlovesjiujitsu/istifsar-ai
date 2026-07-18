@@ -88,12 +88,11 @@ function CustomScholarNode({
         }}
       >
         <div
-          className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-[#27272a] border-[1.5px] flex items-center justify-center transition-transform hover:scale-110 shadow-[0_0_8px_rgba(212,175,55,0.15)]"
-          style={{ borderColor: color }}
+          className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-primary border-4 border-card flex items-center justify-center transition-transform hover:scale-110 shadow-md"
         >
           <svg
-            className="w-6 h-6 sm:w-7 sm:h-7"
-            fill={color}
+            className="w-6 h-6 sm:w-7 sm:h-7 text-primary-foreground"
+            fill="currentColor"
             viewBox="0 0 24 24"
             aria-hidden="true"
           >
@@ -173,7 +172,7 @@ export default function ContentionGraph({ contentions }: Props) {
     );
   }
 
-  const [activeTooltipId, setActiveTooltipId] = useState<string | null>(null);
+  const [activeTooltipIds, setActiveTooltipIds] = useState<string[]>([]);
 
   const nodeTypes = useMemo(() => ({
     centerNode: CustomCenterNode,
@@ -225,7 +224,6 @@ export default function ContentionGraph({ contentions }: Props) {
           const angle = -Math.PI / 2 + (i * 2 * Math.PI) / N;
           const x = centerX + radius * Math.cos(angle) - 60;
           const y = centerY + radius * Math.sin(angle) - 50;
-          const color = SCHOLAR_PALETTE[i % SCHOLAR_PALETTE.length].hex;
           const uniqueScholarId = `${contentionId}-${claim.documentId}`;
 
           baseNodes.push({
@@ -234,14 +232,17 @@ export default function ContentionGraph({ contentions }: Props) {
             position: { x, y },
             data: {
               claim,
-              color,
-              isActive: activeTooltipId === uniqueScholarId,
+              color: SCHOLAR_PALETTE[i % SCHOLAR_PALETTE.length].hex,
+              isActive: false,
               onToggle: () => {
-                setActiveTooltipId((prev) =>
-                  prev === uniqueScholarId ? null : uniqueScholarId
+                setActiveTooltipIds((prev) =>
+                  prev.includes(claim.documentId)
+                    ? prev.filter((id) => id !== claim.documentId)
+                    : [...prev, claim.documentId]
                 );
               },
             },
+            draggable: true,
           });
 
           // Connect center to scholar
@@ -285,10 +286,31 @@ export default function ContentionGraph({ contentions }: Props) {
 
     setNodes(baseNodes);
     setEdges(baseEdges);
-  }, [contentions, activeTooltipId, setNodes, setEdges]);
+  }, [contentions, setNodes, setEdges]);
+
+  // Update tooltip active state on existing nodes without resetting their position
+  useEffect(() => {
+    setNodes((prevNodes) =>
+      prevNodes.map((node) => {
+        if (node.type === 'scholarNode') {
+          const data = node.data as any;
+          if (data?.claim) {
+            return {
+              ...node,
+              data: {
+                ...data,
+                isActive: activeTooltipIds.includes(data.claim.documentId),
+              },
+            };
+          }
+        }
+        return node;
+      })
+    );
+  }, [activeTooltipIds, setNodes]);
 
   const onPaneClick = useCallback(() => {
-    setActiveTooltipId(null);
+    setActiveTooltipIds([]);
   }, []);
 
   return (
@@ -308,7 +330,7 @@ export default function ContentionGraph({ contentions }: Props) {
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
           fitView
-          fitViewOptions={{ padding: 0.15 }}
+          fitViewOptions={{ padding: 0.15, maxZoom: 0.85 }}
           minZoom={0.5}
           maxZoom={1.5}
           zoomOnScroll={false}
