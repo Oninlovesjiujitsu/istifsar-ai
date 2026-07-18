@@ -30,9 +30,6 @@ export default function SignUpPage() {
           <h2 className="text-lg font-heading font-medium text-foreground sm:text-xl">
             Join the Archive
           </h2>
-          <p className="text-sm text-muted-foreground">
-            Create a free account to start exploring history through primary sources.
-          </p>
         </div>
 
         <SignUpForm />

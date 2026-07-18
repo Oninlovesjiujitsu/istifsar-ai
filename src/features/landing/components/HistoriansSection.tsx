@@ -16,7 +16,7 @@ export default function HistoriansSection() {
   return (
     <section
       id="historians"
-      className="pt-8 sm:pt-12 md:pt-16 pb-16 sm:pb-24 md:pb-32 text-center max-w-4xl mx-auto px-4 sm:px-6 md:px-8 scroll-mt-20"
+      className="pt-24 pb-32 text-center max-w-4xl mx-auto px-4 sm:px-6 md:px-8 scroll-mt-20"
     >
       <motion.h2
         variants={fadeUp}

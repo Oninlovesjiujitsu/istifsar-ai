@@ -16,7 +16,7 @@ const staggerContainer = {
 
 export default function HeroSection() {
   return (
-    <section className="relative min-h-screen flex items-start sm:items-center justify-center pt-36 sm:pt-0 px-4 sm:px-6 md:px-0 overflow-hidden">
+    <section id="hero" className="relative min-h-screen flex items-center justify-center pt-24 pb-32 px-4 sm:px-6 md:px-0 overflow-hidden">
       <div className="absolute inset-0 z-0">
         {/* Soft, warm spotlight gradient simulating a reading lamp on a desk */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_hsl(43_60%_98%)_0%,_hsl(var(--background))_100%)] opacity-80" />

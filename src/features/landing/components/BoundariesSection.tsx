@@ -17,7 +17,7 @@ const viewport = { once: true, amount: 0.3 as const };
 
 export default function BoundariesSection() {
   return (
-    <section id="boundaries" className="bg-background py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-12 border-y border-border">
+    <section id="boundaries" className="bg-background pt-24 pb-32 px-4 sm:px-6 md:px-12 border-y border-border scroll-mt-20">
       <div className="max-w-[1440px] mx-auto">
         <motion.div
           variants={fadeUp}

@@ -48,7 +48,7 @@ export default function AgoncilloSection() {
   const [activeTab, setActiveTab] = useState<'none' | 'constraint' | 'contention' | 'citation'>('none');
 
   return (
-    <section id="agoncillo" className="bg-surface-vault pt-12 sm:pt-16 md:pt-24 pb-16 sm:pb-24 md:pb-32 px-4 sm:px-6 md:px-12 scroll-mt-20">
+    <section id="agoncillo" className="bg-surface-vault pt-24 pb-32 px-4 sm:px-6 md:px-12 scroll-mt-20">
       <motion.div
         variants={fadeUp}
         initial="hidden"
@@ -77,17 +77,15 @@ export default function AgoncilloSection() {
                   onMouseEnter={() => setActiveTab(prop.id)}
                   onMouseLeave={() => setActiveTab('none')}
                   onClick={() => setActiveTab(prop.id)}
-                  className={`flex flex-row items-start gap-4 p-5 rounded-md border transition-all duration-300 select-none cursor-pointer ${
-                    isActive
+                  className={`flex flex-row items-start gap-4 p-5 rounded-md border transition-all duration-300 select-none cursor-pointer ${isActive
                       ? 'bg-card border-primary/40 shadow-sm translate-x-1 sm:translate-x-3'
                       : 'bg-transparent border-transparent hover:bg-card/30 hover:border-border/30'
-                  }`}
+                    }`}
                 >
-                  <div className={`p-3 rounded-sm border transition-colors duration-300 ${
-                    isActive
+                  <div className={`p-3 rounded-sm border transition-colors duration-300 ${isActive
                       ? 'bg-primary text-primary-foreground border-primary'
                       : 'bg-card text-primary border-border'
-                  }`}>
+                    }`}>
                     <HugeiconsIcon icon={prop.icon} size={22} />
                   </div>
                   <div className="flex-1">
@@ -109,7 +107,7 @@ export default function AgoncilloSection() {
           <div className="w-full max-w-[500px] aspect-square lg:aspect-auto lg:h-[500px] bg-card/20 rounded-md border border-border/40 relative overflow-hidden parchment-texture">
             {/* Subtle light vignette for WebGL context */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20 bg-radial-[circle_at_center,transparent_40%,hsl(var(--background))_100%]" />
-            
+
             {/* Dynamic WebGL canvas */}
             <AgoncilloCanvasClient activeTab={activeTab} />
           </div>

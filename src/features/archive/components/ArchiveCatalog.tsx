@@ -46,7 +46,7 @@ export default function ArchiveCatalog() {
   }, []);
 
   return (
-    <section id="collections" className="max-w-6xl mx-auto px-4 sm:px-6 md:px-12 py-16 sm:py-24 md:py-32">
+    <section id="collections" className="max-w-6xl mx-auto px-4 sm:px-6 md:px-12 pt-24 pb-32 scroll-mt-20">
       <motion.div
         initial="hidden"
         whileInView="visible"
