@@ -16,6 +16,9 @@
     --color-ink-light: hsl(27 9% 44%);
     --color-parchment: hsl(43 45% 94%);
     --color-sage: hsl(99 11% 36%);
+    --color-gold: #d4af37;
+    --color-gold-bright: #f5c543;
+    --color-gold-dim: #b8922c;
 
     --color-card: hsl(var(--card));
     --color-card-foreground: hsl(var(--card-foreground));

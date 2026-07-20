@@ -76,7 +76,7 @@ export default function ContactModal({ open, onClose }: Props) {
   }
 
   const inputClass =
-    'w-full rounded-lg border border-white/[0.08] bg-[#111014] px-4 py-2.5 text-sm text-neutral-200 placeholder:text-neutral-500 focus:border-amber-500/40 focus:outline-none focus:ring-2 focus:ring-amber-500/10 transition-colors';
+    'w-full rounded-sm border border-border/85 bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/10 transition-colors';
 
   return (
     <AnimatePresence>
@@ -94,21 +94,21 @@ export default function ContactModal({ open, onClose }: Props) {
           transition={{ duration: 0.2 }}
         >
           <motion.div
-            className="w-full max-w-md bg-surface-vault border border-white/[0.08] rounded-sm shadow-2xl overflow-hidden"
+            className="w-full max-w-md bg-surface-vault border border-border rounded-sm shadow-2xl overflow-hidden"
             initial={{ opacity: 0, scale: 0.95, y: 12 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 12 }}
             transition={{ duration: 0.2 }}
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 bg-surface-elevated border-b border-white/[0.06]">
-              <span className="text-[10px] uppercase tracking-[0.2em] text-gold/60 font-bold">
+            <div className="flex items-center justify-between px-6 py-4 bg-surface-elevated border-b border-border/60">
+              <span className="text-[10px] uppercase tracking-[0.2em] text-primary font-bold">
                 Get in Touch
               </span>
               <button
                 type="button"
                 onClick={handleClose}
-                className="text-text-muted-vault hover:text-gold transition-colors"
+                className="text-text-muted-vault hover:text-primary transition-colors cursor-pointer"
                 aria-label="Close contact form"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -126,12 +126,12 @@ export default function ContactModal({ open, onClose }: Props) {
                       <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                     </svg>
                   </div>
-                  <p className="text-sm text-neutral-200 font-medium">Message sent!</p>
+                  <p className="text-sm text-foreground font-medium">Message sent!</p>
                   <p className="text-xs text-text-muted-vault">Thank you for reaching out. I&apos;ll get back to you soon.</p>
                   <button
                     type="button"
                     onClick={handleClose}
-                    className="mt-2 text-xs text-gold hover:text-gold/80 uppercase tracking-widest font-bold transition-colors"
+                    className="mt-2 text-xs text-primary hover:text-primary/80 uppercase tracking-widest font-bold transition-colors cursor-pointer"
                   >
                     Close
                   </button>
@@ -140,7 +140,7 @@ export default function ContactModal({ open, onClose }: Props) {
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
                     <label htmlFor="contact-name" className="block text-[10px] uppercase tracking-[0.15em] text-text-muted-vault mb-1.5">
-                      Name <span className="text-amber-500">*</span>
+                      Name <span className="text-destructive">*</span>
                     </label>
                     <input
                       id="contact-name"
@@ -155,7 +155,7 @@ export default function ContactModal({ open, onClose }: Props) {
 
                   <div>
                     <label htmlFor="contact-email" className="block text-[10px] uppercase tracking-[0.15em] text-text-muted-vault mb-1.5">
-                      Email <span className="text-amber-500">*</span>
+                      Email <span className="text-destructive">*</span>
                     </label>
                     <input
                       id="contact-email"
@@ -170,7 +170,7 @@ export default function ContactModal({ open, onClose }: Props) {
 
                   <div>
                     <label htmlFor="contact-message" className="block text-[10px] uppercase tracking-[0.15em] text-text-muted-vault mb-1.5">
-                      Message <span className="text-amber-500">*</span>
+                      Message <span className="text-destructive">*</span>
                     </label>
                     <textarea
                       id="contact-message"
@@ -184,7 +184,7 @@ export default function ContactModal({ open, onClose }: Props) {
                   </div>
 
                   {result?.error && (
-                    <div className="rounded-lg bg-red-950/40 border border-red-500/20 px-4 py-2.5 text-sm text-red-400">
+                    <div className="rounded-sm bg-destructive/10 border border-destructive/20 px-4 py-2.5 text-sm text-destructive">
                       {result.error}
                     </div>
                   )}
@@ -192,7 +192,7 @@ export default function ContactModal({ open, onClose }: Props) {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full rounded-lg bg-gold/90 hover:bg-gold text-black font-bold text-sm py-2.5 uppercase tracking-widest transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full rounded-sm bg-primary text-primary-foreground px-6 py-2.5 text-xs font-semibold uppercase tracking-widest hover:bg-foreground hover:text-background border-t border-l border-t-white/20 border-l-white/20 border-b-2 border-r-2 border-b-black/30 border-r-black/30 shadow-[1px_1px_3px_rgba(0,0,0,0.15)] active:border-t-2 active:border-l-2 active:border-b active:border-r active:border-t-black/30 active:border-l-black/30 active:border-b-white/20 active:border-r-white/20 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all duration-100 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                   >
                     {loading ? 'Sending...' : 'Send Message'}
                   </button>

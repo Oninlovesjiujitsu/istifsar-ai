@@ -16,11 +16,27 @@ export default function LandingFooter({
       transition={{ duration: 0.6 }}
       className="w-full border-t border-border relative z-20 bg-background"
     >
-      <div className="flex flex-col md:flex-row justify-between items-center px-4 sm:px-6 md:px-16 py-6 md:py-8 w-full max-w-[1440px] mx-auto gap-6 md:gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 items-center px-4 sm:px-6 md:px-16 py-6 md:py-8 w-full max-w-[1440px] mx-auto gap-6 md:gap-8">
+        {/* Left Column: Copyright */}
         <p className="text-xs sm:text-sm tracking-widest uppercase text-muted-foreground text-center md:text-left">
           &copy; 2026 Istifsar AI. All rights reserved. The Digital Curator.
         </p>
-        <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-6 md:gap-12">
+
+        {/* Center Column: Portfolio Link */}
+        <p className="text-xs sm:text-sm tracking-widest uppercase text-muted-foreground/80 text-center">
+          Built by{' '}
+          <a
+            href="https://onin-portfolio.vercel.app"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:text-foreground transition-all font-medium hover:underline underline-offset-2"
+          >
+            Niño Olvis
+          </a>
+        </p>
+
+        {/* Right Column: Menu Links */}
+        <div className="flex flex-wrap justify-center md:justify-end items-center gap-4 sm:gap-6 md:gap-10">
           <Link
             href="/privacy"
             className="text-xs sm:text-sm tracking-wider sm:tracking-widest uppercase text-muted-foreground hover:text-primary transition-all opacity-80 hover:opacity-100"
