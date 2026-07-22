@@ -30,7 +30,7 @@ export default function EditDisplayName({ currentName }: { currentName: string }
           <button
             type="button"
             onClick={() => { setName(currentName); setEditing(true); setError(''); }}
-            className="text-gold hover:text-gold/80 transition-colors"
+            className="text-primary hover:text-primary/80 transition-colors"
             aria-label="Edit display name"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -53,7 +53,7 @@ export default function EditDisplayName({ currentName }: { currentName: string }
           value={name}
           onChange={(e) => setName(e.target.value)}
           maxLength={100}
-          className="flex-1 rounded-md border bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-gold"
+          className="flex-1 rounded-md border bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
           autoFocus
           onKeyDown={(e) => {
             if (e.key === 'Enter') handleSave();
@@ -64,7 +64,7 @@ export default function EditDisplayName({ currentName }: { currentName: string }
           type="button"
           onClick={handleSave}
           disabled={saving}
-          className="rounded-md bg-gold px-3 py-1.5 text-xs font-medium text-black hover:bg-gold/90 transition-colors disabled:opacity-50"
+          className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
         >
           {saving ? 'Saving…' : 'Save'}
         </button>

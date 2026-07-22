@@ -207,7 +207,6 @@ export async function runRag(params: RagParams): Promise<Response> {
     void processAndInsertArchiveGap(supabase, {
       query: params.query,
       userId: params.userId,
-      similarityScore: topChunk?.cosineScore ?? 0,
     });
 
     // Clear chunks so downstream stages know context is empty
@@ -329,9 +328,12 @@ export async function runRag(params: RagParams): Promise<Response> {
   }
 
   // Stage 5: Build context
+  const { data: userData } = await supabase.auth.getUser();
+  const userPreferences = userData?.user?.user_metadata?.preferences;
+
   const contextBlock = buildContextBlock(rankedChunks, contentionsMeta, entityConnections);
   const systemPrompt =
-    buildSystemPrompt(params.targetScholar, params.documentTitle, isDiveDeeper) + contextBlock;
+    buildSystemPrompt(params.targetScholar, params.documentTitle, isDiveDeeper, userPreferences) + contextBlock;
 
   const citations: CitationMeta[] = rankedChunks.map((chunk, i) => {
     const author = authorByDocId.get(chunk.documentId);

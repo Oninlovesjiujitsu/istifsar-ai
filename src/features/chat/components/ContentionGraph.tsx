@@ -20,6 +20,9 @@ import type { ContentionClaim, ContentionMeta } from '@/src/types/contention';
 
 type Props = {
   contentions: ContentionMeta[];
+  layout?: 'vertical' | 'horizontal';
+  interactive?: boolean;
+  isMobile?: boolean;
 };
 
 const SCHOLAR_PALETTE = [
@@ -161,7 +164,7 @@ const nodeTypes = {
 
 /* ── Unified Contention Graph Canvas ─────────────────────────────────── */
 
-export default function ContentionGraph({ contentions }: Props) {
+export default function ContentionGraph({ contentions, layout = 'vertical', interactive = false, isMobile = false }: Props) {
   if (!contentions || contentions.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center p-12 text-center h-full min-h-[300px]">
@@ -187,27 +190,35 @@ export default function ContentionGraph({ contentions }: Props) {
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
 
-  // Dynamically calculate height to stack contentions vertically inside a single canvas
+  // Dynamically calculate height to stack contentions inside a single canvas
   const canvasHeight = useMemo(() => {
-    return Math.max(450, contentions.length * 400);
-  }, [contentions]);
+    if (layout === 'horizontal') return 700;
+    return Math.max(isMobile ? 500 : 600, contentions.length * (isMobile ? 450 : 600));
+  }, [contentions, layout, isMobile]);
 
   useEffect(() => {
     const baseNodes: Node[] = [];
     const baseEdges: Edge[] = [];
 
     // Layout configuration
-    const width = 450;
-    const centerX = width / 2;
-    const radius = 130;
+    const radius = isMobile ? 140 : 220; // Tighter radius on mobile
 
     contentions.forEach((contention, k) => {
       const { claims, contentionId } = contention;
       const topicLabel = contention.topic ?? contention.title;
       const isLegacy = claims.length === 0;
 
-      // Position center node for this contention cluster in the tall vertical canvas
-      const centerY = k * 400 + 200;
+      // Position center node for this contention cluster
+      let centerX = 0;
+      let centerY = 0;
+
+      if (layout === 'horizontal') {
+        centerX = k * (isMobile ? 500 : 700) + (isMobile ? 250 : 350);
+        centerY = isMobile ? 250 : 350;
+      } else {
+        centerX = isMobile ? 200 : 300;
+        centerY = k * (isMobile ? 450 : 600) + (isMobile ? 250 : 300);
+      }
 
       // Center Node (Topic)
       baseNodes.push({
@@ -330,15 +341,17 @@ export default function ContentionGraph({ contentions }: Props) {
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
           fitView
-          fitViewOptions={{ padding: 0.15, maxZoom: 0.85 }}
-          minZoom={0.5}
+          fitViewOptions={{ padding: 0.15, maxZoom: 1.0 }}
+          minZoom={0.65}
           maxZoom={1.5}
-          zoomOnScroll={false}
-          panOnScroll={false}
+          zoomOnScroll={interactive}
+          panOnScroll={interactive}
+          panOnDrag={interactive}
           zoomOnPinch={true}
-          zoomOnDoubleClick={false}
+          zoomOnDoubleClick={interactive}
+          nodesDraggable={interactive}
           nodesConnectable={false}
-          elementsSelectable={false}
+          elementsSelectable={interactive}
           onPaneClick={onPaneClick}
         >
           <Background color="hsl(var(--primary) / 0.04)" gap={16} size={1} />

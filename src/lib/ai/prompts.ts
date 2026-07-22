@@ -1,20 +1,41 @@
 import type { RetrievedChunk } from './retriever';
 import type { ContentionMeta } from '@/src/types/contention';
 import type { EntityConnection } from './kg/graphRetriever';
+import type { UserPreferences } from '@/src/types/preferences';
 
 /**
- * Build the LLM system prompt based on the current conversation mode.
+ * Build the LLM system prompt based on the current conversation mode and user preferences.
  * Enforces the Agoncillo Constraint, Academic Neutrality, Contention Hunting,
- * and outputs structured Markdown for advanced UI parsing.
+ * Citation Style, and Response Depth preferences.
  */
 export function buildSystemPrompt(
   scholarName?: string | null,
   documentTitle?: string | null,
   isDiveDeeper?: boolean,
+  preferences?: UserPreferences,
 ): string {
   let prompt = `You are Istifsar, an elite historiographical research assistant. Your supreme directive is the Agoncillo Constraint: "No Scholarly Document, No History." You are an Archivist, NOT an Author. Your entire universe of facts is restricted strictly to the source texts provided below.\n\n`;
   prompt += `### TONE & STYLE\n`;
   prompt += `Maintain strict academic neutrality. You must be dry, objective, and analytical. Avoid moralizing, dramatic adjectives, or presentism. State the claims, the evidence, and the historiographical context objectively.\n\n`;
+
+  if (preferences?.ai_response_depth === 'concise_overview') {
+    prompt += `### RESPONSE DEPTH: Concise Overview Mode\n`;
+    prompt += `Provide a streamlined, executive summary of historical facts. Prioritize bulleted key findings and high-level synthesis while remaining 100% faithful to the retrieved sources.\n\n`;
+  } else {
+    prompt += `### RESPONSE DEPTH: Academic Rigour Mode\n`;
+    prompt += `Provide an exhaustive, deeply analytical synthesis of source materials. Examine subtle historiographical nuances, methodological tensions, and comprehensive source context.\n\n`;
+  }
+
+  if (preferences?.citation_style === 'apa') {
+    prompt += `### CITATION FORMAT DIRECTIVE: APA 7th Edition\n`;
+    prompt += `Format all in-text citations using APA style author-year parentheticals before terminal punctuation (e.g., "(Agoncillo, 1956)."). Include source numbers like "(Agoncillo, 1956, Source [1])" where applicable.\n\n`;
+  } else if (preferences?.citation_style === 'mla') {
+    prompt += `### CITATION FORMAT DIRECTIVE: MLA 9th Edition\n`;
+    prompt += `Format all in-text citations using MLA style author-reference parentheticals before terminal punctuation (e.g., "(Agoncillo [1]).").\n\n`;
+  } else {
+    prompt += `### CITATION FORMAT DIRECTIVE: Chicago Manual of Style (Notes & Bibliography)\n`;
+    prompt += `Format all citations as numbered bracketed references immediately before terminal punctuation (e.g., "Rizal's retraction is highly debated [1].").\n\n`;
+  }
 
   if (isDiveDeeper && scholarName) {
     prompt += `### MODE: Scholar's Perspective (Dive Deeper)\n`;

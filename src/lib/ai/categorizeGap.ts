@@ -30,7 +30,6 @@ export function isQueryObviousSpam(query: string): boolean {
 interface ProcessGapParams {
   query: string;
   userId: string;
-  similarityScore: number;
 }
 
 /**
@@ -42,7 +41,7 @@ export async function processAndInsertArchiveGap(
   supabase: SupabaseClient<Database>,
   params: ProcessGapParams,
 ): Promise<void> {
-  const { query, userId, similarityScore } = params;
+  const { query, userId } = params;
 
   // Step 1: Run local heuristic filter
   if (isQueryObviousSpam(query)) {
@@ -90,7 +89,6 @@ Return ONLY valid raw JSON. No markdown formatting, no backticks.`,
     const { error } = await supabase.from('archive_gaps').insert({
       query_text: query,
       user_id: userId,
-      similarity_score: similarityScore,
       mode: 'scholarly_consensus',
       era: result.era || null,
       geography: result.geography || null,
@@ -106,3 +104,80 @@ Return ONLY valid raw JSON. No markdown formatting, no backticks.`,
     console.error('[ArchiveGap] Unexpected execution error:', err);
   }
 }
+
+export type CategorizationResult = {
+  isRelevant: boolean;
+  era: string | null;
+  geography: string | null;
+  subject: string | null;
+  reason?: string;
+};
+
+/**
+ * Classifies a user-posted request title & description using Gemini Flash
+ * to extract historical metadata (era, geography, subject) and filter out spam.
+ */
+export async function classifyUserRequest(
+  title: string,
+  description?: string | null
+): Promise<CategorizationResult> {
+  const combined = `${title} ${description || ''}`.trim();
+
+  if (isQueryObviousSpam(combined)) {
+    return {
+      isRelevant: false,
+      era: null,
+      geography: null,
+      subject: null,
+      reason: 'Flagged as spam or insufficient text length.',
+    };
+  }
+
+  try {
+    const google = createGoogleGenerativeAI({
+      apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
+    });
+
+    const { text } = await generateText({
+      model: google(MODELS.fast),
+      system: `You are a historical research assistant. Analyze the user's historical inquiry title and description.
+      Determine if it is a valid, meaningful question or topic request about history, historical events, figures, documents, culture, or research.
+      It is NOT relevant if it is general chitchat, tech/coding support, math, translations, or offensive spam.
+
+      Return a raw JSON object:
+      {
+        "is_relevant": boolean,
+        "era": "historical period (e.g. 'Spanish Colonial', 'WWII Era', '19th Century') or null",
+        "geography": "region or country (e.g. 'Philippines', 'Iloilo', 'Southeast Asia') or null",
+        "subject": "topic area (e.g. 'Trade', 'Revolution', 'Genealogy', 'Governance') or null"
+      }
+      Return ONLY valid raw JSON. No markdown formatting, no backticks.`,
+      messages: [{ role: 'user', content: `Title: ${title}\nDescription: ${description || 'N/A'}` }],
+    });
+
+    const cleaned = text.replace(/```json?\s*|\s*```/g, '').trim();
+    const result = JSON.parse(cleaned) as {
+      is_relevant: boolean;
+      era?: string | null;
+      geography?: string | null;
+      subject?: string | null;
+    };
+
+    return {
+      isRelevant: result.is_relevant,
+      era: result.era || null,
+      geography: result.geography || null,
+      subject: result.subject || null,
+    };
+  } catch (err) {
+    console.error('[ArchiveGap] Error classifying user request:', err);
+    // Fallback gracefully so valid posts aren't blocked if AI API fails
+    return {
+      isRelevant: true,
+      era: null,
+      geography: null,
+      subject: null,
+    };
+  }
+}
+

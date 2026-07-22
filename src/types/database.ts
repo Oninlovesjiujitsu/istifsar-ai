@@ -91,40 +91,127 @@ export type Database = {
       archive_gaps: {
         Row: {
           created_at: string
+          description: string | null
           era: string | null
           geography: string | null
           id: string
           mode: string
           query_text: string
-          similarity_score: number | null
+          source_type: string
+          status: string
           subject: string | null
+          title: string | null
+          upvote_count: number
           user_id: string | null
         }
         Insert: {
           created_at?: string
+          description?: string | null
           era?: string | null
           geography?: string | null
           id?: string
           mode?: string
           query_text: string
-          similarity_score?: number | null
+          source_type?: string
+          status?: string
           subject?: string | null
+          title?: string | null
+          upvote_count?: number
           user_id?: string | null
         }
         Update: {
           created_at?: string
+          description?: string | null
           era?: string | null
           geography?: string | null
           id?: string
           mode?: string
           query_text?: string
-          similarity_score?: number | null
+          source_type?: string
+          status?: string
           subject?: string | null
+          title?: string | null
+          upvote_count?: number
           user_id?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "archive_gaps_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      archive_gap_upvotes: {
+        Row: {
+          created_at: string
+          gap_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          gap_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          gap_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "archive_gap_upvotes_gap_id_fkey"
+            columns: ["gap_id"]
+            isOneToOne: false
+            referencedRelation: "archive_gaps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "archive_gap_upvotes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      archive_gap_comments: {
+        Row: {
+          content: string
+          created_at: string
+          gap_id: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          gap_id: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          gap_id?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "archive_gap_comments_gap_id_fkey"
+            columns: ["gap_id"]
+            isOneToOne: false
+            referencedRelation: "archive_gaps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "archive_gap_comments_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
