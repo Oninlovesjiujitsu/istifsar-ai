@@ -46,17 +46,17 @@ export default function ArchiveCatalog() {
   }, []);
 
   return (
-    <section id="collections" className="max-w-6xl mx-auto px-4 sm:px-6 md:px-12 pt-24 pb-32 scroll-mt-20">
+    <section id="collections" className="max-w-6xl mx-auto px-4 sm:px-6 md:px-12 pt-16 sm:pt-24 pb-20 sm:pb-32 scroll-mt-20">
       <motion.div
         initial="hidden"
         whileInView="visible"
         viewport={viewport}
-        className="flex flex-col mb-16 md:mb-20"
+        className="flex flex-col mb-10 sm:mb-16 md:mb-20"
       >
         <motion.h2
           variants={fadeUp}
           transition={{ duration: 1.0, ease: 'easeOut' }}
-          className="font-heading text-2xl sm:text-3xl md:text-4xl text-foreground mb-4"
+          className="font-heading text-2xl sm:text-3xl md:text-4xl text-foreground mb-3 sm:mb-4"
         >
           The Digital Collections
         </motion.h2>
@@ -65,21 +65,21 @@ export default function ArchiveCatalog() {
           whileInView={{ scaleX: 1 }}
           viewport={viewport}
           transition={{ duration: 1.0, delay: 0.5, ease: 'easeOut' }}
-          className="w-24 h-px bg-primary/40 origin-left"
+          className="w-20 sm:w-24 h-px bg-primary/40 origin-left"
         />
       </motion.div>
 
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 lg:gap-12">
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="bg-card p-8 md:p-10 rounded-sm border border-border animate-pulse h-56"
+              className="bg-card p-6 md:p-10 rounded-sm border border-border animate-pulse h-52 sm:h-56"
             />
           ))}
         </div>
       ) : collections.length === 0 ? (
-        <p className="text-muted-foreground text-sm">
+        <p className="text-muted-foreground text-xs sm:text-sm">
           No collections available yet. Writings are being added to the archive.
         </p>
       ) : (
@@ -88,7 +88,7 @@ export default function ArchiveCatalog() {
           initial="hidden"
           whileInView="visible"
           viewport={viewport}
-          className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12"
+          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 lg:gap-12"
         >
           {collections.map((collection) => (
             <motion.div

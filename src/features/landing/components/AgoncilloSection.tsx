@@ -27,20 +27,20 @@ const valueProps = [
   {
     id: 'constraint' as const,
     icon: Shield01Icon,
-    title: 'The Agoncillo Constraint',
-    text: 'Our AI adheres to strict historiographical protocols, prioritizing validated sources over speculative inference.',
+    title: 'The Agoncillo Principle',
+    text: 'Our AI engine adheres to strict historiographical boundaries—built exclusively on the indexed writings and verified publications of trustworthy historians.',
   },
   {
     id: 'contention' as const,
     icon: BalanceScaleIcon,
     title: 'Nodes of Contention',
-    text: 'Identify conflicting historical narratives instantly. Istifsar highlights discrepancies to facilitate critical debate.',
+    text: 'Identify conflicting historical perspectives as documented across scholar literature. Istifsar highlights discrepancies to facilitate critical debate.',
   },
   {
     id: 'citation' as const,
     icon: ChartBarIncreasingIcon,
     title: 'The Citation Economy',
-    text: 'Every claim is backed by a verifiable digital thread, connecting synthesized insights directly to scholarly literature.',
+    text: 'Every synthesized response is anchored to verified historian texts, connecting insights directly to page-level citations.',
   },
 ];
 
@@ -48,7 +48,7 @@ export default function AgoncilloSection() {
   const [activeTab, setActiveTab] = useState<'none' | 'constraint' | 'contention' | 'citation'>('none');
 
   return (
-    <section id="agoncillo" className="bg-surface-vault pt-24 pb-32 px-4 sm:px-6 md:px-12 scroll-mt-20">
+    <section id="agoncillo" className="bg-surface-vault pt-16 sm:pt-24 pb-20 sm:pb-32 px-4 sm:px-6 md:px-12 scroll-mt-20">
       <motion.div
         variants={fadeUp}
         initial="hidden"
@@ -58,45 +58,62 @@ export default function AgoncilloSection() {
         className="max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 lg:gap-16 items-center"
       >
         {/* Left Column: Text Content and Interactive Value Cards */}
-        <div className="lg:col-span-6 xl:col-span-7 flex flex-col space-y-8 sm:space-y-10">
+        <div className="lg:col-span-6 xl:col-span-7 flex flex-col space-y-6 sm:space-y-10">
           <div>
-            <h2 className="font-heading text-3xl sm:text-4xl md:text-5xl text-foreground mb-4">
+            <h2 className="font-heading text-2xl sm:text-4xl md:text-5xl text-foreground mb-3 sm:mb-4">
               Rigorous Epistemic Standards
             </h2>
-            <p className="text-sm sm:text-base text-muted-foreground max-w-xl leading-relaxed">
+            <p className="text-xs sm:text-base text-muted-foreground max-w-xl leading-relaxed">
               History is not built on speculative AI generation, but on verified archival records. We enforce these structural principles to ground every insight in source literature.
             </p>
           </div>
 
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-3 sm:gap-4">
             {valueProps.map((prop) => {
               const isActive = activeTab === prop.id;
               return (
-                <div
+                <button
                   key={prop.id}
-                  onMouseEnter={() => setActiveTab(prop.id)}
-                  onMouseLeave={() => setActiveTab('none')}
-                  onClick={() => setActiveTab(prop.id)}
-                  className={`flex flex-row items-start gap-4 p-5 rounded-md border transition-all duration-300 select-none cursor-pointer ${isActive
-                      ? 'bg-card border-primary/40 shadow-sm translate-x-1 sm:translate-x-3'
-                      : 'bg-transparent border-transparent hover:bg-card/30 hover:border-border/30'
+                  type="button"
+                  onClick={() => setActiveTab((prev) => (prev === prop.id ? 'none' : prop.id))}
+                  onMouseEnter={() => {
+                    if (window.matchMedia('(hover: hover)').matches) {
+                      setActiveTab(prop.id);
+                    }
+                  }}
+                  onMouseLeave={() => {
+                    if (window.matchMedia('(hover: hover)').matches) {
+                      setActiveTab('none');
+                    }
+                  }}
+                  className={`w-full text-left flex flex-row items-start gap-3 sm:gap-4 p-4 sm:p-5 rounded-md border transition-all duration-300 select-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/40 ${isActive
+                      ? 'bg-card border-primary shadow-sm translate-x-1 sm:translate-x-3'
+                      : 'bg-card/40 border-border/50 hover:bg-card/70 hover:border-border'
                     }`}
                 >
-                  <div className={`p-3 rounded-sm border transition-colors duration-300 ${isActive
+                  <div className={`p-2.5 sm:p-3 rounded-sm border transition-colors duration-300 shrink-0 ${isActive
                       ? 'bg-primary text-primary-foreground border-primary'
-                      : 'bg-card text-primary border-border'
+                      : 'bg-background text-primary border-border'
                     }`}>
-                    <HugeiconsIcon icon={prop.icon} size={22} />
+                    <HugeiconsIcon icon={prop.icon} size={20} />
                   </div>
-                  <div className="flex-1">
-                    <h4 className="font-heading text-base sm:text-lg text-foreground mb-1.5 sm:mb-2">
-                      {prop.title}
-                    </h4>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <h4 className="font-heading text-sm sm:text-lg text-foreground font-semibold">
+                        {prop.title}
+                      </h4>
+                      <span className={`text-[9px] font-mono px-2 py-0.5 rounded-full uppercase tracking-wider transition-colors shrink-0 ${isActive
+                          ? 'bg-primary/20 text-primary font-bold'
+                          : 'bg-muted text-muted-foreground opacity-70'
+                        }`}>
+                        {isActive ? 'Active Node' : 'Tap to View'}
+                      </span>
+                    </div>
                     <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                       {prop.text}
                     </p>
                   </div>
-                </div>
+                </button>
               );
             })}
           </div>
@@ -104,7 +121,7 @@ export default function AgoncilloSection() {
 
         {/* Right Column: 3D Visualization Canvas Container */}
         <div className="lg:col-span-6 xl:col-span-5 w-full flex items-center justify-center lg:sticky lg:top-24">
-          <div className="w-full max-w-[500px] aspect-square lg:aspect-auto lg:h-[500px] bg-card/20 rounded-md border border-border/40 relative overflow-hidden parchment-texture">
+          <div className="w-full max-w-[500px] h-[300px] sm:h-[400px] lg:h-[500px] bg-card/20 rounded-md border border-border/40 relative overflow-hidden parchment-texture">
             {/* Subtle light vignette for WebGL context */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20 bg-radial-[circle_at_center,transparent_40%,hsl(var(--background))_100%]" />
 

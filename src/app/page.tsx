@@ -12,6 +12,9 @@ import FloatingBackToTop from '@/src/components/layout/FloatingBackToTheTop';
 
 // Landing Feature Components
 import HeroSection from '@/src/features/landing/components/HeroSection';
+import ArchivalStatsBanner from '@/src/features/landing/components/ArchivalStatsBanner';
+import PlatformPillarsSection from '@/src/features/landing/components/PlatformPillarsSection';
+import PersonaSection from '@/src/features/landing/components/PersonaSection';
 import AgoncilloSection from '@/src/features/landing/components/AgoncilloSection';
 import BoundariesSection from '@/src/features/landing/components/BoundariesSection';
 import HistoriansSection from '@/src/features/landing/components/HistoriansSection';
@@ -43,8 +46,11 @@ export default function LandingPage() {
 
       <main>
         <HeroSection />
-        <ArchiveCatalog />
+        <ArchivalStatsBanner />
+        <PlatformPillarsSection />
         <AgoncilloSection />
+        <PersonaSection />
+        <ArchiveCatalog />
         <BoundariesSection />
         <HistoriansSection />
       </main>

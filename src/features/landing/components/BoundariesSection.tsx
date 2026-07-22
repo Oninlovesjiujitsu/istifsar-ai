@@ -17,7 +17,7 @@ const viewport = { once: true, amount: 0.3 as const };
 
 export default function BoundariesSection() {
   return (
-    <section id="boundaries" className="bg-background pt-24 pb-32 px-4 sm:px-6 md:px-12 border-y border-border scroll-mt-20">
+    <section id="boundaries" className="bg-background pt-16 sm:pt-24 pb-20 sm:pb-32 px-4 sm:px-6 md:px-12 border-y border-border scroll-mt-20">
       <div className="max-w-[1440px] mx-auto">
         <motion.div
           variants={fadeUp}
@@ -27,10 +27,10 @@ export default function BoundariesSection() {
           transition={{ duration: 1.0, ease: 'easeOut' }}
           className="text-center mb-10 sm:mb-14"
         >
-          <h2 className="font-heading text-3xl sm:text-4xl md:text-5xl text-foreground mb-6">
-            Capabilities & Limits
+          <h2 className="font-heading text-2xl sm:text-4xl md:text-5xl text-foreground mb-3 sm:mb-6">
+            Capabilities &amp; Limits
           </h2>
-          <p className="max-w-2xl mx-auto text-muted-foreground text-sm sm:text-base leading-relaxed">
+          <p className="max-w-2xl mx-auto text-muted-foreground text-xs sm:text-base leading-relaxed px-2">
             In the realm of historical research, understanding the limitations of a tool is just as important as knowing its strengths. Istifsar AI is designed to assist, not replace, the rigorous work of historical analysis.
           </p>
         </motion.div>
