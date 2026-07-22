@@ -187,8 +187,8 @@ function SidebarNavLink({
       className={[
         'px-3 py-3 transition-colors flex items-center font-serif text-sm tracking-tight rounded-sm',
         isActive
-          ? 'text-primary dark:text-gold bg-accent dark:bg-gold/[0.08]'
-          : 'text-text-muted-vault hover:text-foreground hover:bg-foreground/[0.04]',
+          ? 'text-primary bg-primary/10 font-semibold'
+          : 'text-muted-foreground hover:text-foreground hover:bg-foreground/[0.04]',
         expanded ? 'gap-3' : 'lg:justify-center gap-3',
       ].join(' ')}
     >

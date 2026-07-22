@@ -60,20 +60,20 @@ export default async function TagDocumentsPage({ params }: Props) {
     <div className="min-h-full p-4 sm:p-6 lg:p-8 xl:p-12 relative">
       {/* Dynamic Breadcrumbs */}
       <nav className="max-w-6xl mx-auto mb-6 text-sm text-muted-foreground flex items-center gap-2">
-        <Link href="/documents" className="hover:text-gold transition-colors">
+        <Link href="/documents" className="hover:text-foreground transition-colors">
           Archive
         </Link>
-        <span className="text-zinc-600">/</span>
-        <span className="text-gold font-medium">{activeTag.name}</span>
+        <span className="text-muted-foreground/60">/</span>
+        <span className="text-primary font-medium">{activeTag.name}</span>
       </nav>
 
       {/* Header */}
       <header className="max-w-6xl mx-auto mb-8 sm:mb-12">
         <div className="flex flex-col gap-2 sm:gap-3">
-          <span className="text-[10px] sm:text-xs uppercase tracking-[0.3em] text-gold/60">
+          <span className="text-[10px] sm:text-xs uppercase tracking-[0.3em] text-muted-foreground">
             {filteredDocs.length} {filteredDocs.length === 1 ? 'writing' : 'writings'} in collection
           </span>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading text-gold leading-tight max-w-2xl">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading text-foreground leading-tight max-w-2xl">
             {activeTag.name}
           </h2>
           {activeTag.description && (
@@ -81,7 +81,7 @@ export default async function TagDocumentsPage({ params }: Props) {
               {activeTag.description}
             </p>
           )}
-          <div className="h-px w-20 bg-gradient-to-r from-gold to-transparent mt-3" />
+          <div className="h-px w-20 bg-gradient-to-r from-primary to-transparent mt-3" />
         </div>
       </header>
 
@@ -112,12 +112,12 @@ export default async function TagDocumentsPage({ params }: Props) {
           </div>
         ) : (
           <div className="text-center py-20 border border-dashed border-border rounded-sm">
-            <p className="text-text-muted-vault text-lg">
+            <p className="text-muted-foreground text-lg">
               No writings found in the {activeTag.name} collection yet.
             </p>
             <Link
               href="/documents"
-              className="text-gold hover:underline mt-4 inline-block text-sm"
+              className="text-primary hover:underline mt-4 inline-block text-sm"
             >
               Browse other collections
             </Link>

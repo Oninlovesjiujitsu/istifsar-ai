@@ -131,7 +131,7 @@ export default async function HistorianDashboard() {
     <div className="px-6 md:px-12 py-12 max-w-7xl">
       {/* Editorial Header */}
       <div className="mb-16">
-        <span className="text-[10px] uppercase tracking-[0.3em] text-gold/60 mb-4 block">
+        <span className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-4 block">
           Analytical Overview
         </span>
         <h2 className="font-heading text-3xl md:text-5xl font-black text-foreground mb-4 tracking-tight">
@@ -194,7 +194,7 @@ export default async function HistorianDashboard() {
             <h4 className="font-heading text-xl md:text-2xl font-bold text-foreground">Top Cited Works</h4>
             <Link
               href="/publications"
-              className="text-[10px] uppercase tracking-widest text-gold hover:underline underline-offset-4 decoration-2 transition-all"
+              className="text-[10px] uppercase tracking-widest text-primary hover:underline underline-offset-4 decoration-2 transition-all"
             >
               View All Publications
             </Link>
@@ -206,7 +206,7 @@ export default async function HistorianDashboard() {
               <div key={doc.id} className="bg-surface-elevated p-4 space-y-3">
                 <Link
                   href={`/publications/${doc.id}`}
-                  className="font-heading text-base text-foreground hover:text-gold transition-colors block"
+                  className="font-heading text-base text-foreground hover:text-primary transition-colors block"
                 >
                   {doc.title}
                 </Link>
@@ -217,7 +217,7 @@ export default async function HistorianDashboard() {
                         ? new Date(doc.published_at).getFullYear()
                         : new Date().getFullYear()}
                     </span>
-                    <span className="font-heading text-lg text-gold font-bold">{doc.citations} <span className="text-xs font-normal text-text-muted-vault">citations</span></span>
+                    <span className="font-heading text-lg text-primary font-bold">{doc.citations} <span className="text-xs font-normal text-text-muted-vault">citations</span></span>
                   </div>
                   <StatusBadge status={doc.status} />
                 </div>
@@ -230,7 +230,7 @@ export default async function HistorianDashboard() {
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
-                  <tr className="border-b border-white/[0.06]">
+                  <tr className="border-b border-border">
                     <th className="py-6 px-8 text-[10px] uppercase tracking-widest text-text-muted-vault font-medium">
                       Manuscript Title
                     </th>
@@ -245,17 +245,17 @@ export default async function HistorianDashboard() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/[0.03]">
+                <tbody className="divide-y divide-border/40">
                   {topCited.map((doc) => (
-                    <tr key={doc.id} className="group hover:bg-zinc-900/40 transition-colors">
+                    <tr key={doc.id} className="group hover:bg-muted/40 transition-colors">
                       <td className="py-8 px-8">
                         <div className="flex items-center gap-4">
-                          <svg className="w-5 h-5 shrink-0 text-gold/40" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                          <svg className="w-5 h-5 shrink-0 text-primary/40" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
                           </svg>
                           <Link
                             href={`/publications/${doc.id}`}
-                            className="font-heading text-lg text-foreground group-hover:text-gold transition-colors"
+                            className="font-heading text-lg text-foreground group-hover:text-primary transition-colors"
                           >
                             {doc.title}
                           </Link>
@@ -267,7 +267,7 @@ export default async function HistorianDashboard() {
                           : new Date().getFullYear()}
                       </td>
                       <td className="py-8 px-8">
-                        <span className="font-heading text-xl text-gold font-bold">{doc.citations}</span>
+                        <span className="font-heading text-xl text-primary font-bold">{doc.citations}</span>
                       </td>
                       <td className="py-8 px-8 text-right">
                         <StatusBadge status={doc.status} />
@@ -287,7 +287,7 @@ export default async function HistorianDashboard() {
           <p className="font-heading text-xl text-foreground">No contributions yet</p>
           <p className="text-sm text-muted-foreground">
             Start by{' '}
-            <Link href="/upload" className="text-gold hover:underline">
+            <Link href="/upload" className="text-primary hover:underline">
               uploading a manuscript
             </Link>{' '}
             to the archive.
@@ -312,12 +312,12 @@ function MetricCard({
   icon: React.ReactNode;
 }) {
   return (
-    <div className="bg-surface-elevated p-5 sm:p-6 md:p-8 border-t-2 border-gold shadow-[0_0_20px_rgba(212,175,55,0.08)] relative overflow-hidden group hover:shadow-[0_0_25px_rgba(212,175,55,0.15)] transition-all duration-500">
+    <div className="bg-surface-elevated p-5 sm:p-6 md:p-8 border-t-2 border-primary shadow-sm relative overflow-hidden group hover:border-primary/80 transition-all duration-300">
       <div className="absolute -right-4 -bottom-4 opacity-5 group-hover:opacity-10 transition-opacity text-foreground">
         {icon}
       </div>
       <p className="text-[10px] uppercase tracking-widest text-text-muted-vault mb-3 md:mb-6">{label}</p>
-      <h3 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold text-gold mb-2">
+      <h3 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold text-primary mb-2">
         {value.toLocaleString()}
       </h3>
       {detail && (
@@ -329,7 +329,7 @@ function MetricCard({
 
 const STATUS_STYLES: Record<string, string> = {
   published:
-    'bg-gold/10 border-gold/20 text-gold',
+    'bg-primary/10 border-primary/20 text-primary',
   under_review:
     'bg-amber-500/10 border-amber-500/20 text-amber-400',
   pending:

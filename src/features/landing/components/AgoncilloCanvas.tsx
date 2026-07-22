@@ -472,7 +472,7 @@ function ScholarlyNetwork({ activeTab }: AgoncilloCanvasProps) {
           {packetsData.map((_, i) => (
             <mesh key={i} scale={0}>
               <sphereGeometry args={[0.045, 8, 8]} />
-              <meshBasicMaterial color="#d4af37" />
+              <meshBasicMaterial color="#c28d38" />
             </mesh>
           ))}
         </group>

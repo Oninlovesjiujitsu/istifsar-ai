@@ -15,7 +15,7 @@ type Props = {
 export default function AskAboutButton({
   topicId,
   documentId,
-  className = "shrink-0 text-xs bg-gold text-[#241a00] font-semibold px-3 py-1.5 rounded-full hover:bg-gold/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed",
+  className = "shrink-0 text-xs bg-primary text-primary-foreground font-semibold px-3 py-1.5 rounded-full hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed",
   label = "Ask about this →",
   pendingLabel = 'Starting…',
 }: Props) {

@@ -75,7 +75,7 @@ export default function SignOutButton({
                 onClick={handleSignOut}
                 className="w-full sm:w-auto px-4 py-2 rounded-md bg-destructive text-destructive-foreground text-xs font-medium uppercase tracking-wider hover:bg-destructive/90 transition-all disabled:opacity-50 shadow-sm text-center"
               >
-                {isPending ? 'Signing out…' : 'Yes, Sign Out'}
+                {isPending ? 'Signing out…' : 'Yes'}
               </button>
             </div>
           </div>

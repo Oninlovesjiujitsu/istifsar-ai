@@ -103,7 +103,7 @@
 /* Vault-themed scrollbar for Source Details panel */
 .vault-scrollbar {
     scrollbar-width: thin;
-    scrollbar-color: #d4af3733 transparent;
+    scrollbar-color: hsl(var(--primary) / 0.2) transparent;
 }
 
 .vault-scrollbar::-webkit-scrollbar {
@@ -115,12 +115,12 @@
 }
 
 .vault-scrollbar::-webkit-scrollbar-thumb {
-    background: #d4af3733;
+    background: hsl(var(--primary) / 0.2);
     border-radius: 3px;
 }
 
 .vault-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #d4af3766;
+    background: hsl(var(--primary) / 0.4);
 }
 
 @layer base {

@@ -31,7 +31,7 @@ export default function DocumentCard({
     : null;
 
   return (
-    <div className="rounded-lg border bg-card transition-all duration-300 ease-out hover:-translate-y-1.5 hover:scale-[1.01] hover:shadow-md hover:border-gold/30 dark:hover:border-gold/40 flex flex-col h-full">
+    <div className="rounded-lg border bg-card transition-all duration-300 ease-out hover:-translate-y-1.5 hover:scale-[1.01] hover:shadow-md hover:border-primary/30 dark:hover:border-primary/40 flex flex-col h-full">
       <div className="p-5 flex flex-col gap-3 flex-1">
         {/* Tag chips */}
         {tags.length > 0 && (

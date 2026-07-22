@@ -71,7 +71,7 @@ export default function AdminSidebarContent() {
             onClick={close}
             title="Enter Workspace"
             className={[
-              'text-text-muted-vault hover:text-foreground dark:hover:text-gold px-3 py-3 transition-colors hover:bg-foreground/[0.04] flex items-center font-serif text-sm tracking-tight',
+              'text-text-muted-vault hover:text-foreground px-3 py-3 transition-colors hover:bg-foreground/[0.04] flex items-center font-serif text-sm tracking-tight',
               expanded ? 'gap-3' : 'lg:justify-center gap-3',
             ].join(' ')}
           >

@@ -129,8 +129,8 @@ export default function SidebarShell({
             expanded ? 'lg:ml-64' : 'lg:ml-16',
           ].join(' ')}
         >
-          {/* Ambient gold glow (dark mode only) */}
-          <div className="pointer-events-none absolute top-0 right-0 w-[800px] h-[800px] hidden dark:block bg-[radial-gradient(circle_at_center,rgba(212,175,55,0.03)_0%,transparent_70%)]" />
+          {/* Ambient glow (dark mode only) */}
+          <div className="pointer-events-none absolute top-0 right-0 w-[800px] h-[800px] hidden dark:block bg-[radial-gradient(circle_at_center,hsl(var(--primary)/0.03)_0%,transparent_70%)]" />
           {children}
         </div>
       </div>

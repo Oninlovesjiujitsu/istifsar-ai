@@ -57,7 +57,7 @@ export default async function AdminDashboardPage() {
           <Link
             key={card.href}
             href={card.href}
-            className="group rounded-xl border bg-card p-5 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:scale-[1.01] hover:shadow-md hover:border-gold/30"
+            className="group rounded-xl border bg-card p-5 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:scale-[1.01] hover:shadow-md hover:border-primary/30"
           >
             <p className="text-3xl font-bold tabular-nums">{card.value.toLocaleString()}</p>
             <p className="mt-1 text-sm text-muted-foreground group-hover:text-foreground transition-colors">
@@ -75,7 +75,7 @@ export default async function AdminDashboardPage() {
             <Link
               key={link.href}
               href={link.href}
-              className="flex flex-col gap-1 rounded-lg border bg-card p-4 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:scale-[1.01] hover:shadow-md hover:border-gold/30"
+              className="flex flex-col gap-1 rounded-lg border bg-card p-4 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:scale-[1.01] hover:shadow-md hover:border-primary/30"
             >
               <span className="font-medium hover:text-primary transition-colors">{link.label} →</span>
               <span className="text-sm text-muted-foreground">{link.description}</span>

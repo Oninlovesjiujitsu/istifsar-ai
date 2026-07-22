@@ -80,7 +80,7 @@ export default function ProfileContent({
           className={[
             'relative flex h-24 w-24 sm:h-28 sm:w-28 shrink-0 items-center justify-center rounded-full text-3xl font-bold',
             avatarClass,
-            isHistorian ? 'ring-2 ring-gold/60 ring-offset-2 ring-offset-background' : '',
+            isHistorian ? 'ring-2 ring-primary/60 ring-offset-2 ring-offset-background' : '',
           ].join(' ')}
         >
           {profile.avatar_url ? (
@@ -105,7 +105,7 @@ export default function ProfileContent({
               className={[
                 'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
                 isHistorian
-                  ? 'bg-gold/15 text-gold-dim dark:bg-gold/20 dark:text-gold'
+                  ? 'bg-primary/15 text-primary'
                   : 'bg-muted text-muted-foreground',
               ].join(' ')}
             >
@@ -165,7 +165,7 @@ export default function ProfileContent({
               <Link
                 key={doc.id}
                 href={`/documents/all/${doc.id}`}
-                className="group rounded-lg border bg-card p-4 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:scale-[1.01] hover:shadow-md hover:border-gold/30 space-y-2"
+                className="group rounded-lg border bg-card p-4 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:scale-[1.01] hover:shadow-md hover:border-primary/30 space-y-2"
               >
                 <p className="font-medium leading-snug line-clamp-2 group-hover:text-primary transition-colors text-sm">
                   {doc.title}
@@ -200,7 +200,7 @@ export default function ProfileContent({
               <Link
                 key={essay.id}
                 href={`/essays/${essay.slug}`}
-                className="group rounded-lg border bg-card p-4 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:scale-[1.01] hover:shadow-md hover:border-gold/30 space-y-2"
+                className="group rounded-lg border bg-card p-4 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:scale-[1.01] hover:shadow-md hover:border-primary/30 space-y-2"
               >
                 <p className="font-medium leading-snug line-clamp-2 group-hover:text-primary transition-colors text-sm">
                   {essay.title}
@@ -228,7 +228,7 @@ export default function ProfileContent({
               <Link
                 key={path.id}
                 href={`/paths/${path.slug}`}
-                className="group rounded-lg border bg-card p-4 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:scale-[1.01] hover:shadow-md hover:border-gold/30 space-y-2"
+                className="group rounded-lg border bg-card p-4 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:scale-[1.01] hover:shadow-md hover:border-primary/30 space-y-2"
               >
                 <p className="font-medium leading-snug line-clamp-2 group-hover:text-primary transition-colors text-sm">
                   {path.title}

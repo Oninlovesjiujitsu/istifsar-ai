@@ -81,15 +81,15 @@ export default async function DocumentDetailPage({ params }: Props) {
     <div className="mx-auto max-w-6xl px-4 py-10">
       {/* Dynamic Breadcrumbs */}
       <nav className="mb-6 text-sm text-muted-foreground flex items-center gap-2">
-        <Link href="/documents" className="hover:text-gold transition-colors">
+        <Link href="/documents" className="hover:text-foreground transition-colors">
           Archive
         </Link>
-        <span className="text-zinc-600">/</span>
-        <Link href={`/documents/${activeTag.slug}`} className="hover:text-gold transition-colors">
+        <span className="text-muted-foreground/60">/</span>
+        <Link href={`/documents/${activeTag.slug}`} className="hover:text-foreground transition-colors">
           {activeTag.name}
         </Link>
-        <span className="text-zinc-600">/</span>
-        <span className="text-gold font-medium line-clamp-1 max-w-[240px]" title={doc.title}>
+        <span className="text-muted-foreground/60">/</span>
+        <span className="text-primary font-medium line-clamp-1 max-w-[240px]" title={doc.title}>
           {doc.title}
         </span>
       </nav>
@@ -225,7 +225,7 @@ export default async function DocumentDetailPage({ params }: Props) {
           documentId={doc.id}
           label="Ask about this source"
           pendingLabel="Starting conversation…"
-          className="shrink-0 text-xs bg-gold text-[#241a00] font-semibold px-3 py-1.5 rounded-full hover:bg-gold/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          className="shrink-0 text-xs bg-primary text-primary-foreground font-semibold px-3.5 py-2 rounded-full hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         />
       </div>
     </div>
