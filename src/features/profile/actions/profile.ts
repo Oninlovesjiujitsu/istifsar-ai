@@ -1,6 +1,7 @@
 'use server';
 
 import { createClient } from '@/src/lib/supabase/server';
+import type { TablesUpdate } from '@/src/types/database';
 import { revalidatePath } from 'next/cache';
 
 export async function updateDisplayName(
@@ -27,7 +28,7 @@ export async function updateFullProfile(
 
   if (!user) return { error: 'Not authenticated' };
 
-  const updates: Record<string, string | null> = {
+  const updates: TablesUpdate<'profiles'> = {
     updated_at: new Date().toISOString(),
   };
 
