@@ -24,6 +24,16 @@ export default function HeroSection() {
       </div>
 
       <div className="relative z-10 max-w-5xl text-center w-full">
+        {/* Custom Graph RAG Badge */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="inline-flex items-center gap-2 text-xs sm:text-sm font-mono uppercase tracking-widest text-primary bg-primary/10 border border-primary/20 px-3.5 sm:px-4 py-1.5 rounded-full mb-6 shadow-sm"
+        >
+          <span className="shrink-0">🕸️</span>
+          <span>Powered by Custom Graph RAG &amp; Grounded Archival Retrieval</span>
+        </motion.div>
 
         <motion.h1
           initial={{ opacity: 0, y: 30 }}
@@ -61,7 +71,7 @@ export default function HeroSection() {
           transition={{ duration: 0.9, delay: 0.6, ease: 'easeOut' }}
           className="text-sm sm:text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed mb-8 sm:mb-12 px-2 font-sans"
         >
-          An advanced analytical engine built exclusively on the indexed writings and published works of trustworthy historians. Synthesizing scholar perspectives, mapping documented node contentions, and eliminating AI speculation.
+          Driven by a custom-built Graph RAG engine over trustworthy historian publications. Traversing entity networks, mapping documented node contentions, and eliminating AI speculation.
         </motion.p>
 
         {/* Dual CTAs */}

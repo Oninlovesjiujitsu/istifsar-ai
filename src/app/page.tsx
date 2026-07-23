@@ -14,6 +14,7 @@ import FloatingBackToTop from '@/src/components/layout/FloatingBackToTheTop';
 import HeroSection from '@/src/features/landing/components/HeroSection';
 import ArchivalStatsBanner from '@/src/features/landing/components/ArchivalStatsBanner';
 import PlatformPillarsSection from '@/src/features/landing/components/PlatformPillarsSection';
+import GraphRAGArchitectureSection from '@/src/features/landing/components/GraphRAGArchitectureSection';
 import PersonaSection from '@/src/features/landing/components/PersonaSection';
 import AgoncilloSection from '@/src/features/landing/components/AgoncilloSection';
 import BoundariesSection from '@/src/features/landing/components/BoundariesSection';
@@ -48,6 +49,7 @@ export default function LandingPage() {
         <HeroSection />
         <ArchivalStatsBanner />
         <PlatformPillarsSection />
+        <GraphRAGArchitectureSection />
         <AgoncilloSection />
         <PersonaSection />
         <ArchiveCatalog />
