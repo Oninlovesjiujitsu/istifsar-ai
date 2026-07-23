@@ -2,6 +2,8 @@ import { createClient } from '@/src/lib/supabase/server';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import DeleteDocumentButton from '@/src/features/publications/components/DeleteDocumentButton';
+import ArchivalConnectionsPanel from '@/src/features/knowledge-graph/components/ArchivalConnectionsPanel';
+import { getDocumentKGData } from '@/src/features/knowledge-graph/actions/kg-fetch';
 import type { Metadata } from 'next';
 
 type Props = { params: Promise<{ id: string }> };
@@ -37,6 +39,9 @@ export default async function WorkspaceDocumentPage({ params }: Props) {
     .single();
 
   if (!doc) notFound();
+
+  // Fetch Knowledge Graph Data
+  const kgData = await getDocumentKGData(doc.id);
 
   // Signed URL for document scan
   let signedUrl: string | null = null;
@@ -97,6 +102,9 @@ export default async function WorkspaceDocumentPage({ params }: Props) {
         </Link>
         <DeleteDocumentButton documentId={doc.id} documentTitle={doc.title} />
       </div>
+
+      {/* Title */}
+      <h1 className="mt-4 text-2xl font-bold sm:text-3xl">{doc.title}</h1>
 
       {/* Metadata bar */}
       <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
@@ -191,6 +199,9 @@ export default async function WorkspaceDocumentPage({ params }: Props) {
         </div>
       </div>
 
+      {/* Archival Knowledge Connections Panel */}
+      <ArchivalConnectionsPanel documentId={doc.id} initialData={kgData} />
+
       {/* Tags */}
       {tags.length > 0 && (
         <div className="mt-8 space-y-2">
@@ -209,7 +220,6 @@ export default async function WorkspaceDocumentPage({ params }: Props) {
           </div>
         </div>
       )}
-
     </div>
   );
 }

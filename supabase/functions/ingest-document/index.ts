@@ -948,7 +948,12 @@ async function extractAndLinkKG(
 
   const parts = geminiResult.candidates?.[0]?.content?.parts ?? [];
   const rawText = parts.map((p) => p.text).join('').trim() || '{}';
-  const cleaned = rawText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim();
+  let cleaned = rawText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim();
+
+  // Sanitize unquoted type values (e.g. "type": RELATED_TO -> "type": "RELATED_TO") and trailing commas
+  cleaned = cleaned
+    .replace(/"type":\s*([A-Z_]+)(?=[,\s\n\}])/g, '"type": "$1"')
+    .replace(/,\s*([\}\]])/g, '$1');
 
   let parsed: { entities?: KGEntity[]; relationships?: KGRelationship[] } = {};
   if (cleaned) {
@@ -960,7 +965,6 @@ async function extractAndLinkKG(
       const snippet = pos > 0 ? cleaned.slice(Math.max(0, pos - 50), pos + 50) : cleaned.slice(0, 200);
       console.warn(`[ingest-document] KG extraction: JSON parse failed. Length: ${cleaned.length}, finishReason: ${finishReason}`);
       console.warn(`[ingest-document] Parse error snippet around position ${pos}: ...${snippet}...`);
-      console.warn('[ingest-document] KG extraction: Full raw text was:', rawText);
     }
   } else {
     console.warn('[ingest-document] KG extraction: Gemini returned empty response text');

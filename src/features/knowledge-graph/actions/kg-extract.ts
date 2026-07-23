@@ -1,16 +1,15 @@
 'use server';
 
 /**
- * Server action to trigger KG extraction for an already-ingested document.
- * Used for backfilling existing documents that were ingested before KG-RAG.
- *
- * Restricted to admin users.
+ * Server action to trigger Knowledge Graph entity extraction for a manuscript.
+ * Can be triggered by the authoring Verified Historian or an Admin.
  */
 
 import { createAdminClient } from '@/src/lib/supabase/admin';
 import { createClient } from '@/src/lib/supabase/server';
 import { extractEntitiesAndRelationships } from '@/src/lib/ai/kg/extractor';
 import { linkToGraph, clearDocumentKG } from '@/src/lib/ai/kg/linker';
+import { revalidatePath } from 'next/cache';
 
 export async function extractDocumentKG(documentId: string): Promise<{
   success: boolean;
@@ -18,7 +17,7 @@ export async function extractDocumentKG(documentId: string): Promise<{
   entities?: number;
   relationships?: number;
 }> {
-  // Auth check — admin only
+  // Auth check
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { success: false, error: 'Not authenticated' };
@@ -29,22 +28,27 @@ export async function extractDocumentKG(documentId: string): Promise<{
     .eq('id', user.id)
     .single();
 
-  if (profile?.role !== 'admin') {
-    return { success: false, error: 'Admin access required' };
-  }
+  const role = profile?.role;
 
   try {
     const adminDb = createAdminClient();
 
-    // Fetch document with its text (from first N chunks)
-    const { data: doc } = await adminDb
+    // Fetch document with its metadata
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: doc } = await (adminDb as any)
       .from('documents')
-      .select('id, title, submitter_id, profiles!documents_submitter_id_fkey(display_name)')
+      .select('id, title, submitter_id, status, profiles!documents_submitter_id_fkey(display_name)')
       .eq('id', documentId)
-      .eq('status', 'published')
       .single();
 
-    if (!doc) return { success: false, error: 'Document not found or not published' };
+    if (!doc) return { success: false, error: 'Document not found' };
+
+    // Authorization check: User must be author OR admin
+    const isAuthor = doc.submitter_id === user.id;
+    const isAdmin = role === 'admin';
+    if (!isAuthor && !isAdmin) {
+      return { success: false, error: 'Only the authoring historian or an admin can re-scan connections.' };
+    }
 
     // Reconstruct full text from chunks
     const { data: chunks } = await adminDb
@@ -54,16 +58,16 @@ export async function extractDocumentKG(documentId: string): Promise<{
       .order('chunk_index');
 
     if (!chunks || chunks.length === 0) {
-      return { success: false, error: 'No chunks found for document' };
+      return { success: false, error: 'No text chunks found for this manuscript. Ensure ingestion has completed.' };
     }
 
     const fullText = chunks.map((c) => c.content).join('\n\n');
     const authorName = (doc.profiles as { display_name?: string } | null)?.display_name ?? null;
 
-    // Clear existing KG data for re-extraction
+    // Clear existing KG data for clean re-extraction
     await clearDocumentKG(adminDb, documentId);
 
-    // Extract entities and relationships
+    // Extract entities and relationships via Gemini AI
     const extraction = await extractEntitiesAndRelationships(
       fullText,
       doc.title,
@@ -73,6 +77,8 @@ export async function extractDocumentKG(documentId: string): Promise<{
     // Link to graph (with deduplication)
     const result = await linkToGraph(adminDb, documentId, extraction);
 
+    revalidatePath(`/publications/${documentId}`);
+
     return {
       success: true,
       entities: result.entitiesLinked,
@@ -81,86 +87,6 @@ export async function extractDocumentKG(documentId: string): Promise<{
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error('[KG Extract] Error:', msg);
-    return { success: false, error: msg };
-  }
-}
-
-/**
- * Batch KG extraction for all published documents that don't have KG data yet.
- * Admin only. Returns count of documents processed.
- */
-export async function backfillKG(): Promise<{
-  success: boolean;
-  error?: string;
-  processed?: number;
-  failed?: number;
-}> {
-  // Auth check — admin only
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: 'Not authenticated' };
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-
-  if (profile?.role !== 'admin') {
-    return { success: false, error: 'Admin access required' };
-  }
-
-  try {
-    const adminDb = createAdminClient();
-
-    // Find published documents without KG entity mentions
-    // Cast to any: ingestion_status column added in migration 0006, not in generated types
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: docs } = await (adminDb as any)
-      .from('documents')
-      .select('id')
-      .eq('status', 'published')
-      .eq('ingestion_status', 'done');
-
-    if (!docs || docs.length === 0) {
-      return { success: true, processed: 0, failed: 0 };
-    }
-
-    // Filter to only docs without existing KG mentions
-    // Cast to any: kg_entity_mentions not in generated types yet
-    const docIds = (docs as Array<{ id: string }>).map((d) => d.id);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: existingMentions } = await (adminDb as any)
-      .from('kg_entity_mentions')
-      .select('document_id')
-      .in('document_id', docIds);
-
-    const docsWithKG = new Set(
-      ((existingMentions ?? []) as Array<{ document_id: string }>).map((m) => m.document_id),
-    );
-    const docsToProcess = docIds.filter((id) => !docsWithKG.has(id));
-
-    let processed = 0;
-    let failed = 0;
-
-    for (const docId of docsToProcess) {
-      try {
-        const result = await extractDocumentKG(docId);
-        if (result.success) {
-          processed++;
-          console.log(`[KG Backfill] ${docId}: ${result.entities} entities, ${result.relationships} relationships`);
-        } else {
-          failed++;
-          console.warn(`[KG Backfill] ${docId} failed: ${result.error}`);
-        }
-      } catch {
-        failed++;
-      }
-    }
-
-    return { success: true, processed, failed };
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
     return { success: false, error: msg };
   }
 }

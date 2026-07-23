@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "kg:backfill": "tsx scripts/backfill-kg.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.52",

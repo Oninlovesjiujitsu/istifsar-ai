@@ -4,16 +4,17 @@
  * Extracts entities (historians, events, dates, locations, claims, etc.)
  * and relationships between them from full document text using Gemini Flash.
  *
- * Runs on full text (not per-chunk) to avoid losing cross-boundary
- * entities and relationships.
+ * Uses Vercel AI SDK generateObject for guaranteed structured JSON outputs,
+ * with fallbacks for robust handling of large historical texts.
  */
 
-import { generateText } from 'ai';
+import { generateObject, generateText } from 'ai';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { z } from 'zod';
 import { MODELS } from '@/src/lib/config/models';
 
 // ---------------------------------------------------------------------------
-// Types
+// Types & Schema
 // ---------------------------------------------------------------------------
 
 export type EntityType =
@@ -58,6 +59,50 @@ export type ExtractionResult = {
   relationships: ExtractedRelationship[];
 };
 
+const entityTypeSchema = z.enum([
+  'HISTORIAN',
+  'EVENT',
+  'DATE',
+  'LOCATION',
+  'CLAIM',
+  'SOURCE_REFERENCE',
+  'CONCEPT',
+]);
+
+const relationshipTypeSchema = z.enum([
+  'ARGUES',
+  'CONTRADICTS',
+  'OCCURRED_AT',
+  'PARTICIPATED_IN',
+  'CITES',
+  'SUPPORTS',
+  'AUTHORED',
+  'ABOUT',
+  'OCCURRED_DURING',
+  'RELATED_TO',
+]);
+
+const extractionSchema = z.object({
+  entities: z.array(
+    z.object({
+      name: z.string().describe('Formal complete name of the historical entity'),
+      type: entityTypeSchema,
+      aliases: z.array(z.string()).default([]),
+      excerpt: z.string().default(''),
+      confidence: z.number().min(0).max(1).default(0.8),
+    }),
+  ).default([]),
+  relationships: z.array(
+    z.object({
+      sourceEntity: z.string().describe('Entity name matching an entity above'),
+      targetEntity: z.string().describe('Entity name matching an entity above'),
+      type: relationshipTypeSchema,
+      evidence: z.string().default(''),
+      weight: z.number().min(0).max(1).default(0.7),
+    }),
+  ).default([]),
+});
+
 // ---------------------------------------------------------------------------
 // Prompt
 // ---------------------------------------------------------------------------
@@ -94,29 +139,41 @@ Given a scholarly document text, extract structured entities and relationships.
 5. Confidence: 1.0 for explicitly stated, 0.8 for strongly implied, 0.6 for inferred
 6. Excerpt: include a brief verbatim quote (max 40 words) where the entity appears
 7. Relationship evidence: include a brief excerpt supporting the relationship
-8. Weight: 1.0 for explicitly stated relationships, 0.7 for implied, 0.5 for inferred
+8. Weight: 1.0 for explicitly stated relationships, 0.7 for implied, 0.5 for inferred`;
 
-Respond with ONLY a JSON object in this exact shape (no markdown, no prose):
-{
-  "entities": [
-    {
-      "name": "string",
-      "type": "HISTORIAN|EVENT|DATE|LOCATION|CLAIM|SOURCE_REFERENCE|CONCEPT",
-      "aliases": ["string"],
-      "excerpt": "verbatim quote where entity appears",
-      "confidence": 0.0-1.0
+// ---------------------------------------------------------------------------
+// Helper: Robust JSON Sanitizer
+// ---------------------------------------------------------------------------
+
+function sanitizeAndParseJSON(rawText: string): any {
+  // Strip markdown fences
+  let cleaned = rawText.replace(/```json?\s*|\s*```/g, '').trim();
+
+  // Quote unquoted type values like "type": RELATED_TO -> "type": "RELATED_TO"
+  cleaned = cleaned.replace(
+    /"type":\s*([A-Z_]+)(?=[,\s\n\}])/g,
+    '"type": "$1"'
+  );
+
+  // Quote unquoted keys if any
+  cleaned = cleaned.replace(/([{,]\s*)([a-zA-Z0-9_]+)\s*:/g, '$1"$2":');
+
+  // Strip trailing commas
+  cleaned = cleaned.replace(/,\s*([\}\]])/g, '$1');
+
+  try {
+    return JSON.parse(cleaned);
+  } catch {
+    // Substring extraction fallback
+    const firstBrace = cleaned.indexOf('{');
+    const lastBrace = cleaned.lastIndexOf('}');
+    if (firstBrace >= 0 && lastBrace > firstBrace) {
+      const sub = cleaned.slice(firstBrace, lastBrace + 1);
+      return JSON.parse(sub);
     }
-  ],
-  "relationships": [
-    {
-      "sourceEntity": "entity name (must match an entity above)",
-      "targetEntity": "entity name (must match an entity above)",
-      "type": "ARGUES|CONTRADICTS|OCCURRED_AT|PARTICIPATED_IN|CITES|SUPPORTS|AUTHORED|ABOUT|OCCURRED_DURING|RELATED_TO",
-      "evidence": "brief excerpt supporting this relationship",
-      "weight": 0.0-1.0
-    }
-  ]
-}`;
+    throw new Error('Failed to parse JSON response from Gemini');
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Extraction function
@@ -124,11 +181,7 @@ Respond with ONLY a JSON object in this exact shape (no markdown, no prose):
 
 /**
  * Extract entities and relationships from a full document text.
- * Uses Gemini Flash for fast, cost-effective extraction.
- *
- * @param text     Full extracted text of the document
- * @param title    Document title (provides context to the LLM)
- * @param author   Author/historian display name if known
+ * Uses Gemini Flash with structured JSON output enforcement.
  */
 export async function extractEntitiesAndRelationships(
   text: string,
@@ -139,9 +192,7 @@ export async function extractEntitiesAndRelationships(
     apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
   });
 
-  // Truncate very long documents to stay within context limits
-  // Gemini Flash handles ~1M tokens, but we cap at ~30k chars (~7.5k tokens)
-  // to keep extraction focused and costs reasonable
+  // Cap snippet at ~30k chars (~7.5k tokens) for focused extraction
   const maxChars = 30_000;
   const snippet = text.length > maxChars
     ? text.slice(0, maxChars) + '\n\n[... document truncated for extraction ...]'
@@ -156,17 +207,48 @@ export async function extractEntitiesAndRelationships(
     .filter(Boolean)
     .join('\n');
 
-  const { text: responseText } = await generateText({
-    model: google(MODELS.fast),
-    system: EXTRACTION_PROMPT,
-    messages: [{ role: 'user', content: userPrompt }],
-  });
+  let rawEntities: Array<{
+    name: string;
+    type: string;
+    aliases?: string[];
+    excerpt?: string;
+    confidence?: number;
+  }> = [];
 
-  // Parse the JSON response
-  const cleaned = responseText.replace(/```json?\s*|\s*```/g, '').trim();
-  const parsed = JSON.parse(cleaned) as ExtractionResult;
+  let rawRelationships: Array<{
+    sourceEntity: string;
+    targetEntity: string;
+    type: string;
+    evidence?: string;
+    weight?: number;
+  }> = [];
 
-  // Validate and sanitize
+  // Primary: Use Vercel AI SDK generateObject (enforces strict JSON Schema)
+  try {
+    const { object } = await generateObject({
+      model: google(MODELS.fast),
+      schema: extractionSchema,
+      system: EXTRACTION_PROMPT,
+      prompt: userPrompt,
+    });
+    rawEntities = object.entities ?? [];
+    rawRelationships = object.relationships ?? [];
+  } catch (genObjErr) {
+    console.warn('[KG Extraction] generateObject failed, falling back to generateText + robust parser:', genObjErr);
+
+    // Fallback: Use generateText with manual sanitizer
+    const { text: responseText } = await generateText({
+      model: google(MODELS.fast),
+      system: EXTRACTION_PROMPT + '\nRespond strictly with a single valid JSON object.',
+      prompt: userPrompt,
+    });
+
+    const parsed = sanitizeAndParseJSON(responseText);
+    rawEntities = parsed.entities ?? [];
+    rawRelationships = parsed.relationships ?? [];
+  }
+
+  // Validate and sanitize types
   const validEntityTypes = new Set<string>([
     'HISTORIAN', 'EVENT', 'DATE', 'LOCATION',
     'CLAIM', 'SOURCE_REFERENCE', 'CONCEPT',
@@ -177,41 +259,53 @@ export async function extractEntitiesAndRelationships(
     'OCCURRED_DURING', 'RELATED_TO',
   ]);
 
-  const entities = (parsed.entities ?? []).filter(
-    (e) =>
-      typeof e.name === 'string' &&
-      e.name.trim() &&
-      validEntityTypes.has(e.type),
-  ).map((e) => ({
-    name: e.name.trim(),
-    type: e.type as EntityType,
-    aliases: Array.isArray(e.aliases)
-      ? e.aliases.filter((a) => typeof a === 'string' && a.trim()).map((a) => a.trim())
-      : [],
-    excerpt: typeof e.excerpt === 'string' ? e.excerpt.slice(0, 200) : '',
-    confidence: typeof e.confidence === 'number'
-      ? Math.max(0, Math.min(1, e.confidence))
-      : 0.8,
-  }));
+  const entities = rawEntities
+    .map((e) => ({
+      ...e,
+      type: (e.type || '').toUpperCase(),
+    }))
+    .filter(
+      (e) =>
+        typeof e.name === 'string' &&
+        e.name.trim() &&
+        validEntityTypes.has(e.type),
+    )
+    .map((e) => ({
+      name: e.name.trim(),
+      type: e.type as EntityType,
+      aliases: Array.isArray(e.aliases)
+        ? e.aliases.filter((a) => typeof a === 'string' && a.trim()).map((a) => a.trim())
+        : [],
+      excerpt: typeof e.excerpt === 'string' ? e.excerpt.slice(0, 200) : '',
+      confidence: typeof e.confidence === 'number'
+        ? Math.max(0, Math.min(1, e.confidence))
+        : 0.8,
+    }));
 
   const entityNames = new Set(entities.map((e) => e.name));
 
-  const relationships = (parsed.relationships ?? []).filter(
-    (r) =>
-      typeof r.sourceEntity === 'string' &&
-      typeof r.targetEntity === 'string' &&
-      validRelTypes.has(r.type) &&
-      entityNames.has(r.sourceEntity) &&
-      entityNames.has(r.targetEntity),
-  ).map((r) => ({
-    sourceEntity: r.sourceEntity,
-    targetEntity: r.targetEntity,
-    type: r.type as RelationshipType,
-    evidence: typeof r.evidence === 'string' ? r.evidence.slice(0, 200) : '',
-    weight: typeof r.weight === 'number'
-      ? Math.max(0, Math.min(1, r.weight))
-      : 0.7,
-  }));
+  const relationships = rawRelationships
+    .map((r) => ({
+      ...r,
+      type: (r.type || '').toUpperCase(),
+    }))
+    .filter(
+      (r) =>
+        typeof r.sourceEntity === 'string' &&
+        typeof r.targetEntity === 'string' &&
+        validRelTypes.has(r.type) &&
+        entityNames.has(r.sourceEntity) &&
+        entityNames.has(r.targetEntity),
+    )
+    .map((r) => ({
+      sourceEntity: r.sourceEntity,
+      targetEntity: r.targetEntity,
+      type: r.type as RelationshipType,
+      evidence: typeof r.evidence === 'string' ? r.evidence.slice(0, 200) : '',
+      weight: typeof r.weight === 'number'
+        ? Math.max(0, Math.min(1, r.weight))
+        : 0.7,
+    }));
 
   return { entities, relationships };
 }
