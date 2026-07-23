@@ -13,6 +13,7 @@ export type CitationData = {
   score: number;
   authorUsername: string | null;
   authorDisplayName: string | null;
+  citationNumber?: number;
 };
 
 type Props = {
@@ -29,7 +30,6 @@ type Props = {
   isContentionPanelOpen?: boolean;
   onToggleContentionPanel?: () => void;
 };
-
 
 function linkifyCitations(text: string, citationCount: number): string {
   return text.replace(/\[(?:Source\s*)?[\d\s,(?:Source)]+\]/gi, (match) => {
@@ -131,7 +131,10 @@ export default function MessageBubble({
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            onCitationClick?.(citation);
+                            onCitationClick?.({
+                              ...citation,
+                              citationNumber: sourceNum,
+                            });
                           }}
                           className="not-prose inline-flex items-center px-2 py-0.5 rounded-full bg-muted/50 !text-primary text-xs cursor-pointer hover:shadow-sm transition-all font-mono mx-1 border border-border"
                           aria-label={`View source ${sourceNum}: ${citation.documentTitle}`}
@@ -215,3 +218,4 @@ export default function MessageBubble({
     </div>
   );
 }
+

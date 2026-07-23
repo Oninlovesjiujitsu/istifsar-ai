@@ -8,20 +8,30 @@ type Props = {
   citation: CitationData;
   onClose: () => void;
 };
-// Implementation of Split-Pane Viewer
+
+// Implementation of Split-Pane Viewer with Citation Number Indication
 export default function SourceDetailsPanel({ citation, onClose }: Props) {
   const [profileUsername, setProfileUsername] = useState<string | null>(null);
 
   return (
     <div className="flex flex-col h-full bg-card border-l border-border">
+      {/* Panel Header */}
       <div className="flex items-center justify-between px-6 lg:px-8 py-5 bg-background border-b border-border shrink-0">
-        <h2 className="font-heading text-primary text-lg lg:text-xl font-black italic tracking-tight">
-          Source Details
-        </h2>
+        <div className="flex items-center gap-3">
+          <h2 className="font-heading text-primary text-lg lg:text-xl font-black italic tracking-tight">
+            Source Details
+          </h2>
+          {citation.citationNumber && (
+            <span className="px-2.5 py-0.5 rounded-full bg-primary/10 border border-primary/30 text-primary text-xs font-mono font-bold shadow-sm animate-in fade-in duration-200">
+              Citation [{citation.citationNumber}]
+            </span>
+          )}
+        </div>
+
         <button
           type="button"
           onClick={onClose}
-          className="text-muted-foreground hover:text-primary transition-colors"
+          className="text-muted-foreground hover:text-primary transition-colors p-1"
           aria-label="Close source panel"
         >
           <svg
@@ -40,11 +50,21 @@ export default function SourceDetailsPanel({ citation, onClose }: Props) {
         </button>
       </div>
 
+      {/* Main Body */}
       <div className="flex-1 min-h-0 flex flex-col p-6 lg:p-8 gap-6">
+        {/* Metadata Section */}
         <div className="shrink-0 space-y-4">
-          <span className="text-[10px] uppercase tracking-[0.2em] text-primary font-bold">
-            Metadata Identification
-          </span>
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] uppercase tracking-[0.2em] text-primary font-bold">
+              Metadata Identification
+            </span>
+            {citation.citationNumber && (
+              <span className="text-[10px] font-mono font-semibold text-muted-foreground bg-muted/60 px-2 py-0.5 rounded border border-border">
+                Ref: [{citation.citationNumber}]
+              </span>
+            )}
+          </div>
+
           <div className="grid grid-cols-1 gap-4">
             <div>
               <div className="text-[10px] text-muted-foreground uppercase mb-1">
@@ -96,10 +116,16 @@ export default function SourceDetailsPanel({ citation, onClose }: Props) {
           </div>
         </div>
 
+        {/* Archival Fragment Section */}
         <div className="flex-1 min-h-0 flex flex-col">
-          <span className="text-[10px] uppercase tracking-[0.2em] text-primary font-bold mb-4 block shrink-0">
-            Archival Fragment
-          </span>
+          <div className="flex items-center justify-between mb-4 shrink-0">
+            <span className="text-[10px] uppercase tracking-[0.2em] text-primary font-bold">
+              {citation.citationNumber
+                ? `Archival Fragment for Citation [${citation.citationNumber}]`
+                : 'Archival Fragment'}
+            </span>
+          </div>
+
           <div className="flex-1 min-h-0 parchment-texture bg-card border border-border rounded-sm relative flex flex-col">
             <div className="flex-1 min-h-0 overflow-y-auto vault-scrollbar p-6 pb-0">
               <div className="text-foreground leading-relaxed font-light text-sm first-letter:text-3xl first-letter:font-heading first-letter:text-primary first-letter:mr-1 first-letter:float-left">

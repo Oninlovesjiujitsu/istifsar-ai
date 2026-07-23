@@ -64,7 +64,7 @@ function CustomCenterNode({ data }: { data: { label: string } }) {
   );
 }
 
-/* ── Custom Scholar Node ─────────────────────────────────────────────── */
+/* ── Custom Scholar Node with Hover & Pin Support ─────────────────────── */
 
 function CustomScholarNode({
   data,
@@ -76,10 +76,16 @@ function CustomScholarNode({
     onToggle: () => void;
   };
 }) {
-  const { claim, color, isActive, onToggle } = data;
+  const { claim, isActive, onToggle } = data;
+  const [isHovered, setIsHovered] = useState(false);
+  const showTooltip = isActive || isHovered;
 
   return (
-    <div className="flex flex-col items-center pointer-events-auto select-none">
+    <div
+      className="flex flex-col items-center pointer-events-auto select-none"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <Handle type="source" position={Position.Top} className="opacity-0" id="scholar-source" style={{ left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }} />
       <Handle type="target" position={Position.Top} className="opacity-0" id="scholar-target" style={{ left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }} />
 
@@ -91,7 +97,10 @@ function CustomScholarNode({
         }}
       >
         <div
-          className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-primary border-4 border-card flex items-center justify-center transition-transform hover:scale-110 shadow-md"
+          className={cn(
+            "w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-primary border-4 border-card flex items-center justify-center transition-all shadow-md",
+            showTooltip ? "scale-115 border-primary shadow-xl" : "hover:scale-110"
+          )}
         >
           <svg
             className="w-6 h-6 sm:w-7 sm:h-7 text-primary-foreground"
@@ -103,16 +112,21 @@ function CustomScholarNode({
           </svg>
         </div>
 
-        <span className="mt-2 font-serif text-[10px] sm:text-[11px] text-foreground text-center max-w-[110px] truncate">
+        <span className={cn(
+          "mt-2 font-serif text-[10px] sm:text-[11px] text-center max-w-[110px] truncate transition-colors",
+          showTooltip ? "text-primary font-bold" : "text-foreground"
+        )}>
           {claim.scholarName}
         </span>
 
-        {/* Custom Tooltip overlay */}
+        {/* Custom Tooltip overlay (Shows on mouse hover OR click pin) */}
         <div
           className={cn(
-            'absolute w-[240px] sm:w-[280px] p-4 z-50 bg-card border border-border rounded-md shadow-2xl transition-all duration-200',
+            'absolute w-[240px] sm:w-[280px] p-4 bg-card border border-border rounded-md shadow-2xl transition-all duration-200 pointer-events-auto',
             'bottom-[calc(100%+0.75rem)] left-1/2 -translate-x-1/2 origin-bottom',
-            isActive ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2 pointer-events-none'
+            showTooltip
+              ? 'opacity-100 scale-100 translate-y-0 z-[100] pointer-events-auto'
+              : 'opacity-0 scale-95 translate-y-2 pointer-events-none'
           )}
           onClick={(e) => e.stopPropagation()}
         >
@@ -157,14 +171,9 @@ function ContentionEdge({ id, sourceX, sourceY, targetX, targetY, style }: EdgeP
   );
 }
 
-const nodeTypes = {
-  centerNode: CustomCenterNode,
-  scholarNode: CustomScholarNode,
-};
-
 /* ── Unified Contention Graph Canvas ─────────────────────────────────── */
 
-export default function ContentionGraph({ contentions, layout = 'vertical', interactive = false, isMobile = false }: Props) {
+export default function ContentionGraph({ contentions, layout = 'vertical', interactive = true, isMobile = false }: Props) {
   if (!contentions || contentions.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center p-12 text-center h-full min-h-[300px]">
@@ -256,27 +265,25 @@ export default function ContentionGraph({ contentions, layout = 'vertical', inte
             draggable: true,
           });
 
-          // Connect center to scholar
-          const palette = SCHOLAR_PALETTE[i % SCHOLAR_PALETTE.length];
+          // Edge connecting scholar node to center node
           baseEdges.push({
-            id: `edge-center-${contentionId}-${claim.documentId}`,
+            id: `edge-center-${uniqueScholarId}`,
             source: `center-${contentionId}`,
             sourceHandle: 'center-source',
             target: uniqueScholarId,
             targetHandle: 'scholar-target',
             type: 'centerEdge',
             style: {
-              stroke: palette.hex,
-              strokeWidth: 1.2,
-              strokeDasharray: '4 4',
-              opacity: 0.65,
+              stroke: SCHOLAR_PALETTE[i % SCHOLAR_PALETTE.length].hex,
+              strokeWidth: 2,
+              strokeDasharray: SCHOLAR_PALETTE[i % SCHOLAR_PALETTE.length].dash,
             },
           });
         });
 
-        // Connect contradicting scholars to each other within this contention
-        for (let i = 0; i < claims.length; i++) {
-          for (let j = i + 1; j < claims.length; j++) {
+        // Contention edges between conflicting scholars
+        for (let i = 0; i < N; i++) {
+          for (let j = i + 1; j < N; j++) {
             baseEdges.push({
               id: `edge-contention-${contentionId}-${claims[i].documentId}-${claims[j].documentId}`,
               source: `${contentionId}-${claims[i].documentId}`,
@@ -297,13 +304,14 @@ export default function ContentionGraph({ contentions, layout = 'vertical', inte
 
     setNodes(baseNodes);
     setEdges(baseEdges);
-  }, [contentions, setNodes, setEdges]);
+  }, [contentions, layout, isMobile, setNodes, setEdges]);
 
   // Update tooltip active state on existing nodes without resetting their position
   useEffect(() => {
     setNodes((prevNodes) =>
       prevNodes.map((node) => {
         if (node.type === 'scholarNode') {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const data = node.data as any;
           if (data?.claim) {
             return {

@@ -76,7 +76,7 @@ function extractCitations(metadata: unknown): CitationData[] | undefined {
   if (!metadata || typeof metadata !== 'object') return undefined;
   const meta = metadata as RagMetadata;
   if (!meta.citations || meta.citations.length === 0) return undefined;
-  return meta.citations.map((c) => ({
+  return meta.citations.map((c, idx) => ({
     documentId: c.documentId,
     documentTitle: c.documentTitle,
     documentDate: c.documentDate,
@@ -84,6 +84,7 @@ function extractCitations(metadata: unknown): CitationData[] | undefined {
     score: c.score,
     authorUsername: c.authorUsername ?? null,
     authorDisplayName: c.authorDisplayName ?? null,
+    citationNumber: c.position ?? idx + 1,
   }));
 }
 

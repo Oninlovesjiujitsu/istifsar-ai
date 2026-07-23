@@ -38,7 +38,7 @@ export default function ContentionCanvasPanel({ contentions, onClose }: Props) {
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto lg:overflow-hidden vault-scrollbar lg:flex lg:flex-col">
-        <ContentionGraph contentions={contentions} />
+        <ContentionGraph contentions={contentions} interactive={true} />
       </div>
     </div>
   );

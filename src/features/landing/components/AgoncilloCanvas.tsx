@@ -493,6 +493,59 @@ export default function AgoncilloCanvas({ activeTab }: AgoncilloCanvasProps) {
         <directionalLight position={[2, 5, 2]} intensity={1} />
         <ScholarlyNetwork activeTab={activeTab} />
       </Canvas>
+
+      {/* Interactive Hover Overlay Card when activeTab === 'contention' */}
+      {activeTab === 'contention' && (
+        <div className="absolute bottom-3 left-3 right-3 p-3.5 rounded-lg bg-card/95 border border-amber-500/40 shadow-xl backdrop-blur-md text-xs font-mono animate-in fade-in slide-in-from-bottom-2 duration-300 pointer-events-auto">
+          <div className="flex items-center justify-between gap-2 mb-1.5 text-amber-600 font-semibold">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+              <span>Node of Contention Active</span>
+            </span>
+            <span className="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 font-mono">
+              Debate Map
+            </span>
+          </div>
+          <p className="text-[11px] text-muted-foreground leading-relaxed font-sans">
+            <strong className="text-foreground font-semibold">Agoncillo (1956)</strong> vs{' '}
+            <strong className="text-foreground font-semibold">Alvarez (1927)</strong>: Disputed Tejeros election votes. Hover over scholars in <a href="/explore" className="text-primary underline font-semibold">The Contention Map</a> to inspect claims.
+          </p>
+        </div>
+      )}
+
+      {activeTab === 'constraint' && (
+        <div className="absolute bottom-3 left-3 right-3 p-3.5 rounded-lg bg-card/95 border border-primary/40 shadow-xl backdrop-blur-md text-xs font-mono animate-in fade-in slide-in-from-bottom-2 duration-300 pointer-events-auto">
+          <div className="flex items-center justify-between gap-2 mb-1 text-primary font-semibold">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+              <span>Agoncillo Constraint Gate</span>
+            </span>
+            <span className="text-[10px] px-2 py-0.5 rounded bg-primary/10 border border-primary/20">
+              Zero Hallucination
+            </span>
+          </div>
+          <p className="text-[11px] text-muted-foreground leading-relaxed font-sans">
+            Answers are strictly rejected if similarity &lt; 0.65. &quot;No document, no history.&quot;
+          </p>
+        </div>
+      )}
+
+      {activeTab === 'citation' && (
+        <div className="absolute bottom-3 left-3 right-3 p-3.5 rounded-lg bg-card/95 border border-emerald-500/40 shadow-xl backdrop-blur-md text-xs font-mono animate-in fade-in slide-in-from-bottom-2 duration-300 pointer-events-auto">
+          <div className="flex items-center justify-between gap-2 mb-1 text-emerald-600 font-semibold">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>Citation Economy Tree</span>
+            </span>
+            <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">
+              Anchored Sources
+            </span>
+          </div>
+          <p className="text-[11px] text-muted-foreground leading-relaxed font-sans">
+            Every synthesized claim maps to a page-level manuscript split-pane preview.
+          </p>
+        </div>
+      )}
     </div>
   );
 }
