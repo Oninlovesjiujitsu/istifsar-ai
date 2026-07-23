@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache';
 import type { DocumentInsert, UploadDocumentResult } from '@/src/features/documents/types';
 import { isVerifiedHistorian, getUserRole } from '@/src/lib/ui/role-labels';
 import { detectContentions } from '@/src/lib/ai/contention';
+import { processDocumentKGDirect } from '@/src/features/knowledge-graph/actions/kg-extract';
 
 const ALLOWED_SCAN_TYPES = new Set([
   'application/pdf',
@@ -160,12 +161,18 @@ export async function uploadDocument(
     }
   }
 
-  // Fire-and-forget: asynchronous contention detection after chunk ingestion finishes (MVP delay)
-  setTimeout(() => {
+  // Fire-and-forget: asynchronous KG extraction & contention detection after document insertion
+  setTimeout(async () => {
+    try {
+      const kgRes = await processDocumentKGDirect(docId);
+      console.log(`[uploadDocument] Auto-KG extraction succeeded for ${docId}: ${kgRes.entities} entities, ${kgRes.relationships} relationships`);
+    } catch (kgErr) {
+      console.error('[uploadDocument] Auto-KG extraction failed:', kgErr);
+    }
     void detectContentions(docId).catch((err) =>
       console.error('[uploadDocument] Contention detection failed:', err)
     );
-  }, 1000);
+  }, 1500);
 
   return { success: true, documentId: docId };
 }

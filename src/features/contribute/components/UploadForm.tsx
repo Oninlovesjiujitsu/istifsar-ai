@@ -18,13 +18,33 @@ import {
   Plus
 } from 'lucide-react';
 
-const DOCUMENT_TYPES = [
-  { value: 'manuscript', label: 'Manuscript' },
-  { value: 'photograph', label: 'Photograph' },
-  { value: 'newspaper', label: 'Newspaper' },
-  { value: 'official_record', label: 'Official Record' },
-  { value: 'map', label: 'Map' },
-  { value: 'other', label: 'Other' },
+const DOCUMENT_TYPE_GROUPS = [
+  {
+    groupLabel: 'Secondary Literature (Analytical Works)',
+    options: [
+      { value: 'monograph_book', label: 'Monograph / Academic Book' },
+      { value: 'journal_article', label: 'Journal Article & Paper' },
+      { value: 'edited_volume_chapter', label: 'Edited Volume / Book Chapter' },
+      { value: 'dissertation_thesis', label: 'Academic Dissertation & Thesis' },
+      { value: 'translation_commentary', label: 'Translation & Critical Commentary' },
+    ],
+  },
+  {
+    groupLabel: 'Tertiary Literature & Reference Works',
+    options: [
+      { value: 'historiographical_survey', label: 'Historiographical Survey & Literature Review' },
+      { value: 'encyclopedia_reference', label: 'Encyclopedia & Dictionary Entry' },
+      { value: 'bibliography_catalog', label: 'Annotated Bibliography & Catalog' },
+      { value: 'sourcebook_reader', label: 'Documentary Reader / Sourcebook' },
+    ],
+  },
+  {
+    groupLabel: 'Primary & Archival Sources',
+    options: [
+      { value: 'primary_archival', label: 'Primary / Archival Document' },
+      { value: 'other', label: 'Other Reference' },
+    ],
+  },
 ];
 
 const MAX_SCAN_BYTES = 52_428_800;
@@ -98,7 +118,7 @@ export default function UploadForm() {
     <form
       ref={formRef}
       action={handleAction}
-      className="space-y-8 rounded-2xl border border-border bg-card/50 p-6 md:p-8 shadow-sm backdrop-blur-sm"
+      className="space-y-8 rounded-2xl border border-border bg-card/50 p-4 sm:p-6 md:p-8 shadow-sm backdrop-blur-sm"
     >
       {/* Server error banner */}
       {state && !state.success && (
@@ -161,12 +181,16 @@ export default function UploadForm() {
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <Field label="Document Type" htmlFor="document_type">
             <div className="relative">
-              <select id="document_type" name="document_type" className={`${inputClass} appearance-none`}>
-                <option value="">— select type —</option>
-                {DOCUMENT_TYPES.map((t) => (
-                  <option key={t.value} value={t.value}>
-                    {t.label}
-                  </option>
+              <select id="document_type" name="document_type" className={`${inputClass} appearance-none pr-8 truncate text-xs sm:text-sm`}>
+                <option value="" className="text-xs sm:text-sm">— select type —</option>
+                {DOCUMENT_TYPE_GROUPS.map((group) => (
+                  <optgroup key={group.groupLabel} label={group.groupLabel} className="text-xs sm:text-sm font-semibold">
+                    {group.options.map((t) => (
+                      <option key={t.value} value={t.value} className="text-xs sm:text-sm">
+                        {t.label}
+                      </option>
+                    ))}
+                  </optgroup>
                 ))}
               </select>
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground/80">
@@ -220,8 +244,16 @@ export default function UploadForm() {
             Source Files
           </h3>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Upload the scanned document media and optional manual transcriptions.
+            Upload the document file (PDF, EPUB, or images). PDF and EPUB files are automatically parsed, sectioned, and indexed into the GraphRAG knowledge engine.
           </p>
+          <div className="mt-2.5 flex flex-wrap items-center gap-2 text-[11px]">
+            <span className="inline-flex items-center gap-1 rounded-md bg-sage/10 border border-sage/20 px-2 py-0.5 font-medium text-sage">
+              ⚡ Direct Text Indexing: PDF, EPUB
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-0.5 font-medium text-muted-foreground border border-border">
+              📄 Optional Transcription: TXT, MD
+            </span>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -259,8 +291,8 @@ export default function UploadForm() {
                 </div>
                 <div className="text-xs text-foreground font-semibold">
                   {scanFileName ? (
-                    <span className="text-sage flex items-center justify-center gap-1">
-                      <FileText className="h-3.5 w-3.5" />
+                    <span className="text-sage flex items-center justify-center gap-1 break-all px-2">
+                      <FileText className="h-3.5 w-3.5 shrink-0" />
                       {scanFileName}
                     </span>
                   ) : (
@@ -307,8 +339,8 @@ export default function UploadForm() {
                 </div>
                 <div className="text-xs text-foreground font-semibold">
                   {transcriptionFileName ? (
-                    <span className="text-sage flex items-center justify-center gap-1">
-                      <CheckCircle2 className="h-3.5 w-3.5" />
+                    <span className="text-sage flex items-center justify-center gap-1 break-all px-2">
+                      <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
                       {transcriptionFileName}
                     </span>
                   ) : (
@@ -357,7 +389,7 @@ function Field({
     <div className="space-y-1.5">
       <label
         htmlFor={htmlFor}
-        className="text-sm font-medium text-foreground flex items-center justify-between"
+        className="text-xs sm:text-sm font-medium text-foreground flex flex-wrap items-center justify-between gap-1"
       >
         <span className="flex items-center gap-1.5">
           {icon}
@@ -365,7 +397,7 @@ function Field({
           {required && <span className="text-primary">*</span>}
         </span>
         {hint && (
-          <span className="text-[11px] font-normal text-muted-foreground/75 leading-none">{hint}</span>
+          <span className="text-[10px] sm:text-[11px] font-normal text-muted-foreground/75 leading-none">{hint}</span>
         )}
       </label>
       {children}
@@ -374,4 +406,4 @@ function Field({
 }
 
 const inputClass =
-  'w-full rounded-lg border border-border bg-background shadow-[inset_1px_1px_3px_rgba(0,0,0,0.06)] px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary transition-all';
+  'w-full rounded-lg border border-border bg-background shadow-[inset_1px_1px_3px_rgba(0,0,0,0.06)] px-3 py-2 sm:px-3.5 sm:py-2.5 text-xs sm:text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary transition-all';

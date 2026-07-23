@@ -18,6 +18,54 @@ export interface ProfileUpdateInput {
   avatarUrl?: string;
 }
 
+/**
+ * Server action to upload a local avatar image file from the user's device.
+ */
+export async function uploadAvatarImage(
+  formData: FormData,
+): Promise<{ url?: string; error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { error: 'Not authenticated' };
+
+  const file = formData.get('avatar') as File | null;
+  if (!file || file.size === 0) {
+    return { error: 'No image file selected.' };
+  }
+
+  if (file.size > 5 * 1024 * 1024) {
+    return { error: 'Avatar image file must be under 5 MB.' };
+  }
+
+  const ext = file.name.split('.').pop() || 'png';
+  const filePath = `avatars/${user.id}/${Date.now()}.${ext}`;
+
+  // Try uploading to 'avatars' storage bucket
+  const { error: uploadErr } = await supabase.storage
+    .from('avatars')
+    .upload(filePath, file, { upsert: true, contentType: file.type });
+
+  if (uploadErr) {
+    // Fallback: If avatars bucket doesn't exist or RLS issue, convert file to data URL
+    try {
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const base64 = `data:${file.type};base64,${buffer.toString('base64')}`;
+      return { url: base64 };
+    } catch {
+      return { error: `Image upload failed: ${uploadErr.message}` };
+    }
+  }
+
+  const { data: publicUrlData } = supabase.storage
+    .from('avatars')
+    .getPublicUrl(filePath);
+
+  return { url: publicUrlData.publicUrl };
+}
+
 export async function updateFullProfile(
   input: ProfileUpdateInput,
 ): Promise<{ error?: string }> {
@@ -77,8 +125,8 @@ export async function updateFullProfile(
 
   if (input.avatarUrl !== undefined) {
     const trimmedAvatar = input.avatarUrl.trim();
-    if (trimmedAvatar && !/^https?:\/\/.+/.test(trimmedAvatar)) {
-      return { error: 'Avatar URL must be a valid http or https link' };
+    if (trimmedAvatar && !/^(https?:\/\/|data:image\/).+/.test(trimmedAvatar)) {
+      return { error: 'Avatar URL must be a valid http link or image file' };
     }
     updates.avatar_url = trimmedAvatar || null;
   }
