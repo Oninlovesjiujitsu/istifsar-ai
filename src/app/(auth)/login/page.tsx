@@ -4,7 +4,13 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = { title: 'Sign in — Istifsar' };
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { error } = await searchParams;
+
   return (
     <div className="relative mx-auto w-full max-w-sm sm:max-w-md">
       <div className="relative rounded-sm border-t border-l border-b-2 border-r-2 border-t-white border-l-white border-b-foreground/15 border-r-foreground/15 bg-card px-5 py-6 shadow-[4px_4px_0px_0px_hsl(var(--card)),_4px_4px_0px_1px_hsl(var(--border)),_8px_8px_0px_0px_hsl(var(--card)),_8px_8px_0px_1px_hsl(var(--border)),_0_12px_24px_rgba(0,0,0,0.06)] sm:px-10 sm:py-10">
@@ -34,6 +40,12 @@ export default function LoginPage() {
             Sign in to explore history through authentic sources.
           </p>
         </div>
+
+        {error === 'auth_callback_failed' && (
+          <div className="mb-5 rounded-sm border border-destructive/30 bg-destructive/10 px-3 py-2 text-center text-sm text-destructive">
+            Authentication failed. Please try signing in again.
+          </div>
+        )}
 
         <LoginForm />
 

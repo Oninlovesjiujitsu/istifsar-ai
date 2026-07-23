@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { createClient } from '@/src/lib/supabase/client';
 import { signUpHistorian } from '@/src/features/auth/actions';
 import { Eye, EyeOff } from 'lucide-react';
+import GoogleAuthButton from './GoogleAuthButton';
 
 type Role = 'enthusiast' | 'historian';
 type Step = 'role' | 'details' | 'done';
@@ -111,7 +112,26 @@ export default function SignUpForm() {
 
   if (step === 'role') {
     return (
-      <div className="space-y-4">
+      <div className="space-y-5">
+        <div className="space-y-2">
+          <GoogleAuthButton
+            text="Sign up with Google"
+            onError={(err) => setError(err || null)}
+          />
+          <p className="px-1 text-xs leading-relaxed text-muted-foreground/80">
+            Note: Signing in with Google registers you as a <strong className="font-medium text-foreground">History Enthusiast</strong>. Prospective <strong className="font-medium text-foreground">Historians</strong>, please select the Historian option below.
+          </p>
+        </div>
+
+        <div className="relative my-2 flex items-center justify-center">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t border-border/60" />
+          </div>
+          <span className="relative bg-card px-2 text-xs uppercase tracking-wider text-muted-foreground/70 font-medium">
+            Or select account type
+          </span>
+        </div>
+
         <div className="space-y-3">
           {ROLE_CARDS.map((card) => (
             <button
@@ -131,6 +151,12 @@ export default function SignUpForm() {
             </button>
           ))}
         </div>
+
+        {error && (
+          <p className="rounded-sm border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            {error}
+          </p>
+        )}
       </div>
     );
   }
