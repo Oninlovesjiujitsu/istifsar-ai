@@ -19,7 +19,7 @@ export default function ArchiveBookshelfSilhouette() {
   return (
     <div
       aria-hidden="true"
-      className="fixed left-0 right-0 bottom-0 pointer-events-none z-10 select-none transition-opacity duration-700"
+      className="fixed left-0 right-0 bottom-0 pointer-events-none z-10 select-none transition-opacity duration-700 transform-gpu translate-z-0"
       style={{ height: '22vh' }}
     >
       <svg

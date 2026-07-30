@@ -90,7 +90,7 @@ const steps = [
       'Merges vector search, full-text keywords, and graph proximity using Reciprocal Rank Fusion (RRF) to stream answers strictly backed by cited sources.',
     details: [
       { label: 'RRF Fusion', val: 'pgvector + FTS + Graph Distance' },
-      { label: 'Constraint', val: 'Agoncillo zero-hallucination gate' },
+      { label: 'Constraint', val: 'Agoncillo reduce-hallucination gate' },
       { label: 'Citations', val: 'Page-level split-pane source chips' },
     ],
     visual: (

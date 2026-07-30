@@ -18,12 +18,6 @@ export default function GraphRAGFlowLines() {
             <stop offset="50%" stopColor="hsl(var(--primary))" stopOpacity="1" />
             <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0.2" />
           </linearGradient>
-
-          {/* Glow filter */}
-          <filter id="glowArc" x="-20%" y="-40%" width="140%" height="180%">
-            <feGaussianBlur stdDeviation="3.5" result="blur" />
-            <feComposite in="SourceGraphic" in2="blur" operator="over" />
-          </filter>
         </defs>
 
         {/* Step 1 -> Step 2 Arc Curve */}
@@ -32,7 +26,6 @@ export default function GraphRAGFlowLines() {
           stroke="url(#flowGradArc)"
           strokeWidth="3"
           strokeDasharray="6 6"
-          filter="url(#glowArc)"
         />
 
         {/* Step 2 -> Step 3 Arc Curve */}
@@ -41,11 +34,10 @@ export default function GraphRAGFlowLines() {
           stroke="url(#flowGradArc)"
           strokeWidth="3"
           strokeDasharray="6 6"
-          filter="url(#glowArc)"
         />
 
         {/* Animated Particle Dots moving along Arches */}
-        <circle r="5" fill="hsl(var(--primary))" filter="url(#glowArc)">
+        <circle r="4" fill="hsl(var(--primary))">
           <animateMotion
             path="M 280 65 C 330 10, 420 10, 470 65"
             dur="2.8s"
@@ -53,7 +45,7 @@ export default function GraphRAGFlowLines() {
           />
         </circle>
 
-        <circle r="5" fill="hsl(var(--primary))" filter="url(#glowArc)">
+        <circle r="4" fill="hsl(var(--primary))">
           <animateMotion
             path="M 610 65 C 660 10, 750 10, 800 65"
             dur="2.8s"

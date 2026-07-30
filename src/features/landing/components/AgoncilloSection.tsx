@@ -121,7 +121,7 @@ export default function AgoncilloSection() {
 
         {/* Right Column: 3D Visualization Canvas Container */}
         <div className="lg:col-span-6 xl:col-span-5 w-full flex items-center justify-center lg:sticky lg:top-24">
-          <div className="w-full max-w-[500px] h-[300px] sm:h-[400px] lg:h-[500px] bg-card/20 rounded-md border border-border/40 relative overflow-hidden parchment-texture">
+          <div className="w-full max-w-[500px] h-[280px] sm:h-[400px] lg:h-[500px] bg-card/20 rounded-md border border-border/40 relative overflow-hidden parchment-texture">
             {/* Subtle light vignette for WebGL context */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20 bg-radial-[circle_at_center,transparent_40%,hsl(var(--background))_100%]" />
 

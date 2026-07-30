@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useMemo, useEffect } from 'react';
+import React, { useRef, useMemo, useEffect, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
@@ -482,12 +482,40 @@ function ScholarlyNetwork({ activeTab }: AgoncilloCanvasProps) {
 }
 
 export default function AgoncilloCanvas({ activeTab }: AgoncilloCanvasProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting);
+      },
+      { threshold: 0.05 }
+    );
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className="w-full h-full min-h-[320px] lg:min-h-[480px] relative rounded-md select-none overflow-hidden cursor-grab active:cursor-grabbing">
+    <div
+      ref={containerRef}
+      className="w-full h-full min-h-[260px] xs:min-h-[320px] lg:min-h-[480px] relative rounded-md select-none overflow-hidden cursor-grab active:cursor-grabbing touch-pan-y"
+      style={{ touchAction: 'pan-y' }}
+    >
       <Canvas
-        camera={{ position: [0, 0, 8.2], fov: 48 }}
-        dpr={[1, 2]}
-        gl={{ alpha: true, antialias: true }}
+        camera={{ position: [0, 0, isMobile ? 10.8 : 8.2], fov: isMobile ? 52 : 48 }}
+        dpr={[1, 1.5]}
+        gl={{ alpha: true, antialias: false, powerPreference: 'high-performance' }}
+        frameloop={isVisible ? 'always' : 'never'}
       >
         <ambientLight intensity={1.5} />
         <directionalLight position={[2, 5, 2]} intensity={1} />
@@ -496,17 +524,17 @@ export default function AgoncilloCanvas({ activeTab }: AgoncilloCanvasProps) {
 
       {/* Interactive Hover Overlay Card when activeTab === 'contention' */}
       {activeTab === 'contention' && (
-        <div className="absolute bottom-3 left-3 right-3 p-3.5 rounded-lg bg-card/95 border border-amber-500/40 shadow-xl backdrop-blur-md text-xs font-mono animate-in fade-in slide-in-from-bottom-2 duration-300 pointer-events-auto">
-          <div className="flex items-center justify-between gap-2 mb-1.5 text-amber-600 font-semibold">
-            <span className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+        <div className="absolute bottom-2 left-2 right-2 sm:bottom-3 sm:left-3 sm:right-3 p-2.5 sm:p-3.5 rounded-lg bg-card/95 border border-amber-500/40 shadow-xl backdrop-blur-md text-xs font-mono animate-in fade-in slide-in-from-bottom-2 duration-300 pointer-events-auto z-10">
+          <div className="flex items-center justify-between gap-1.5 sm:gap-2 mb-1 sm:mb-1.5 text-amber-600 font-semibold">
+            <span className="flex items-center gap-1.5 text-[11px] sm:text-xs">
+              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse shrink-0" />
               <span>Node of Contention Active</span>
             </span>
-            <span className="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 font-mono">
+            <span className="text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 font-mono shrink-0">
               Debate Map
             </span>
           </div>
-          <p className="text-[11px] text-muted-foreground leading-relaxed font-sans">
+          <p className="text-[10px] sm:text-[11px] text-muted-foreground leading-relaxed font-sans">
             <strong className="text-foreground font-semibold">Agoncillo (1956)</strong> vs{' '}
             <strong className="text-foreground font-semibold">Alvarez (1927)</strong>: Disputed Tejeros election votes. Hover over scholars in <a href="/explore" className="text-primary underline font-semibold">The Contention Map</a> to inspect claims.
           </p>
@@ -514,34 +542,34 @@ export default function AgoncilloCanvas({ activeTab }: AgoncilloCanvasProps) {
       )}
 
       {activeTab === 'constraint' && (
-        <div className="absolute bottom-3 left-3 right-3 p-3.5 rounded-lg bg-card/95 border border-primary/40 shadow-xl backdrop-blur-md text-xs font-mono animate-in fade-in slide-in-from-bottom-2 duration-300 pointer-events-auto">
-          <div className="flex items-center justify-between gap-2 mb-1 text-primary font-semibold">
-            <span className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+        <div className="absolute bottom-2 left-2 right-2 sm:bottom-3 sm:left-3 sm:right-3 p-2.5 sm:p-3.5 rounded-lg bg-card/95 border border-primary/40 shadow-xl backdrop-blur-md text-xs font-mono animate-in fade-in slide-in-from-bottom-2 duration-300 pointer-events-auto z-10">
+          <div className="flex items-center justify-between gap-1.5 sm:gap-2 mb-1 text-primary font-semibold">
+            <span className="flex items-center gap-1.5 text-[11px] sm:text-xs">
+              <span className="w-2 h-2 rounded-full bg-primary animate-pulse shrink-0" />
               <span>Agoncillo Constraint Gate</span>
             </span>
-            <span className="text-[10px] px-2 py-0.5 rounded bg-primary/10 border border-primary/20">
-              Zero Hallucination
+            <span className="text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded bg-primary/10 border border-primary/20 shrink-0">
+              Less Hallucination
             </span>
           </div>
-          <p className="text-[11px] text-muted-foreground leading-relaxed font-sans">
+          <p className="text-[10px] sm:text-[11px] text-muted-foreground leading-relaxed font-sans">
             Answers are strictly rejected if similarity &lt; 0.65. &quot;No document, no history.&quot;
           </p>
         </div>
       )}
 
       {activeTab === 'citation' && (
-        <div className="absolute bottom-3 left-3 right-3 p-3.5 rounded-lg bg-card/95 border border-emerald-500/40 shadow-xl backdrop-blur-md text-xs font-mono animate-in fade-in slide-in-from-bottom-2 duration-300 pointer-events-auto">
-          <div className="flex items-center justify-between gap-2 mb-1 text-emerald-600 font-semibold">
-            <span className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+        <div className="absolute bottom-2 left-2 right-2 sm:bottom-3 sm:left-3 sm:right-3 p-2.5 sm:p-3.5 rounded-lg bg-card/95 border border-emerald-500/40 shadow-xl backdrop-blur-md text-xs font-mono animate-in fade-in slide-in-from-bottom-2 duration-300 pointer-events-auto z-10">
+          <div className="flex items-center justify-between gap-1.5 sm:gap-2 mb-1 text-emerald-600 font-semibold">
+            <span className="flex items-center gap-1.5 text-[11px] sm:text-xs">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
               <span>Citation Economy Tree</span>
             </span>
-            <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">
+            <span className="text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 shrink-0">
               Anchored Sources
             </span>
           </div>
-          <p className="text-[11px] text-muted-foreground leading-relaxed font-sans">
+          <p className="text-[10px] sm:text-[11px] text-muted-foreground leading-relaxed font-sans">
             Every synthesized claim maps to a page-level manuscript split-pane preview.
           </p>
         </div>

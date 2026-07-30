@@ -1,19 +1,29 @@
 'use client';
 
+import { memo } from 'react';
 import { motion } from 'motion/react';
 import { TypeAnimation } from 'react-type-animation';
 import { ArrowDown } from 'lucide-react';
 import HeroDemoPreview from './HeroDemoPreview';
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0 },
-};
-
-const staggerContainer = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.15 } },
-};
+const TypewriterText = memo(function TypewriterText() {
+  return (
+    <TypeAnimation
+      sequence={[
+        'in Historian Writings.',
+        2500,
+        'in Archival Literature.',
+        2500,
+        'in Verified Documents.',
+        2500,
+      ]}
+      wrapper="span"
+      speed={30}
+      repeat={Infinity}
+      className="inline-block max-w-full"
+    />
+  );
+});
 
 export default function HeroSection() {
   return (
@@ -48,20 +58,7 @@ export default function HeroSection() {
             transition={{ duration: 1, delay: 0.6 }}
             className="italic font-light font-serif text-foreground inline-block mt-1 sm:mt-0"
           >
-            <TypeAnimation
-              sequence={[
-                'in Historian Writings.',
-                2500,
-                'in Archival Literature.',
-                2500,
-                'in Verified Documents.',
-                2500,
-              ]}
-              wrapper="span"
-              speed={30}
-              repeat={Infinity}
-              className="inline-block max-w-full"
-            />
+            <TypewriterText />
           </motion.span>
         </motion.h1>
 
@@ -71,7 +68,7 @@ export default function HeroSection() {
           transition={{ duration: 0.9, delay: 0.6, ease: 'easeOut' }}
           className="text-sm sm:text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed mb-8 sm:mb-12 px-2 font-sans"
         >
-          Driven by a custom-built Graph RAG engine over trustworthy historian publications. Traversing entity networks, mapping documented node contentions, and eliminating AI speculation.
+          Driven by a custom-built Graph RAG engine over trustworthy historian publications. Traversing entity networks, mapping documented node contentions, and minimizing ungrounded AI speculation.
         </motion.p>
 
         {/* Dual CTAs */}

@@ -84,7 +84,7 @@ export default function PlatformPillarsSection() {
             How Istifsar AI Transforms Historical Research
           </h2>
           <p className="max-w-2xl mx-auto text-muted-foreground text-xs sm:text-base leading-relaxed px-2">
-            Engineered to eliminate hallucination, map historiographical debates, and bridge history enthusiasts with verified scholar literature.
+            Engineered to significantly reduce hallucination risks, map historiographical debates, and bridge history enthusiasts with verified scholar literature.
           </p>
         </motion.div>
 

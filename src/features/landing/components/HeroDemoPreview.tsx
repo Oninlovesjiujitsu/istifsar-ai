@@ -27,7 +27,7 @@ export default function HeroDemoPreview() {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto mt-12 text-left shadow-2xl rounded-lg border border-border/60 bg-card/90 backdrop-blur-md overflow-hidden font-sans parchment-texture">
+    <div className="w-full max-w-4xl mx-auto mt-12 text-left shadow-xl rounded-lg border border-border/60 bg-card overflow-hidden font-sans">
       {/* Search Header Bar */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between px-4 sm:px-6 py-3.5 bg-muted/40 border-b border-border/50 gap-3">
         <div className="flex items-center gap-2.5 text-xs text-muted-foreground font-mono">
@@ -134,7 +134,7 @@ export default function HeroDemoPreview() {
                   <span>Synthesized from 4 Historian Publications (Guerrero, Schumacher, Coates, Zaide)</span>
                 </div>
                 <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
-                  Zero Speculation
+                  Grounded Retrieval
                 </span>
               </div>
 
@@ -157,7 +157,7 @@ export default function HeroDemoPreview() {
               <div className="p-3 rounded-md bg-card/80 border border-border/50 text-xs flex items-start gap-2.5">
                 <HugeiconsIcon icon={HelpCircleIcon} size={16} className="text-primary mt-0.5 shrink-0" />
                 <div className="text-muted-foreground leading-normal">
-                  <strong className="text-foreground">Agoncillo Engine Guarantee:</strong> This output contains no generated speculation. All statements are mapped directly to verified published works by Philippine historians.
+                  <strong className="text-foreground">Agoncillo Engine Guarantee:</strong> This output minimizes ungrounded speculation. All statements are mapped directly to verified published works by Philippine historians.
                 </div>
               </div>
             </motion.div>

@@ -50,7 +50,7 @@ export default function PrivacyPolicyPage() {
             </h2>
           </div>
           <p className="text-xs sm:text-sm md:text-base text-muted-foreground leading-relaxed font-serif">
-            Istifsar AI exists to connect curious minds and scholars with verified historical literature while eliminating AI speculation. We believe that historical research requires uncompromising privacy, transparent source attribution, and strict protection against commercial data harvesting or historical distortion.
+            Istifsar AI exists to connect curious minds and scholars with verified historical literature while minimizing ungrounded AI speculation. We believe that historical research requires uncompromising privacy, transparent source attribution, and strict protection against commercial data harvesting or historical distortion.
           </p>
         </div>
 
