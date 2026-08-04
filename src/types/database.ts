@@ -735,7 +735,11 @@ export type Database = {
           content: string
           conversation_id: string
           created_at: string
+          evaluation_status: string | null
+          faithfulness_score: number | null
           id: string
+          is_hallucination_flagged: boolean | null
+          relevancy_score: number | null
           role: string
           topic_id: string | null
         }
@@ -743,7 +747,11 @@ export type Database = {
           content: string
           conversation_id: string
           created_at?: string
+          evaluation_status?: string | null
+          faithfulness_score?: number | null
           id?: string
+          is_hallucination_flagged?: boolean | null
+          relevancy_score?: number | null
           role: string
           topic_id?: string | null
         }
@@ -751,7 +759,11 @@ export type Database = {
           content?: string
           conversation_id?: string
           created_at?: string
+          evaluation_status?: string | null
+          faithfulness_score?: number | null
           id?: string
+          is_hallucination_flagged?: boolean | null
+          relevancy_score?: number | null
           role?: string
           topic_id?: string | null
         }

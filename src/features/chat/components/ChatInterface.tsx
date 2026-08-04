@@ -12,6 +12,7 @@ import type { TopicOption } from './ChatInput';
 import SourceDetailsPanel from './SourceDetailsPanel';
 import ContentionCanvasPanel from './ContentionCanvasPanel';
 import { createConversation } from '@/src/features/chat/actions/conversation';
+import { submitEvaluationFlag } from '@/src/features/chat/actions/evaluate';
 
 type RightPanelState =
   | { kind: 'citation'; citation: CitationData }
@@ -284,6 +285,37 @@ export default function ChatInterface({
     );
   }
 
+  async function handleFlagInaccuracy(index: number, message: RagUIMessage, citations?: CitationData[]) {
+    // Find the user query (the previous message)
+    let query = 'Unknown Query';
+    for (let j = index - 1; j >= 0; j--) {
+      if (messages[j].role === 'user') {
+        query = getMessageText(messages[j]);
+        break;
+      }
+    }
+    
+    const text = getMessageText(message);
+    
+    try {
+      const res = await submitEvaluationFlag({
+        query,
+        retrieved_context: citations?.map(c => c.excerpt) || [],
+        generated_answer: text,
+        timestamp: new Date().toISOString(),
+        record_id: message.id
+      });
+      if (res.success) {
+        alert("Flagged successfully! The evaluation hub will analyze this message in the background.");
+      } else {
+        alert("Failed to flag message. Please check the console.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error while flagging message.");
+    }
+  }
+
   return (
     <div className="flex h-full min-h-0">
       <div className="flex flex-1 min-h-0 min-w-0 flex-col bg-background relative">
@@ -363,6 +395,11 @@ export default function ChatInterface({
                 onToggleContentionPanel={
                   contentions && contentions.length > 0
                     ? () => toggleContentionPanel(message.id, contentions)
+                    : undefined
+                }
+                onFlagInaccuracy={
+                  message.role === 'assistant'
+                    ? () => handleFlagInaccuracy(i, message, citations)
                     : undefined
                 }
               />

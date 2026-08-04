@@ -29,6 +29,7 @@ type Props = {
   onCitationClick?: (citation: CitationData) => void;
   isContentionPanelOpen?: boolean;
   onToggleContentionPanel?: () => void;
+  onFlagInaccuracy?: () => void;
 };
 
 function linkifyCitations(text: string, citationCount: number): string {
@@ -63,6 +64,7 @@ export default function MessageBubble({
   onCitationClick,
   isContentionPanelOpen,
   onToggleContentionPanel,
+  onFlagInaccuracy,
 }: Props) {
   if (role === 'user') {
     return (
@@ -197,21 +199,39 @@ export default function MessageBubble({
           )}
         </div>
 
-        {diveDeeperScholars && diveDeeperScholars.length > 0 && (
-          <div className="flex flex-wrap gap-2 px-1 pt-1">
-            {diveDeeperScholars.map((scholar) => (
+        {(diveDeeperScholars && diveDeeperScholars.length > 0 || onFlagInaccuracy) && (
+          <div className="flex flex-wrap gap-2 px-1 pt-1 items-center">
+            {diveDeeperScholars && diveDeeperScholars.length > 0 && (
+              <>
+                {diveDeeperScholars.map((scholar) => (
+                  <button
+                    key={scholar}
+                    type="button"
+                    onClick={() => onDiveDeeper?.(scholar)}
+                    className="inline-flex items-center gap-1.5 rounded-sm border border-border bg-background px-3 py-1.5 text-xs text-muted-foreground hover:bg-muted/20 hover:text-foreground transition-colors"
+                  >
+                    <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                    </svg>
+                    Explore {scholar}&apos;s perspective
+                  </button>
+                ))}
+                <div className="w-px h-4 bg-border mx-1 hidden sm:block" />
+              </>
+            )}
+            
+            {onFlagInaccuracy && !isStreaming && (
               <button
-                key={scholar}
                 type="button"
-                onClick={() => onDiveDeeper?.(scholar)}
-                className="inline-flex items-center gap-1.5 rounded-sm border border-border bg-background px-3 py-1.5 text-xs text-muted-foreground hover:bg-muted/20 hover:text-foreground transition-colors"
+                onClick={onFlagInaccuracy}
+                className="inline-flex items-center gap-1.5 rounded-sm px-3 py-1.5 text-xs text-amber-600/80 hover:bg-amber-500/10 hover:text-amber-600 transition-colors ml-auto sm:ml-0"
               >
                 <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 3v1.5M3 21v-6m0 0 2.77-.693a9 9 0 0 1 6.208.682l.108.054a9 9 0 0 0 6.086.71l3.114-.732a48.524 48.524 0 0 1-.005-10.499l-3.11.732a9 9 0 0 1-6.085-.711l-.108-.054a9 9 0 0 0-6.208-.682L3 4.5M3 15V4.5" />
                 </svg>
-                Explore {scholar}&apos;s perspective
+                Flag Inaccuracy
               </button>
-            ))}
+            )}
           </div>
         )}
       </div>

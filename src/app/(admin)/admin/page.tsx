@@ -12,11 +12,13 @@ async function getStats() {
     { count: docCount },
     { count: contentionCount },
     { count: gapCount },
+    { count: flaggedCount },
   ] = await Promise.all([
     db.from('profiles').select('id', { count: 'exact', head: true }),
     db.from('documents').select('id', { count: 'exact', head: true }).eq('status', 'published'),
     db.from('contentions').select('id', { count: 'exact', head: true }).eq('status', 'open'),
     db.from('archive_gaps').select('id', { count: 'exact', head: true }),
+    db.from('messages').select('id', { count: 'exact', head: true }).eq('is_hallucination_flagged', true),
   ]);
 
   return {
@@ -24,6 +26,7 @@ async function getStats() {
     docCount: docCount ?? 0,
     contentionCount: contentionCount ?? 0,
     gapCount: gapCount ?? 0,
+    flaggedCount: flaggedCount ?? 0,
   };
 }
 
@@ -35,6 +38,7 @@ export default async function AdminDashboardPage() {
     { label: 'Published sources', value: stats.docCount, href: '/documents' },
     { label: 'Open contentions', value: stats.contentionCount, href: '/admin/contentions' },
     { label: 'Unanswered queries', value: stats.gapCount, href: '/admin/gaps' },
+    { label: 'Flagged evaluations', value: stats.flaggedCount, href: '/admin/evaluations' },
   ];
 
   const quickLinks = [
@@ -42,6 +46,7 @@ export default async function AdminDashboardPage() {
     { label: 'Review contentions', description: 'Resolve or dispute flagged contradictions', href: '/admin/contentions' },
     { label: 'Unanswered queries', description: 'Queries the archive couldn\'t answer — guides what to add next', href: '/admin/gaps' },
     { label: 'Ingestion queue', description: 'Documents pending ingestion processing', href: '/contribute/validate' },
+    { label: 'RAG Evaluations', description: 'Review automatically graded responses for hallucinations', href: '/admin/evaluations' },
   ];
 
   return (
