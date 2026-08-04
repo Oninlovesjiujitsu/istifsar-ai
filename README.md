@@ -76,6 +76,28 @@ Istifsar was built to solve a specific problem: LLMs answer historical questions
 - Add accessibility audit (screen reader support for Citation Graph, keyboard navigation for Split-Pane).
 - Add rate limiting and abuse detection on the query endpoint.
 
+### ⚖️ Why We Chose Recursive Splitting Over Semantic Chunking
+
+While percentile-based Semantic Chunking is a popular academic concept, we opted for an optimized Recursive Character Splitter in production for several critical reasons:
+
+**1. API Latency & Edge Function Timeouts (The Biggest Issue)**
+Supabase Edge Functions typically have strict timeout limits (e.g., 60 seconds). If a historian uploads a 30-page PDF, that document might contain 1,500 sentences. Semantic chunking sends all 1,500 sentences to the Gemini API *just to figure out where to cut the text*. After assembling the chunks, it sends them to Gemini again to get the final storage embeddings.
+> **Trade-off:** This is exponentially slower and drastically increases the risk of the Edge Function timing out and failing the ingestion entirely.
+> **Recursive Advantage:** It runs locally in milliseconds using regex. Zero API calls are needed for the chunking phase.
+
+**2. The Dimensionality Problem (Noisy Sentences)**
+`gemini-embedding-001` creates massive, 3072-dimensional vectors designed to capture deep concepts. Single sentences (e.g., *"He disagreed."* or *"However, the timeline shifted."*) often do not contain enough context to form a stable 3072-dimensional vector.
+> **Trade-off:** When calculating the cosine similarity between two adjacent short sentences, the math gets very noisy. The semantic chunker will frequently create violent, unnatural splits right in the middle of a cohesive paragraph.
+
+**3. The Lack of Context Overlap**
+Percentile-based Semantic Chunking creates "hard borders." If a chunk ends, the next chunk begins, with zero overlap.
+> **Trade-off:** If the answer to a user's question requires the last sentence of Chunk A and the first sentence of Chunk B, the LLM receives an incomplete thought.
+> **Recursive Advantage:** Recursive splitting strictly enforces a `CHUNK_OVERLAP` (e.g., 150 tokens). This guarantees that the end of one chunk "bleeds" into the beginning of the next, ensuring the LLM never misses the connective context.
+
+**4. Human Language is Already "Semantically Chunked"**
+We don't actually need an AI model to tell us where one thought ends and another begins. Human authors already do this for us using paragraphs (`\n\n`) and sections.
+> **Recursive Advantage:** A Recursive Character Splitter respects this natural hierarchy. It tries to split at `\n\n` (paragraphs) first, naturally preserving the author's intended structural grouping of concepts far better than a mathematical vector drop does.
+
 ## 🚦 Running the Project
 
 To run the project in your local environment, follow these steps:

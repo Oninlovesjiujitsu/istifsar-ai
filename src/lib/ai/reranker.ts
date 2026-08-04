@@ -19,12 +19,21 @@ export function rerank(
 ): RetrievedChunk[] {
   if (chunks.length === 0) return [];
 
+  // Aggressively prune noisy chunks. Drop if cosine < 0.70 AND RRF < 0.014 (FTS didn't save it).
+  // Graph-retrieved chunks (graphRank > 0) are exempt from this filter.
+  const filteredChunks = chunks.filter((c) => {
+    if (c.graphRank > 0) return true;
+    return c.cosineScore >= 0.70 || c.rrfScore >= 0.014;
+  });
+
+  if (filteredChunks.length === 0) return [];
+
   // Check if we have any graph-retrieved chunks
-  const hasGraphChunks = chunks.some((c) => c.graphRank > 0);
+  const hasGraphChunks = filteredChunks.some((c) => c.graphRank > 0);
 
   if (!hasGraphChunks) {
     // No graph signal — pure cosine rerank (original behavior)
-    return [...chunks]
+    return [...filteredChunks]
       .sort((a, b) => b.cosineScore - a.cosineScore)
       .slice(0, topK);
   }
@@ -33,12 +42,12 @@ export function rerank(
   const cosineSlots = topK - GRAPH_RESERVED_SLOTS;
 
   // Sort by cosine for the primary slots
-  const byCosine = [...chunks].sort((a, b) => b.cosineScore - a.cosineScore);
+  const byCosine = [...filteredChunks].sort((a, b) => b.cosineScore - a.cosineScore);
   const cosineTop = byCosine.slice(0, cosineSlots);
   const cosineTopIds = new Set(cosineTop.map((c) => c.chunkId));
 
   // Find best graph-only chunks not already in cosine top
-  const graphOnly = chunks
+  const graphOnly = filteredChunks
     .filter((c) => c.graphRank > 0 && !cosineTopIds.has(c.chunkId))
     .sort((a, b) => a.graphRank - b.graphRank) // Lower rank = closer to seed = better
     .slice(0, GRAPH_RESERVED_SLOTS);

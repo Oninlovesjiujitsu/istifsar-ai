@@ -1,16 +1,16 @@
 
-export const SIMILARITY_THRESHOLD = 0.65;
+export const SIMILARITY_THRESHOLD = 0.80;
 
-export const DOCUMENT_SCOPE_SIMILARITY_THRESHOLD = 0.50;
+export const DOCUMENT_SCOPE_SIMILARITY_THRESHOLD = 0.75;
 
-export const TOPIC_SCOPE_SIMILARITY_THRESHOLD = 0.50;
+export const TOPIC_SCOPE_SIMILARITY_THRESHOLD = 0.75;
 
 /** Offset subtracted from the similarity threshold for scholar-scoped (Dive Deeper) queries. */
 export const SCHOLAR_SCOPE_GATE_OFFSET = 0.05;
 
-export const CHUNK_SIZE_TOKENS = 600;
+export const CHUNK_SIZE_TOKENS = 800;
 
-export const CHUNK_OVERLAP_TOKENS = 100;
+export const CHUNK_OVERLAP_TOKENS = 150;
 
 export const RETRIEVAL_CANDIDATE_COUNT = 30;
 
@@ -54,19 +54,4 @@ export const EMBEDDING_CACHE_TTL_SECONDS = 60 * 60 * 24 * 7;
 /** Number of peer reviews required to publish a Living Essay. */
 export const ESSAY_REVIEWS_REQUIRED = 1;
 
-// Semantic Chunking
-
-export const SEMANTIC_BREAKPOINT_METHOD = 'percentile' as const;
-
-/** Threshold for the chosen breakpoint method.
- *  For 'percentile': sentences with similarity below this percentile become chunk boundaries. */
-export const SEMANTIC_BREAKPOINT_THRESHOLD = 75;
-
-// Oversized chunks are split. 
-export const SEMANTIC_MAX_CHUNK_TOKENS = 1500;
-
-// Min token count for a semantic chunk. Undersized chunks are merged with neighbors. 
-export const SEMANTIC_MIN_CHUNK_TOKENS = 50;
-
-// Documents with more sentences than this fall back to recursive character splitting. 
-export const MAX_SENTENCES_FOR_SEMANTIC = 2000;
+// Semantic chunking has been deprecated in favor of optimized recursive splitting
