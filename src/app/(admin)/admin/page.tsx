@@ -2,7 +2,7 @@ import { createAdminClient } from '@/src/lib/supabase/admin';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 
-export const metadata: Metadata = { title: 'Admin Dashboard — Istifsar' };
+export const metadata: Metadata = { title: 'Admin Console — Istifsar' };
 
 async function getStats() {
   const db = createAdminClient();
@@ -34,56 +34,74 @@ export default async function AdminDashboardPage() {
   const stats = await getStats();
 
   const statCards = [
-    { label: 'Total users', value: stats.userCount, href: '/admin/users' },
-    { label: 'Published sources', value: stats.docCount, href: '/documents' },
-    { label: 'Open contentions', value: stats.contentionCount, href: '/admin/contentions' },
-    { label: 'Unanswered queries', value: stats.gapCount, href: '/admin/gaps' },
-    { label: 'Flagged evaluations', value: stats.flaggedCount, href: '/admin/evaluations' },
+    { label: 'Registered Users', value: stats.userCount, href: '/admin/users' },
+    { label: 'Published Sources', value: stats.docCount, href: '/documents' },
+    { label: 'Open Contentions', value: stats.contentionCount, href: '/admin/contentions' },
+    { label: 'Archive Gaps', value: stats.gapCount, href: '/admin/gaps' },
+    { label: 'Flagged Evaluations', value: stats.flaggedCount, href: '/admin/evaluations' },
   ];
 
   const quickLinks = [
-    { label: 'Manage users', description: 'View all accounts and change tiers', href: '/admin/users' },
-    { label: 'Review contentions', description: 'Resolve or dispute flagged contradictions', href: '/admin/contentions' },
-    { label: 'Unanswered queries', description: 'Queries the archive couldn\'t answer — guides what to add next', href: '/admin/gaps' },
-    { label: 'Ingestion queue', description: 'Documents pending ingestion processing', href: '/contribute/validate' },
-    { label: 'RAG Evaluations', description: 'Review automatically graded responses for hallucinations', href: '/admin/evaluations' },
+    { label: 'User Directory', description: 'Manage accounts and adjust authorization tiers', href: '/admin/users' },
+    { label: 'Historiographical Contentions', description: 'Review, resolve, or dispute flagged scholar contradictions', href: '/admin/contentions' },
+    { label: 'Archive Gaps Board', description: 'Unanswered questions driving future source indexing priorities', href: '/admin/gaps' },
+    { label: 'Ingestion Queue', description: 'Validate newly submitted historian publications', href: '/contribute/validate' },
+    { label: 'RAG Evaluation Hub', description: 'Audit automatically graded responses for hallucination risks', href: '/admin/evaluations' },
   ];
 
   return (
     <div className="space-y-8 sm:space-y-10 p-4 sm:p-6 lg:p-10">
-      <div>
-        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-        <p className="mt-1 text-muted-foreground">Curate the archive. Keep the knowledge honest.</p>
+      {/* Header */}
+      <div className="border-b border-border/60 pb-5">
+        <h1 className="text-3xl sm:text-4xl font-bold font-heading text-foreground tracking-tight">
+          Admin Console
+        </h1>
+        <p className="mt-1 text-base text-muted-foreground font-serif italic">
+          Curate the scholarly record. Guard the Agoncillo Constraint: &ldquo;No Document, No History.&rdquo;
+        </p>
       </div>
 
-      {/* Stat cards */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      {/* Stat Cards */}
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
         {statCards.map((card) => (
           <Link
             key={card.href}
             href={card.href}
-            className="group rounded-xl border bg-card p-5 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:scale-[1.01] hover:shadow-md hover:border-primary/30"
+            className="group rounded-md border border-border/80 bg-card p-5 parchment-texture shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-gold/50"
           >
-            <p className="text-3xl font-bold tabular-nums">{card.value.toLocaleString()}</p>
-            <p className="mt-1 text-sm text-muted-foreground group-hover:text-foreground transition-colors">
+            <p className="text-3xl font-bold font-heading tabular-nums text-foreground group-hover:text-primary transition-colors">
+              {card.value.toLocaleString()}
+            </p>
+            <p className="mt-1 text-xs font-serif text-muted-foreground uppercase tracking-wider group-hover:text-foreground transition-colors">
               {card.label}
             </p>
           </Link>
         ))}
       </div>
 
-      {/* Quick links */}
-      <div>
-        <h2 className="mb-4 text-lg font-semibold">Quick actions</h2>
-        <div className="grid gap-3 sm:grid-cols-2">
+      {/* Quick Actions */}
+      <div className="space-y-4">
+        <h2 className="text-xl font-bold font-heading text-foreground border-l-2 border-gold/60 pl-3">
+          Quick Actions
+        </h2>
+        <div className="grid gap-4 sm:grid-cols-2">
           {quickLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="flex flex-col gap-1 rounded-lg border bg-card p-4 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:scale-[1.01] hover:shadow-md hover:border-primary/30"
+              className="group flex flex-col gap-1.5 rounded-md border border-border/80 bg-card p-5 parchment-texture shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md hover:border-gold/50"
             >
-              <span className="font-medium hover:text-primary transition-colors">{link.label} →</span>
-              <span className="text-sm text-muted-foreground">{link.description}</span>
+              <div className="flex items-center justify-between">
+                <span className="font-heading font-semibold text-foreground group-hover:text-primary transition-colors">
+                  {link.label}
+                </span>
+                <span className="text-xs text-gold-dim opacity-0 group-hover:opacity-100 transition-opacity font-serif">
+                  Access &rarr;
+                </span>
+              </div>
+              <span className="text-sm font-serif text-muted-foreground">
+                {link.description}
+              </span>
             </Link>
           ))}
         </div>
@@ -91,3 +109,4 @@ export default async function AdminDashboardPage() {
     </div>
   );
 }
+

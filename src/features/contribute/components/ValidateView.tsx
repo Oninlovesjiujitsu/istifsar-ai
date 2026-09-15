@@ -27,9 +27,9 @@ const DECISION_LABELS: Record<string, string> = {
 };
 
 const DECISION_BADGE_STYLES: Record<string, string> = {
-  approved: 'bg-sage/10 border border-sage/20 text-sage',
-  rejected: 'bg-red-800/10 border border-red-800/20 text-red-800',
-  flagged: 'bg-amber-800/10 border border-amber-800/20 text-amber-800',
+  approved: 'bg-sage/10 border border-sage/20 text-sage font-serif',
+  rejected: 'bg-destructive/10 border border-destructive/20 text-destructive font-serif',
+  flagged: 'bg-gold/10 border border-gold/40 text-gold-dim dark:text-gold-bright font-serif',
 };
 
 export default function ValidateView({

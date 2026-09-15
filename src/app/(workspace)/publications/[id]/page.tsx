@@ -81,13 +81,13 @@ export default async function WorkspaceDocumentPage({ params }: Props) {
 
   const STATUS_BADGE: Record<string, string> = {
     published:
-      'bg-sage/10 border border-sage/20 text-sage',
+      'bg-sage/10 border border-sage/20 text-sage font-serif',
     pending_review:
-      'bg-amber-800/10 border border-amber-800/20 text-amber-800',
+      'bg-gold/10 border border-gold/40 text-gold-dim dark:text-gold-bright font-serif',
     under_review:
-      'bg-cyan-800/10 border border-cyan-800/20 text-cyan-800',
+      'bg-primary/10 border border-primary/20 text-primary font-serif',
     rejected:
-      'bg-red-800/10 border border-red-800/20 text-red-800',
+      'bg-destructive/10 border border-destructive/20 text-destructive font-serif',
   };
 
   return (

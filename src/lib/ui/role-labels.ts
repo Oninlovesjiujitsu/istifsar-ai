@@ -10,9 +10,9 @@ export const ROLE_LABELS: Record<string, string> = {
 
 /** Tailwind badge classes for each role. */
 export const ROLE_BADGE: Record<string, string> = {
-  reader: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  verified_historian: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
-  admin: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+  reader: 'bg-primary/10 border border-primary/20 text-primary dark:bg-primary/20 dark:text-primary-foreground font-serif',
+  verified_historian: 'bg-gold/10 border border-gold/40 text-gold-dim dark:text-gold-bright font-serif',
+  admin: 'bg-amber-950/10 border border-amber-800/30 text-amber-900 dark:bg-amber-900/20 dark:text-amber-300 font-serif',
 };
 
 /** Extract user role from Supabase user metadata, defaulting to 'reader'. */

@@ -106,7 +106,7 @@ export default function ArchivalConnectionsPanel({ documentId, initialData }: Pr
         <div
           className={`p-3.5 rounded-lg text-xs font-medium flex items-center gap-2 ${message.type === 'success'
               ? 'bg-emerald-500/10 text-emerald-700 border border-emerald-500/20'
-              : 'bg-red-500/10 text-red-700 border border-red-500/20'
+              : 'bg-destructive/10 text-destructive border border-destructive/20'
             }`}
         >
           <HugeiconsIcon icon={CheckmarkCircle02Icon} size={16} className="shrink-0" />

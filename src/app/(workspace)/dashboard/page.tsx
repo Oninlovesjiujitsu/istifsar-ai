@@ -331,13 +331,13 @@ const STATUS_STYLES: Record<string, string> = {
   published:
     'bg-primary/10 border-primary/20 text-primary',
   under_review:
-    'bg-amber-500/10 border-amber-500/20 text-amber-400',
+    'bg-gold/10 border-gold/30 text-gold-dim dark:text-gold-bright',
   pending:
-    'bg-zinc-800/40 border-zinc-700/50 text-zinc-400',
+    'bg-muted/40 border-border/50 text-muted-foreground',
   draft:
-    'bg-zinc-800/40 border-zinc-700/50 text-zinc-400',
+    'bg-muted/40 border-border/50 text-muted-foreground',
   rejected:
-    'bg-red-500/10 border-red-500/20 text-red-400',
+    'bg-destructive/10 border-destructive/20 text-destructive',
 };
 
 function StatusBadge({ status }: { status: string }) {

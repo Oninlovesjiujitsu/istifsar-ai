@@ -103,9 +103,9 @@ export default async function Navbar() {
           {showAdmin && (
             <Link
               href="/admin"
-              className="rounded-md px-2 py-1 text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200 transition-colors"
+              className="rounded-sm border border-gold/40 px-2.5 py-1 text-xs font-serif font-medium bg-gold/10 text-gold-dim hover:bg-gold/20 transition-colors"
             >
-              Admin
+              Admin Console
             </Link>
           )}
           <SignOutButton className="text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50" />
