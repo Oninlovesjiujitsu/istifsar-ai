@@ -54,4 +54,9 @@ export const EMBEDDING_CACHE_TTL_SECONDS = 60 * 60 * 24 * 7;
 /** Number of peer reviews required to publish a Living Essay. */
 export const ESSAY_REVIEWS_REQUIRED = 1;
 
-// Semantic chunking has been deprecated in favor of optimized recursive splitting
+// Semantic chunking constants (Restored for chunker.ts)
+export const SEMANTIC_BREAKPOINT_METHOD = 'percentile';
+export const SEMANTIC_BREAKPOINT_THRESHOLD = 95;
+export const SEMANTIC_MAX_CHUNK_TOKENS = 1200;
+export const SEMANTIC_MIN_CHUNK_TOKENS = 50;
+export const MAX_SENTENCES_FOR_SEMANTIC = 1000;

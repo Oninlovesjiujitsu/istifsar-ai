@@ -90,7 +90,7 @@ export default function PrivacyPolicyPage() {
         </div>
       </main>
 
-      <LandingFooter onContactClick={() => setContactOpen(true)} />
+      <LandingFooter onContactClickAction={() => setContactOpen(true)} />
       <ContactModal open={contactOpen} onClose={() => setContactOpen(false)} />
       <FloatingBackToTop />
     </div>
