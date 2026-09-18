@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+
 
 /**
  * Two-layer bookshelf silhouette band along the viewport's bottom edge.
@@ -8,14 +8,6 @@ import { useEffect, useState } from 'react';
  * Integrates with the project's custom theme using Tailwind color overlays.
  */
 export default function ArchiveBookshelfSilhouette() {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return null;
-
   return (
     <div
       aria-hidden="true"

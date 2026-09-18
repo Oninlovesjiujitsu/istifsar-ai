@@ -1,45 +1,26 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/src/features/auth/hooks/use-auth';
+import dynamic from 'next/dynamic';
 import LandingNavbar from '@/src/components/layout/LandingNavbar';
-import ContactModal from '@/src/features/contact/components/ContactModal';
-import ArchiveCatalog from '@/src/features/archive/components/ArchiveCatalog';
 import ArchiveBookshelfSilhouette from '@/src/components/layout/ArchiveBookshelfSilhouette';
 import FloatingBackToTop from '@/src/components/layout/FloatingBackToTheTop';
+import LandingPageAuthRedirect from '@/src/components/layout/LandingPageAuthRedirect';
+import FooterWithContact from '@/src/features/landing/components/FooterWithContact';
 
-// Landing Feature Components
+// Above-the-fold components (load synchronously)
 import HeroSection from '@/src/features/landing/components/HeroSection';
-import PlatformPillarsSection from '@/src/features/landing/components/PlatformPillarsSection';
-import GraphRAGArchitectureSection from '@/src/features/landing/components/GraphRAGArchitectureSection';
-import PersonaSection from '@/src/features/landing/components/PersonaSection';
-import AgoncilloSection from '@/src/features/landing/components/AgoncilloSection';
-import BoundariesSection from '@/src/features/landing/components/BoundariesSection';
-import HistoriansSection from '@/src/features/landing/components/HistoriansSection';
-import LandingFooter from '@/src/features/landing/components/LandingFooter';
+
+// Below-the-fold components (lazy load to improve hydration and LCP)
+const PlatformPillarsSection = dynamic(() => import('@/src/features/landing/components/PlatformPillarsSection'));
+const GraphRAGArchitectureSection = dynamic(() => import('@/src/features/landing/components/GraphRAGArchitectureSection'));
+const PersonaSection = dynamic(() => import('@/src/features/landing/components/PersonaSection'));
+const AgoncilloSection = dynamic(() => import('@/src/features/landing/components/AgoncilloSection'));
+const BoundariesSection = dynamic(() => import('@/src/features/landing/components/BoundariesSection'));
+const HistoriansSection = dynamic(() => import('@/src/features/landing/components/HistoriansSection'));
+const ArchiveCatalog = dynamic(() => import('@/src/features/archive/components/ArchiveCatalog'));
 
 export default function LandingPage() {
-  const [contactOpen, setContactOpen] = useState(false);
-
-  const { role, loading } = useAuth();
-  const router = useRouter();
-
-  // Silent session validation redirect
-  useEffect(() => {
-    if (!loading && role) {
-      if (role === 'admin') {
-        router.replace('/admin');
-      } else if (role === 'verified_historian') {
-        router.replace('/dashboard');
-      } else {
-        router.replace('/explore');
-      }
-    }
-  }, [role, loading, router]);
-
   return (
     <div>
+      <LandingPageAuthRedirect />
       <ArchiveBookshelfSilhouette />
       <LandingNavbar />
 
@@ -54,8 +35,7 @@ export default function LandingPage() {
         <HistoriansSection />
       </main>
 
-      <LandingFooter onContactClickAction={() => setContactOpen(true)} />
-      <ContactModal open={contactOpen} onClose={() => setContactOpen(false)} />
+      <FooterWithContact />
       <FloatingBackToTop />
     </div>
   );
