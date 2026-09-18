@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: '100mb',
     },
+    optimizePackageImports: ['@hugeicons/core-free-icons', '@hugeicons/react', 'lucide-react'],
   },
 };
 

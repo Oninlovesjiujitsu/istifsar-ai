@@ -41,12 +41,27 @@ export default function LandingNavbar() {
       { rootMargin: '-15% 0px -65% 0px' },
     );
 
-    for (const id of navSections) {
-      const el = document.getElementById(id);
-      if (el) observer.observe(el);
-    }
+    const observeSections = () => {
+      for (const id of navSections) {
+        const el = document.getElementById(id);
+        if (el) observer.observe(el);
+      }
+    };
 
-    return () => observer.disconnect();
+    // Observe immediately (for hero/above the fold)
+    observeSections();
+
+    // Re-observe when DOM mutations occur (for dynamic sections loading in)
+    const mutationObserver = new MutationObserver(() => {
+      observeSections();
+    });
+    
+    mutationObserver.observe(document.body, { childList: true, subtree: true });
+
+    return () => {
+      observer.disconnect();
+      mutationObserver.disconnect();
+    };
   }, [pathname]);
 
   useEffect(() => {
